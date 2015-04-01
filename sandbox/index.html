@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="http://d3js.org/queue.v1.min.js"></script>
+
+  <style type="text/css">
+
+	body {
+		width: 800px;
+		margin: 25px auto;
+		font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	}
+
+	path {
+	  fill: #ccc;
+	  stroke: #fff;
+	  stroke-width: .5px;
+	}
+
+	path:hover {
+	  fill: steelblue;
+	}
+		
+  </style>
+
+</head>
+
+<body>
+
+  <h1>CS171 Final Project</h1>
+
+  <div id="content">
+    <form>
+
+      <label>Scope: <input type="radio" class="raScope" name="scope" value="us"></input>United States </label>
+      <label><input type="radio" class="raScope" name="scope" value="fl" checked></input>Florida </label>
+			
+		</form>
+  </div>
+
+  <script type="text/javascript">
+
+  	// Setup variables
+  	//
+    var margin = {top: 10, bottom: 10, left: 10, right: 10};
+    var width = 680 - margin.left - margin.right;
+    var height = 530 - margin.top - margin.bottom;
+		var viewUS = false;
+
+    // Load states
+    //
+    var stateNames = {
+			1: "Alabama",
+			2: "Alaska",
+			4: "Arizona",
+			5: "Arkansas",
+			6: "California",
+			8: "Colorado",
+			9: "Connecticut",
+			10: "Delaware",
+			12: "Florida",
+			13: "Georgia",
+			15: "Hawaii",
+			16: "Idaho",
+			17: "Illinois",
+			18: "Indiana",
+			19: "Iowa",
+			20: "Kansas",
+			21: "Kentucky",
+			22: "Louisiana",
+			23: "Maine",
+			24: "Maryland",
+			25: "Massachusetts",
+			26: "Michigan",
+			27: "Minnesota",
+			28: "Mississippi",
+			29: "Missouri",
+			30: "Montana",
+			31: "Nebraska",
+			32: "Nevada",
+			33: "New Hampshire",
+			34: "New Jersey",
+			35: "New Mexico",
+			36: "New York",
+			37: "North Carolina",
+			38: "North Dakota",
+			39: "Ohio",
+			40: "Oklahoma",
+			41: "Oregon",
+			42: "Pennsylvania",
+			44: "Rhode Island",
+			45: "South Carolina",
+			46: "South Dakota",
+			47: "Tennessee",
+			48: "Texas",
+			49: "Utah",
+			50: "Vermont",
+			51: "Virginia",
+			53: "Washington",
+			54: "West Virginia",
+			55: "Wisconsin",
+			56: "Wyoming"
+		};
+
+    var stateIds = {};
+	for(var id in stateNames) { stateIds[stateNames[id]] = id; }
+	
+    // Load counties
+    //
+    var countyNames = {
+			12001: "Alachua",
+			12003: "Baker",
+			12005: "Bay",
+			12007: "Bradford",
+			12009: "Brevard",
+			12011: "Broward",
+			12013: "Calhoun",
+			12015: "Charlotte",
+			12017: "Citrus",
+			12019: "Clay",
+			12021: "Collier",
+			12023: "Columbia",
+			12025: "Dade",
+			12027: "De Soto",
+			12029: "Dixie",
+			12031: "Duval",
+			12033: "Escambia",
+			12035: "Flagler",
+			12037: "Franklin",
+			12039: "Gadsden",
+			12041: "Gilchrist",
+			12043: "Glades",
+			12045: "Gulf",
+			12047: "Hamilton",
+			12049: "Hardee",
+			12051: "Hendry",
+			12053: "Hernando",
+			12055: "Highlands",
+			12057: "Hillsborough",
+			12059: "Holmes",
+			12061: "Indian River",
+			12063: "Jackson",
+			12065: "Jefferson",
+			12067: "Lafayette",
+			12069: "Lake",
+			12071: "Lee",
+			12073: "Leon",
+			12075: "Levy",
+			12077: "Liberty",
+			12079: "Madison",
+			12081: "Manatee",
+			12083: "Marion",
+			12085: "Martin",
+			12086: "Miami-Dade",
+			12087: "Monroe",
+			12089: "Nassau",
+			12091: "Okaloosa",
+			12093: "Okeechobee",
+			12095: "Orange",
+			12097: "Osceola",
+			12099: "Palm Beach",
+			12101: "Pasco",
+			12103: "Pinellas",
+			12105: "Polk",
+			12107: "Putnam",
+			12109: "St. Johns",
+			12111: "St. Lucie",
+			12113: "Santa Rosa",
+			12115: "Sarasota",
+			12117: "Seminole",
+			12119: "Sumter",
+			12121: "Suwannee",
+			12123: "Taylor",
+			12125: "Union",
+			12127: "Volusia",
+			12129: "Wakulla",
+			12131: "Walton",
+			12133: "Washington"
+    	};
+
+    var countyIds = {};
+	for(var id in countyNames) { countyIds[countyNames[id]] = id; }
+
+    // Empty SVG for controls/navigation
+    //
+	var svg1 = d3.select("body").append("svg")
+	    .attr("width", 800 - width)
+	    .attr("height", height);
+
+	// Set up Florida map
+	//
+	var svg2 = d3.select("body").append("svg")
+	    .attr("width", width)
+	    .attr("height", height);
+
+	var projection = d3.geo.albersUsa()
+	    .scale(5000)
+	    .translate([-650,-600]);
+
+	var path = d3.geo.path()
+	    .projection(projection);
+
+	// Create counties
+	//
+	d3.json("maps/us.json", function(error, topology) {
+
+		// Extract only Florida counties
+		//
+		newgeo = [];
+		topology.objects.counties.geometries.forEach(function (e) {
+			if (e.id > 12000 && e.id < 13000) { newgeo.push(e) }
+		});
+		topology.objects.counties.geometries = newgeo;
+
+		// Draw states
+		//
+	  	svg2.selectAll(".spath")
+	    	  	.data(topojson.feature(topology, topology.objects.states).features)
+	    	.enter().append("path")
+						.attr("class", "spath")
+						.attr("visibility", "hidden")
+	      		.attr("id", function (d) { return d.id })
+	      		.attr("d", path)
+	      		.on("click", function (d) { 
+	      			stateClick(d);
+	      		});
+						
+		// Draw counties
+		//
+	  	svg2.selectAll(".cpath")
+	    	  	.data(topojson.feature(topology, topology.objects.counties).features)
+	    	.enter().append("path")
+						.attr("class", "cpath")
+	      		.attr("id", function (d) { return d.id })
+	      		.attr("d", path)
+	      		.on("click", function (d) { 
+	      			countyClick(d);
+	      		});
+
+	});
+	
+	//
+	// Event Handlers
+	//
+
+	// Which visualization
+	d3.selectAll('.raScope').on('change', function () {
+		viewUS = viewUS ? false : true;
+		
+		d3.selectAll(".showtext").remove();
+
+		if (viewUS) {
+			projection.scale(900)
+				.translate([width/2,height/2]);
+		} else {
+			projection.scale(5000)
+				.translate([-650,-600]);
+		};
+			path = d3.geo.path().projection(projection);
+			svg2.selectAll(".spath").transition().duration(1000)
+							.attr("visibility", function () { return viewUS ? "visible" : "hidden" })
+							.attr("d", path);
+			svg2.selectAll(".cpath").transition().duration(1000)
+							.attr("visibility", function () { return viewUS ? "hidden" : "visible" })
+							.attr("d", path);
+						
+	});
+
+	// Show something on click
+	//
+	function stateClick(d) {
+
+		d3.selectAll(".showtext").remove();
+		
+		svg1.append("text")
+			.attr("class", "showtext")
+			.attr("x",00)
+			.attr("y",30)
+			.text(stateNames[d.id]);
+		
+		svg1.append("text")
+			.attr("class", "showtext")
+			.attr("x",00)
+			.attr("y",60)
+			.text("2013 Budget");	
+		svg1.append("text")
+			.attr("class", "showtext")
+			.attr("x",20)
+			.attr("y",80)
+			.text(d3.format(",")(totBudgets[d.id]));
+		
+		svg1.append("text")
+			.attr("class", "showtext")
+			.attr("x",00)
+			.attr("y",110)
+			.text("2013 Judicial");	
+		svg1.append("text")
+			.attr("class", "showtext")
+			.attr("x",20)
+			.attr("y",130)
+			.text(d3.format(",")(judBudgets[d.id]));			
+
+	};
+	
+	// Show something on click
+	//
+	function countyClick(d) {
+
+		d3.selectAll(".showtext").remove();
+
+		svg1.append("text")
+			.attr("class", "showtext")
+			.attr("x",10)
+			.attr("y",30)
+			.text(countyNames[d.id]);
+
+		svg2.append("text")
+			.attr("class", "showtext")
+			.attr("x",10)
+			.attr("y",200)
+			.text("2013 Filings");
+
+		var showFilings = d3.nest()
+            .rollup( function (leaves) {
+			    	return { "cases" : d3.sum(leaves, function (e) { return e["cases"][27] })};
+			    })
+			.entries(filings.filter( function (e) { return e.id == d.id }));
+
+		svg2.append("text")
+			.attr("class", "showtext")
+			.attr("x",30)
+			.attr("y",230)
+			.text(d3.format(",")(showFilings["cases"]));
+
+		svg2.append("text")
+			.attr("class", "showtext")
+			.attr("x",10)
+			.attr("y",300)
+			.text("2013 Dispositions");
+
+		var showDispositions = d3.nest()
+            .rollup( function (leaves) {
+							return { "cases" : d3.sum(leaves, function (e) { return e["cases"][27] })};
+			    })
+			.entries(dispositions.filter( function (e) { return e.id == d.id }));
+
+		svg2.append("text")
+			.attr("class", "showtext")
+			.attr("x",30)
+			.attr("y",330)
+			.text(d3.format(",")(showDispositions["cases"]));
+
+	};
+
+
+	// Load Filings and Dispositions
+	//
+	filings = {};
+	dispositions = {};
+	
+	queue()
+		.defer(d3.csv, 'data/20150220_Filings_1986to2013.csv')
+		.defer(d3.csv, 'data/20150220_Dispositions_1986to2013.csv')
+		.defer(d3.csv, 'data/government_ids.csv')
+		.defer(d3.csv, 'data/13state35_2.csv')
+		.await(function(error, filData, disData, bidData, budData) { 
+									allLoaded(filData,disData, bidData, budData); 
+									});
+
+	function allLoaded(fData, dData, iData, bData) {
+
+    filings = fData.map(function (d) {
+		
+			var caseArray = [];
+			for (var i = 1986; i < 2014; i++) {
+				var usenum = (d[i]=="") ? 0 : parseInt(d[i].replace(/[^0-9]/g,""));
+				caseArray.push(usenum);
+			};
+			if (caseArray.length == 0) {
+				caseArray = d3.range(0,28).map(function(){return 0;});
+			};
+
+			return {
+				circuit: d.Circuit,
+				county: d.County,
+				id: countyIds[d.County],
+				court: d["Division of Court"],
+				type: d["Type of Case"],
+				cases: caseArray
+			};
+		});
+
+    dispositions = dData.map(function (d) {
+		
+			var caseArray = [];
+			for (var i = 1986; i < 2014; i++) {
+				var usenum = (d[i]=="") ? 0 : parseInt(d[i].replace(/[^0-9]/g,""));
+				caseArray.push(usenum);
+			};
+			if (caseArray.length == 0) {
+				caseArray = d3.range(0,28).map(function(){return 0;});
+			};
+
+			return {
+				circuit: d.Circuit,
+				county: d.County,
+				id: countyIds[d.County],
+				court: d["Division of Court"],
+				type: d["Type of Case"],
+				cases: caseArray
+			};
+		});
+		
+	  budIds = {};
+		iData.forEach(function(d, i) {
+			budIds[+d["ID Code"]] = d["State"];
+		});
+
+		totBudgets = {};
+		bData.forEach(function(d, i) {
+			totBudgets[+stateIds[budIds[+d.GovtID].trim()]] = +d["Grand Total"];
+		});
+
+		judBudgets = {};
+		bData.forEach(function(d, i) {
+			judBudgets[+stateIds[budIds[+d.GovtID].trim()]] = +d["25"];
+		});
+				
+	};
+
+  </script>
+</body>
+</html>
