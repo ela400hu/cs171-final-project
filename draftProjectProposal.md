@@ -19,10 +19,14 @@ The data is in great shape. Because we received a direct download from OSCA's SQ
 
 We envision a set of three or at most four views ranging from the simple to the more visauuly rich presentations. The simple view consists of a timeline that can be aggregated and disaggregated interactively along the geographical and case type dimensions, including resolutions and specific type of resolution. "Resolution" in this context means the stage at which a case was terminated- by pretrial duismissal, by settlement, by jury trial, or otherwise. Except in criminal cases where the terms conviction and acquittal are unambiguous indicators of which side won or lost, the data  does not try to characterize which side has won or lost any case.  
 
-As represented by https://github.com/ela400hu/cs171-final-project/blob/master/images/_BigPicture_4w.jpg , the timeline can be shown by a stacked area graph layout. In addition, we need an appropriate meachnism to let the viewer take advantage of the rich level of detail outr data set offers. FOr this, a collapsible force layout would be preferable to a simple pop-up box if it turns out to be feasibel within time constraints. 
+As represented by the first image, the timeline can be shown by a stacked area graph layout. In addition, we need an appropriate meachnism to let the viewer take advantage of the rich level of detail outr data set offers. FOr this, a collapsible force layout would be preferable to a simple pop-up box if it turns out to be feasibel within time constraints. 
 
-Similarly, along the lines of https://github.com/ela400hu/cs171-final-project/blob/master/images/_multiAxisV2_4W.jpg parallel to the caseload timeline we would match demographic data such as population and, in particular age cohorts, general economic data such as employment rates and changes in gross domestic product, and criome rates. This will allow comparison, for example, of whether higher rates of foreclosure cases are associated with economioc downturns (we already know in general that they are, but this will visualize it in a more concrete setting), whether conviction rates are associated with decresed crime, and whether the budgetary resources of the courts are keeping up with changes in caseloads.   
+![Viz1](/images/_BigPicture_4w.jpg) 
 
+
+Similarly, along the lines of the second image below,  parallel to the caseload timeline we would match demographic data such as population and, in particular age cohorts, general economic data such as employment rates and changes in gross domestic product, and criome rates. This will allow comparison, for example, of whether higher rates of foreclosure cases are associated with economioc downturns (we already know in general that they are, but this will visualize it in a more concrete setting), whether conviction rates are associated with decresed crime, and whether the budgetary resources of the courts are keeping up with changes in caseloads.   
+
+![Viz2](/images/_multiAxisV2_4W.jpg) 
 
 ###Must-Have Features. 
 
