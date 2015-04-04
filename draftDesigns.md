@@ -2,11 +2,11 @@
 
 These initial sketches show a direction for the menu and layout.  Given my understanding of human cognition based design, I chose to feature Scott in the design.  He is the domain specialist and a public figure.  He can provide a design element for triggering and or binding story elements.  Attached are a couple of rough mock ups.  
 
-![Viz1](/images/_BigPicture_4w.jpg)  
+![Viz1](images/_BigPicture_4w.jpg)  
 
 The general color direction is based off of Fathom.  Here are two color grids that can be applied to the vertical layout.  They are made from exact hex values and generated analogous colors.  
-![ColorChart1](/images/171_Final_Colors_Oranges_noHex_4w.jpg)
-![ColorChart2](/images/171_Final_Colors_Blues_noHex_4w.jpg)
+![ColorChart1](images/171_Final_Colors_Oranges_noHex_4w.jpg)
+![ColorChart2](images/171_Final_Colors_Blues_noHex_4w.jpg)
 
 I also have some font options picked out but I haven't have time to use them yet..
 
@@ -27,7 +27,7 @@ The orange page is meant to point in the direction of
 
 Again, the color values are not exact.  They merely point in the direction of the visual style used by fathom.
 
-![Viz2](/images/_multiAxisV2_4W.jpg) 
+![Viz2](images/_multiAxisV2_4W.jpg) 
 
 A boostrap landing page layout can be found here:
 [http://getbootstrap.com/examples/cover/](http://getbootstrap.com/examples/cover/)
