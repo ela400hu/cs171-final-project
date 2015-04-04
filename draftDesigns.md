@@ -6,7 +6,7 @@ These initial sketches show a direction for the menu and layout.  Given my under
 
 The general color direction is based off of Fathom.  Here are two color grids that can be applied to the vertical layout.  They are made from exact hex values and generated analogous colors.  
 ![ColorChart1](/images/171_Final_Colors_Oranges_noHex_4w.jpg)
-![ColorChart2](/171_Final_Colors_Blues_noHex_4w.jpg)
+![ColorChart2](/images/171_Final_Colors_Blues_noHex_4w.jpg)
 
 I also have some font options picked out but I haven't have time to use them yet..
 
