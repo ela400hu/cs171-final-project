@@ -4,7 +4,11 @@ These initial sketches show a direction for the menu and layout.  Given my under
 
 ![Viz1](/images/_BigPicture_4w.jpg)  
 
-The general color direction is based off of Fathom.  I have exact color hex values form them but I didn't have time to use them yet.  I also have some font options picked out.
+The general color direction is based off of Fathom.  Here are two color grids that can be applied to the vertical layout.  They are made from exact hex values and generated analogous colors.  
+![ColorChart1](/images/171_Final_Colors_Oranges_noHex_4w.jpg)
+![ColorChart2](/171_Final_Colors_Blues_noHex_4w.jpg)
+
+I also have some font options picked out but I haven't have time to use them yet..
 
 The node based menu is based on this  
 [http://bl.ocks.org/mbostock/1062288](http://bl.ocks.org/mbostock/1062288)
