@@ -1,0 +1,197 @@
+Division,Year,Count
+Circuit Civil,1986,154727
+Circuit Civil,1987,157405
+Circuit Civil,1988,164108
+Circuit Civil,1989,175978
+Circuit Civil,1990,181365
+Circuit Civil,1991,177523
+Circuit Civil,1992,153990
+Circuit Civil,1993,132648
+Circuit Civil,1994,129646
+Circuit Civil,1995,132947
+Circuit Civil,1996,142470
+Circuit Civil,1997,155209
+Circuit Civil,1998,155882
+Circuit Civil,1999,161440
+Circuit Civil,2000,168283
+Circuit Civil,2001,176679
+Circuit Civil,2002,189637
+Circuit Civil,2003,182305
+Circuit Civil,2004,167668
+Circuit Civil,2005,163935
+Circuit Civil,2006,182430
+Circuit Civil,2007,302858
+Circuit Civil,2008,506849
+Circuit Civil,2009,556125
+Circuit Civil,2010,389371
+Circuit Civil,2011,264118
+Circuit Civil,2012,315847
+Circuit Civil,2013,238510
+Circuit Criminal,1986,130562
+Circuit Criminal,1987,142391
+Circuit Criminal,1988,167564
+Circuit Criminal,1989,182127
+Circuit Criminal,1990,174985
+Circuit Criminal,1991,167761
+Circuit Criminal,1992,160050
+Circuit Criminal,1993,154680
+Circuit Criminal,1994,162450
+Circuit Criminal,1995,167541
+Circuit Criminal,1996,182157
+Circuit Criminal,1997,184163
+Circuit Criminal,1998,192942
+Circuit Criminal,1999,188020
+Circuit Criminal,2000,183080
+Circuit Criminal,2001,181237
+Circuit Criminal,2002,181635
+Circuit Criminal,2003,187397
+Circuit Criminal,2004,193268
+Circuit Criminal,2005,211965
+Circuit Criminal,2006,225259
+Circuit Criminal,2007,233703
+Circuit Criminal,2008,225967
+Circuit Criminal,2009,204568
+Circuit Criminal,2010,197344
+Circuit Criminal,2011,195336
+Circuit Criminal,2012,192027
+Circuit Criminal,2013,181016
+County Civil,1986,328576
+County Civil,1987,328109
+County Civil,1988,324380
+County Civil,1989,331375
+County Civil,1990,319055
+County Civil,1991,329268
+County Civil,1992,299557
+County Civil,1993,295881
+County Civil,1994,304591
+County Civil,1995,306776
+County Civil,1996,328782
+County Civil,1997,341479
+County Civil,1998,337179
+County Civil,1999,342242
+County Civil,2000,382229
+County Civil,2001,431997
+County Civil,2002,453324
+County Civil,2003,471752
+County Civil,2004,434848
+County Civil,2005,460147
+County Civil,2006,507063
+County Civil,2007,576150
+County Civil,2008,561024
+County Civil,2009,516515
+County Civil,2010,461007
+County Civil,2011,468589
+County Civil,2012,463978
+County Civil,2013,417678
+County Criminal,1986,400667
+County Criminal,1987,426877
+County Criminal,1988,435615
+County Criminal,1989,478893
+County Criminal,1990,498107
+County Criminal,1991,469986
+County Criminal,1992,460087
+County Criminal,1993,432808
+County Criminal,1994,447686
+County Criminal,1995,464603
+County Criminal,1996,495012
+County Criminal,1997,502195
+County Criminal,1998,510708
+County Criminal,1999,503040
+County Criminal,2000,505320
+County Criminal,2001,504934
+County Criminal,2002,500639
+County Criminal,2003,488928
+County Criminal,2004,481461
+County Criminal,2005,502012
+County Criminal,2006,516868
+County Criminal,2007,526102
+County Criminal,2008,483465
+County Criminal,2009,458204
+County Criminal,2010,410122
+County Criminal,2011,396033
+County Criminal,2012,370071
+County Criminal,2013,360949
+Family Court,1986,214363
+Family Court,1987,224388
+Family Court,1988,236895
+Family Court,1989,258177
+Family Court,1990,274819
+Family Court,1991,276308
+Family Court,1992,290015
+Family Court,1993,310255
+Family Court,1994,329170
+Family Court,1995,329550
+Family Court,1996,327506
+Family Court,1997,335152
+Family Court,1998,334272
+Family Court,1999,333811
+Family Court,2000,352837
+Family Court,2001,366025
+Family Court,2002,378665
+Family Court,2003,366358
+Family Court,2004,370813
+Family Court,2005,370448
+Family Court,2006,360297
+Family Court,2007,356350
+Family Court,2008,342784
+Family Court,2009,337810
+Family Court,2010,349884
+Family Court,2011,352859
+Family Court,2012,290894
+Family Court,2013,290396
+Probate,1986,72755
+Probate,1987,75771
+Probate,1988,77184
+Probate,1989,76345
+Probate,1990,75418
+Probate,1991,74661
+Probate,1992,76098
+Probate,1993,78903
+Probate,1994,82290
+Probate,1995,82674
+Probate,1996,86350
+Probate,1997,90293
+Probate,1998,91149
+Probate,1999,91522
+Probate,2000,95053
+Probate,2001,95865
+Probate,2002,99815
+Probate,2003,103287
+Probate,2004,108921
+Probate,2005,112690
+Probate,2006,108242
+Probate,2007,103756
+Probate,2008,100699
+Probate,2009,98431
+Probate,2010,99592
+Probate,2011,100385
+Probate,2012,103763
+Probate,2013,111738
+Traffic,1986,1122535
+Traffic,1987,959571
+Traffic,1988,1026655
+Traffic,1989,1111014
+Traffic,1990,1212640
+Traffic,1991,1191238
+Traffic,1992,1088304
+Traffic,1993,1000118
+Traffic,1994,992600
+Traffic,1995,997647
+Traffic,1996,1005816
+Traffic,1997,1024035
+Traffic,1998,1074968
+Traffic,1999,1071769
+Traffic,2000,1067129
+Traffic,2001,1304265
+Traffic,2002,1567685
+Traffic,2003,1789280
+Traffic,2004,1820290
+Traffic,2005,1932316
+Traffic,2006,2109880
+Traffic,2007,2172148
+Traffic,2008,2464020
+Traffic,2009,2325491
+Traffic,2010,2104498
+Traffic,2011,2166143
+Traffic,2012,2351061
+Traffic,2013,2137142
