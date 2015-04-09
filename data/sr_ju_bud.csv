@@ -1,4 +1,4 @@
-Category,Year,Amount
+categ,date,value
 Supreme Court,2000,8279360
 Supreme Court,2001,7461875
 Supreme Court,2002,7171556
@@ -88,4 +88,4 @@ Trial Courts,2010,389468920
 Trial Courts,2011,384205825
 Trial Courts,2012,372083906
 Trial Courts,2013,366101085
-,2014,405465467
+Trial Courts,2014,405465467
