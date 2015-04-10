@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<style type="text/css">
+
+svg {
+  font-family: "Helvetica Neue", Helvetica;
+}
+
+.line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 2px;
+}
+
+.container{ 
+			background: url(bg_dimensionTest.jpg) no-repeat center center fixed; 
+			-webkit-background-size: cover;
+			-moz-background-size: cover;
+			-o-background-size: cover;
+			background-size: cover;
+			/*background-color: black;*/
+		}
+
+</style>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Florida Court Performance</title>
+
+    <!-- ADD Libraries-->
+    <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+		<script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
+    <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+
+
+    <!--Stylesheets-->
+    <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+
+    <!-- Get some nice font-->
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+
+
+    <!--------------------------------->
+    <!-- FROM HERE ON IT IS HW3 stuff-->
+    <!--------------------------------->
+
+    <!-- add own vis classes-->
+    <script src = "js/showreelvis.js"></script>
+
+    <!-- add own stylesheet-->
+    <link rel="stylesheet" type="text/css" href="css/myStyle.css">
+
+</head>
+<body>
+    <div class="container">
+        <h1>Florida Court Performance</h1>
+
+        <div class="row">
+            <div class="col-md-12" id="showreelVis">
+            </div>
+        </div>
+				
+        <div class="row">
+            <div class="col-md-6" id="blankVis">
+						    <form>
+<!-- 									<label>Show: <input type="radio" class="ra" name="show" value="false" checked></input>Data </label>
+									<label><input type="radio" class="ra" name="show" value="true"></input>Growth </label> -->
+									<span style="padding-left:10px"> </span>
+									<label> Dataset: 
+									<select class="sf">
+										<option value="0">Age Demographics</option>
+										<option value="1">Filings & Dispositions</option>
+										<option value="2">Filings</option>
+										<option value="3">Dispositions</option>
+										<option value="4">Florida Budget</option>
+										<option value="5">Judicial Budget</option>
+									</select>
+									</label>
+									<span style="padding-left:10px"> </span>
+									<label> Slide: 
+									<select class="sv">
+										<option value="0">All</option>
+										<option value="1">Lines</option>
+										<option value="2">Horizons</option>
+										<option value="3">Areas</option>
+										<option value="4">Stacked Area</option>
+										<option value="5">Streamgraph</option>
+										<option value="6">Overlapping Area</option>
+										<option value="7">Grouped Bar</option>
+										<option value="8">Stacked Bar</option>
+									</select>
+									</label>
+								</form>
+            </div>
+            <div class="col-md-6" id="menuVis">
+						Actual Menu Elements Over Here...
+            </div>
+				</div>
+
+    </div>
+
+    <script>
+        $(function(){ // this function is called after the HTML document is fully loaded
+
+            // variables keeping global knowledge of the data
+						whichFile = "0";
+						whichViz = "0";
+						growthFlag = false;
+
+            // call this function after Data is loaded, reformatted and bound to the variables
+            var initVis = function(){
+
+                //TODO: Create an eventHandler  --> DONE :)
+                var MyEventHandler = new Object();
+
+                //TODO: Instantiate all Vis Objects here
+								var sr_obj = new ShowreelVis(d3.select("#showreelVis"), whichFile, growthFlag, whichViz, MyEventHandler);
+
+																
+                // TODO: bind the eventHandler to the Vis Objects
+                // events will be created from the CountVis object (nothing to do here)
+                // events will be consumed by the PrioVis and AgeVis object (binding should happen here)
+                $(document).on("menuChange",
+														function (MyEventHandler) { 
+															sr_obj.onSelectionChange()
+															});
+															
+            }
+
+            var startHere = function(){
+						
+								//
+								// Event Handlers
+								//
+
+								// Which visualization
+								d3.selectAll('.ra').on('change', function () {
+									$(document).trigger("menuChange");
+									growthFlag = this.value=="true";
+									//d3.select(".srsvg.g").remove();
+									delete sr_obj;
+									setTimeout(initVis, 1);
+									//initVis();
+								});
+
+								// Which File
+								d3.select('.sf').on("change", function() {
+									$(document).trigger("menuChange");
+									whichFile = this.options[this.selectedIndex].value;
+									//d3.selectAll(".srsvg.g").remove();
+									delete sr_obj;
+									setTimeout(initVis, 1);
+								});
+
+								// Which Viz
+								d3.select('.sv').on("change", function() {
+									$(document).trigger("menuChange");
+									whichViz = this.options[this.selectedIndex].value;
+									//d3.selectAll(".srsvg.g").remove();
+									delete sr_obj;
+									setTimeout(initVis, 1);
+								});
+
+                initVis();
+
+            }
+
+            startHere();
+        })
+    </script>
+</body>
+</html>
