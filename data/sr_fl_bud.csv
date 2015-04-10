@@ -1,19 +1,19 @@
-categ,date,value
-Judicial Branch,2000,289641542
-Judicial Branch,2001,300504592
-Judicial Branch,2002,291969196
-Judicial Branch,2003,269815184
-Judicial Branch,2004,391608311
-Judicial Branch,2005,405406944
-Judicial Branch,2006,450390384
-Judicial Branch,2007,477980209
-Judicial Branch,2008,433206576
-Judicial Branch,2009,451311113
-Judicial Branch,2010,462353526
-Judicial Branch,2011,458128353
-Judicial Branch,2012,443928339
-Judicial Branch,2013,443416191
-Judicial Branch,2014,501556824
+symbol,date,price
+Criminal Justice and Corr,2000,3214836696
+Criminal Justice and Corr,2001,3217899788
+Criminal Justice and Corr,2002,3282502292
+Criminal Justice and Corr,2003,3374125994
+Criminal Justice and Corr,2004,3752162125
+Criminal Justice and Corr,2005,3828447820
+Criminal Justice and Corr,2006,4155559381
+Criminal Justice and Corr,2007,4359223227
+Criminal Justice and Corr,2008,4460862304
+Criminal Justice and Corr,2009,4755407365
+Criminal Justice and Corr,2010,4649689090
+Criminal Justice and Corr,2011,4474350200
+Criminal Justice and Corr,2012,4184769185
+Criminal Justice and Corr,2013,3827529957
+Criminal Justice and Corr,2014,4154805293
 Education (all other),2000,14631134701
 Education (all other),2001,14983595312
 Education (all other),2002,14868420204
@@ -44,51 +44,6 @@ Education (lottery trust),2011,1372792837
 Education (lottery trust),2012,1491084300
 Education (lottery trust),2013,1609468695
 Education (lottery trust),2014,1744867915
-Human Services,2000,14912335051
-Human Services,2001,16986011595
-Human Services,2002,18421676953
-Human Services,2003,19479893817
-Human Services,2004,21780275614
-Human Services,2005,22443267282
-Human Services,2006,23525944681
-Human Services,2007,23804667706
-Human Services,2008,23357267288
-Human Services,2009,26043356456
-Human Services,2010,28472117491
-Human Services,2011,29956643074
-Human Services,2012,29875117966
-Human Services,2013,31071943254
-Human Services,2014,31869917945
-Criminal Justice and Corr,2000,3214836696
-Criminal Justice and Corr,2001,3217899788
-Criminal Justice and Corr,2002,3282502292
-Criminal Justice and Corr,2003,3374125994
-Criminal Justice and Corr,2004,3752162125
-Criminal Justice and Corr,2005,3828447820
-Criminal Justice and Corr,2006,4155559381
-Criminal Justice and Corr,2007,4359223227
-Criminal Justice and Corr,2008,4460862304
-Criminal Justice and Corr,2009,4755407365
-Criminal Justice and Corr,2010,4649689090
-Criminal Justice and Corr,2011,4474350200
-Criminal Justice and Corr,2012,4184769185
-Criminal Justice and Corr,2013,3827529957
-Criminal Justice and Corr,2014,4154805293
-"Natural Resources, et al.",2000,7355259374
-"Natural Resources, et al.",2001,8788501512
-"Natural Resources, et al.",2002,8516966624
-"Natural Resources, et al.",2003,9047217645
-"Natural Resources, et al.",2004,9786302296
-"Natural Resources, et al.",2005,11315792959
-"Natural Resources, et al.",2006,14465581101
-"Natural Resources, et al.",2007,13085813529
-"Natural Resources, et al.",2008,12013857839
-"Natural Resources, et al.",2009,9293484731
-"Natural Resources, et al.",2010,9771511557
-"Natural Resources, et al.",2011,10500312836
-"Natural Resources, et al.",2012,11285023021
-"Natural Resources, et al.",2013,12434798860
-"Natural Resources, et al.",2014,13568297042
 General Government,2000,9595544049
 General Government,2001,3108652181
 General Government,2002,4057646537
@@ -104,3 +59,48 @@ General Government,2011,3953578423
 General Government,2012,3845614776
 General Government,2013,4425205934
 General Government,2014,4340132531
+Human Services,2000,14912335051
+Human Services,2001,16986011595
+Human Services,2002,18421676953
+Human Services,2003,19479893817
+Human Services,2004,21780275614
+Human Services,2005,22443267282
+Human Services,2006,23525944681
+Human Services,2007,23804667706
+Human Services,2008,23357267288
+Human Services,2009,26043356456
+Human Services,2010,28472117491
+Human Services,2011,29956643074
+Human Services,2012,29875117966
+Human Services,2013,31071943254
+Human Services,2014,31869917945
+Judicial Branch,2000,289641542
+Judicial Branch,2001,300504592
+Judicial Branch,2002,291969196
+Judicial Branch,2003,269815184
+Judicial Branch,2004,391608311
+Judicial Branch,2005,405406944
+Judicial Branch,2006,450390384
+Judicial Branch,2007,477980209
+Judicial Branch,2008,433206576
+Judicial Branch,2009,451311113
+Judicial Branch,2010,462353526
+Judicial Branch,2011,458128353
+Judicial Branch,2012,443928339
+Judicial Branch,2013,443416191
+Judicial Branch,2014,501556824
+"Natural Resources, et al.",2000,7355259374
+"Natural Resources, et al.",2001,8788501512
+"Natural Resources, et al.",2002,8516966624
+"Natural Resources, et al.",2003,9047217645
+"Natural Resources, et al.",2004,9786302296
+"Natural Resources, et al.",2005,11315792959
+"Natural Resources, et al.",2006,14465581101
+"Natural Resources, et al.",2007,13085813529
+"Natural Resources, et al.",2008,12013857839
+"Natural Resources, et al.",2009,9293484731
+"Natural Resources, et al.",2010,9771511557
+"Natural Resources, et al.",2011,10500312836
+"Natural Resources, et al.",2012,11285023021
+"Natural Resources, et al.",2013,12434798860
+"Natural Resources, et al.",2014,13568297042

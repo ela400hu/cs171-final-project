@@ -60,18 +60,18 @@ svg {
 									<span style="padding-left:10px"> </span>
 									<label> Dataset: 
 									<select class="sf">
-										<option value="sr_ag_pop.csv">Age Demographics</option>
-										<option value="sr_wl_fd.csv" checked>Filings & Dispositions</option>
-										<option value="sr_wl_fil.csv">Filings</option>
-										<option value="sr_wl_dis.csv">Dispositions</option>
-										<option value="sr_fl_bud.csv">Florida Budget</option>
-										<option value="sr_ju_bud.csv">Judicial Budget</option>
+										<option value="0">Age Demographics</option>
+										<option value="1">Filings & Dispositions</option>
+										<option value="2">Filings</option>
+										<option value="3">Dispositions</option>
+										<option value="4">Florida Budget</option>
+										<option value="5">Judicial Budget</option>
 									</select>
 									</label>
 									<span style="padding-left:10px"> </span>
 									<label> Slide: 
 									<select class="sv">
-										<option value="0" checked>All</option>
+										<option value="0">All</option>
 										<option value="1">Lines</option>
 										<option value="2">Horizons</option>
 										<option value="3">Areas</option>
@@ -95,7 +95,7 @@ svg {
         $(function(){ // this function is called after the HTML document is fully loaded
 
             // variables keeping global knowledge of the data
-						whichFile = "data/sr_ag_pop.csv";
+						whichFile = "0";
 						whichViz = "0";
 						growthFlag = false;
 
@@ -129,28 +129,28 @@ svg {
 								d3.selectAll('.ra').on('change', function () {
 									$(document).trigger("menuChange");
 									growthFlag = this.value=="true";
-									d3.select(".srsvg.g").remove();
+									//d3.select(".srsvg.g").remove();
 									delete sr_obj;
-									setTimeout(initVis, 1500);
+									setTimeout(initVis, 1);
 									//initVis();
 								});
 
 								// Which File
 								d3.select('.sf').on("change", function() {
 									$(document).trigger("menuChange");
-									whichFile = "data/" + this.options[this.selectedIndex].value;
-									d3.selectAll(".srsvg.g").remove();
+									whichFile = this.options[this.selectedIndex].value;
+									//d3.selectAll(".srsvg.g").remove();
 									delete sr_obj;
-									setTimeout(initVis, 1500);
+									setTimeout(initVis, 1);
 								});
 
 								// Which Viz
 								d3.select('.sv').on("change", function() {
 									$(document).trigger("menuChange");
 									whichViz = this.options[this.selectedIndex].value;
-									d3.selectAll(".srsvg.g").remove();
+									//d3.selectAll(".srsvg.g").remove();
 									delete sr_obj;
-									setTimeout(initVis, 1500);
+									setTimeout(initVis, 1);
 								});
 
                 initVis();
