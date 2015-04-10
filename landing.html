@@ -31,11 +31,6 @@ svg {
     <!-- Get some nice font-->
     <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
 
-
-    <!--------------------------------->
-    <!-- FROM HERE ON IT IS HW3 stuff-->
-    <!--------------------------------->
-
     <!-- add own vis classes-->
     <script src = "js/showreelvis.js"></script>
 
@@ -61,6 +56,9 @@ svg {
 									<label> Dataset: 
 									<select class="sf">
 										<option value="0">Age Demographics</option>
+										<option value="6">Age Demo by 4</option>
+										<option value="7">Days to Close</option>
+										<option value="8">Clearance Rate</option>
 										<option value="1">Filings & Dispositions</option>
 										<option value="2">Filings</option>
 										<option value="3">Dispositions</option>
@@ -102,16 +100,14 @@ svg {
             // call this function after Data is loaded, reformatted and bound to the variables
             var initVis = function(){
 
-                //TODO: Create an eventHandler  --> DONE :)
+                //Create an eventHandler
                 var MyEventHandler = new Object();
 
-                //TODO: Instantiate all Vis Objects here
+                //Instantiate all Vis Objects here
 								var sr_obj = new ShowreelVis(d3.select("#showreelVis"), whichFile, growthFlag, whichViz, MyEventHandler);
 
 																
-                // TODO: bind the eventHandler to the Vis Objects
-                // events will be created from the CountVis object (nothing to do here)
-                // events will be consumed by the PrioVis and AgeVis object (binding should happen here)
+                // Bind the eventHandler to the Vis Objects
                 $(document).on("menuChange",
 														function (MyEventHandler) { 
 															sr_obj.onSelectionChange()

@@ -20,13 +20,16 @@ ShowreelVis = function(_parentElement, _whichFile, _growthFlag, _whichSlide, _ev
 
 		this.showFlag = true;
 		
-		numViz = 6;
+		numViz = 9;
 		if (this.whichFile == "0") { this.file = "sr_ag_pop.csv" };
 		if (this.whichFile == "1") { this.file = "sr_wl_fd.csv" };
 		if (this.whichFile == "2") { this.file = "sr_wl_fil.csv" };
 		if (this.whichFile == "3") { this.file = "sr_wl_dis.csv" };
 		if (this.whichFile == "4") { this.file = "sr_fl_bud.csv" };
 		if (this.whichFile == "5") { this.file = "sr_ju_bud.csv" };
+		if (this.whichFile == "6") { this.file = "sr_ag_pop2.csv" };
+		if (this.whichFile == "7") { this.file = "sr_co_dtc.csv" };
+		if (this.whichFile == "8") { this.file = "sr_co_c1y.csv" };
 		
     this.srVis();
 }
@@ -60,11 +63,16 @@ ShowreelVis.prototype.srVis = function () {
 	var color = d3.scale.category10();
 	
 	for (i = 0; i < numViz; i++) {
+		d3.select(".srsvg"+i).attr("visibility", "hidden");
+	};
+		
+	for (i = 0; i < numViz; i++) {
 		d3.select(".srsvg"+i).remove();
 	};
 
 	var svg = d3.select("#showreelVis").append("svg")
 			.attr("class", "srsvg"+whichFile)
+			.attr("visibility", "visible")
 			.attr("width", w + m[1] + m[3] + 100)
 			.attr("height", h + m[0] + m[2])
 		.append("g")
