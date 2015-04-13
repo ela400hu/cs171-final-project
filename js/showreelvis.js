@@ -52,8 +52,10 @@ ShowreelVis.prototype.srVis = function () {
 	var growthFlag = this.growthFlag;
 
 	var m = [20, 20, 30, 20];
-	var w = 960 - m[1] - m[3];
-	var h = 700 - m[0] - m[2];
+	var txtm = 240;
+	var menm = 120;
+	var w = window.innerWidth - m[1] - m[3];
+	var h = window.innerHeight - m[0] - m[2] - menm;
 
 	var x = 0;
 	var y = 0;
@@ -73,7 +75,7 @@ ShowreelVis.prototype.srVis = function () {
 	var svg = d3.select("#showreelVis").append("svg")
 			.attr("class", "srsvg"+whichFile)
 			.attr("visibility", "visible")
-			.attr("width", w + m[1] + m[3] + 100)
+			.attr("width", w + m[1] + m[3])
 			.attr("height", h + m[0] + m[2])
 		.append("g")
 			.attr("transform", "translate(" + m[3] + "," + m[0] + ")");
@@ -184,7 +186,7 @@ ShowreelVis.prototype.srVis = function () {
 	};
 
 	function lines(rep, callback) {
-		x = d3.time.scale().range([0, w - 60]);
+		x = d3.time.scale().range([0, w - txtm]);
 		y = d3.scale.linear().range([h / symbols.length - 20, 0]);
 
 		// Compute the minimum and maximum date across symbols.
@@ -260,8 +262,8 @@ ShowreelVis.prototype.srVis = function () {
 			.append("clipPath")
 				.attr("id", "clip")
 			.append("rect")
-				.attr("width", w+100)
-				.attr("height", h / symbols.length - 20);
+				.attr("width", w)
+				.attr("height", h / symbols.length - 10);
 
 		var color2 = d3.scale.ordinal()
 				.range(["#c6dbef", "#9ecae1", "#6baed6"]);
@@ -270,16 +272,16 @@ ShowreelVis.prototype.srVis = function () {
 				.attr("clip-path", "url(#clip)");
 
 		area
-				.y0(h / symbols.length - 20);
+				.y0(h / symbols.length - 10);
 
 		g.select("circle").transition()
 				.duration(duration)
-				.attr("transform", function(d) { return "translate(" + (w - 60) + "," + (-h / symbols.length) + ")"; })
+				.attr("transform", function(d) { return "translate(" + (w - txtm) + "," + (-h / symbols.length) + ")"; })
 				.remove();
 
 		g.select("text").transition()
 				.duration(duration)
-				.attr("transform", function(d) { return "translate(" + (w - 60) + "," + (h / symbols.length - 30) + ")"; })
+				.attr("transform", function(d) { return "translate(" + (w - txtm) + "," + (h / symbols.length - 25) + ")"; })
 				.attr("dy", "0em");
 
 		g.each(function(d) {
@@ -414,7 +416,7 @@ ShowreelVis.prototype.srVis = function () {
 				.attr("d", function(d) { return line(d.values); });
 
 		t.select("text")
-				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.price / 2 + d.price0) + ")"; });
+				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - txtm) + "," + y(d.price / 2 + d.price0) + ")"; });
 
 		if (that.whichSlide == "4") {
 			that.showFlag = false;
@@ -457,7 +459,7 @@ ShowreelVis.prototype.srVis = function () {
 				.attr("d", function(d) { return line(d.values); });
 
 		t.select("text")
-				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.price / 2 + d.price0) + ")"; });
+				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - txtm) + "," + y(d.price / 2 + d.price0) + ")"; });
 
 		if (that.whichSlide == "5") {
 			that.showFlag = false;
@@ -508,12 +510,12 @@ ShowreelVis.prototype.srVis = function () {
 
 		t.select("text")
 				.attr("dy", ".31em")
-				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.price) + ")"; });
+				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - txtm) + "," + y(d.price) + ")"; });
 
 		svg.append("line")
 				.attr("class", "line")
 				.attr("x1", 0)
-				.attr("x2", w - 60)
+				.attr("x2", w - txtm)
 				.attr("y1", h)
 				.attr("y2", h)
 				.style("stroke-opacity", 1e-6)
@@ -537,7 +539,7 @@ ShowreelVis.prototype.srVis = function () {
 	function groupedBar(callback) {
 		x = d3.scale.ordinal()
 				.domain(symbols[0].values.map(function(d) { return d.date; }))
-				.rangeBands([0, w - 60], .1);
+				.rangeBands([0, w - txtm], .1);
 
 		var x1 = d3.scale.ordinal()
 				.domain(symbols.map(function(d) { return d.key; }))
@@ -588,7 +590,7 @@ ShowreelVis.prototype.srVis = function () {
 	}
 
 	function stackedBar(callback) {
-		x.rangeRoundBands([0, w - 60], .1);
+		x.rangeRoundBands([0, w - txtm], .1);
 
 		var stack = d3.layout.stack()
 				.values(function(d) { return d.values; })
@@ -612,7 +614,7 @@ ShowreelVis.prototype.srVis = function () {
 
 		t.select("text")
 				.delay(symbols[0].values.length * 10)
-				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.price / 2 + d.price0) + ")"; });
+				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - txtm) + "," + y(d.price / 2 + d.price0) + ")"; });
 
 		t.selectAll("rect")
 				.delay(function(d, i) { return i * 10; })
