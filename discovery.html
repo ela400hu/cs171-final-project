@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<style type="text/css">
+
+svg {
+  font: 12px sans-serif;
+  font-family: "Helvetica Neue", Helvetica;
+}
+
+.line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 2px;
+}
+
+.background path {
+  fill: none;
+  stroke: none;
+  stroke-width: 20px;
+  pointer-events: stroke;
+}
+
+.foreground path {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.axis .title {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.axis line,
+.axis path {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis.string {
+  font-size: 6px;
+}
+
+.label {
+  -webkit-transition: fill 125ms linear;
+}
+
+.active .label:not(.inactive) {
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.label.inactive {
+  fill: #ccc;
+}
+
+.foreground path.inactive {
+  stroke: #ccc;
+  stroke-opacity: .5;
+  stroke-width: 1px;
+}
+
+path.cpath {
+	fill: #ccc;
+	stroke: #fff;
+	stroke-width: .5px;
+}
+
+path.cpath:hover {
+	fill: steelblue;
+}
+
+</style>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Florida Court Performance Discovery</title>
+
+    <!-- ADD Libraries-->
+    <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+		<script src="http://d3js.org/topojson.v1.min.js"></script>
+		<script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
+    <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+
+    <!--Stylesheets-->
+    <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+
+    <!-- Get some nice font-->
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+
+    <!-- add own vis classes-->
+    <script src = "js/detailsVis.js"></script>
+
+    <!-- add own stylesheet-->
+    <link rel="stylesheet" type="text/css" href="css/myStyle.css">
+
+</head>
+<body>
+    <div class="container">
+        <h1 id="headline">Florida Court Performance Discovery</h1>
+
+        <div class="row">
+					<div class="col-md-12" id="divtop"></div>
+        </div>
+				
+        <div class="row">
+            <div class="col-md-3" id="divnav">
+						<br><br><br><br>
+              <form>
+                <label> Dataset: 
+                  <select class="cc">
+                    <option value="0">Population by Age</option>
+                    <option value="1">Filings by Division of Court</option>
+                    <option value="2">Filings by Type of Case</option>
+                    <option value="3">Dispositions by Division of Court</option>
+                    <option value="4">Dispositions by Type of Case</option>
+                  </select>
+                  </label>
+								<br>
+                <label>Show Data: </label><br>
+                <input type="radio" class="cd" name="display" value="0" checked></input> Raw <br>
+                <input type="radio" class="cd" name="display" value="1"></input> Indexed <br>
+<!--                 <input type="radio" class="cd" name="display" value="2"></input> Per Capita <br> -->
+								<br>
+                <label>Select by: </label><br>
+                <input type="radio" class="cs" name="select" value="0" checked></input> County 
+                <input type="radio" class="cs" name="select" value="1"></input> Circuit 
+                <input type="radio" class="cs" name="select" value="2"></input> District 
+                <input type="radio" class="cs" name="select" value="3"></input> All<br>
+							</form>
+						</div>
+            <div class="col-md-9" id="divmain">
+								<div id="divmainhead"></div>
+								<div id="divmainbody"></div>
+            </div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-3" id="divbotl"><br>Tooltips<br>
+						<img src="images/scott_sm2.jpg" alt="Scott" style="width:95px;height:120px">
+					</div>
+					<div class="col-md-9" id="divbotr">
+            <br>Time sliders/brushes?
+            <span style="padding-left:100px"> </span>Go 
+            <a href="landing.html">Back to Landing Page</a>
+          </div>
+        </div>
+				
+    </div>
+
+    <script>
+        $(function(){ // this function is called after the HTML document is fully loaded
+
+            // variables keeping global knowledge of the data
+            datSelected = 0;
+            vizSelected = 0;
+            flaSelected = 0;
+
+            // call this function after Data is loaded, reformatted and bound to the variables
+            var initVis = function(){
+
+                //Create an eventHandler
+                var MyEventHandler = new Object();
+
+                //Instantiate all Vis Objects here
+								var det_obj = new DetailsVis(d3.select("#divmain"), datSelected, vizSelected, MyEventHandler);
+																
+                // Bind the eventHandler to the Vis Objects
+                $(document).on("menuChange",
+                            function (MyEventHandler) { 
+                              det_obj.onSelectionChange()
+                              });
+
+
+            }
+
+            var startHere = function(){
+
+							// Set up Florida map
+							//
+							var width = 250;
+							var height = 190;
+							
+							var svg2 = d3.select("#divnav").append("svg")
+									.attr("width", width)
+									.attr("height", height);
+
+							var projection = d3.geo.albersUsa()
+									.scale(1800)
+									.translate([-225,-210]);
+
+							var path = d3.geo.path()
+									.projection(projection);
+
+							// Create counties
+							//
+							d3.json("maps/us.json", function(error, topology) {
+
+								// Extract only Florida counties
+								//
+								newgeo = [];
+								topology.objects.counties.geometries.forEach(function (e) {
+									if (e.id > 12000 && e.id < 13000) { newgeo.push(e) }
+								});
+								topology.objects.counties.geometries = newgeo;
+												
+								// Draw counties
+								//
+								svg2.selectAll(".cpath")
+											.data(topojson.feature(topology, topology.objects.counties).features)
+									.enter().append("path")
+											.attr("class", "cpath")
+											.attr("id", function (d) { return d.id })
+											.attr("d", path);
+											//.on("click", function (d) { countyClick(d); });
+
+							});
+						
+						
+                //
+                // Event Handlers
+                //
+
+                // Which data
+                d3.selectAll('.cc').on('change', function () {
+                  $(document).trigger("menuChange");
+                  datSelected = this.value;
+									console.log(datSelected);
+                  delete det_obj;
+                  setTimeout(initVis, 500);
+                });
+
+                // Which visualization
+                d3.selectAll('.cd').on('change', function () {
+                  $(document).trigger("menuChange");
+                  vizSelected = this.value;
+									console.log(vizSelected);
+                  delete det_obj;
+                  setTimeout(initVis, 500);
+                });
+
+                // Which select
+                d3.selectAll('.cs').on('change', function () {
+                  flaSelected = this.value;
+									console.log(flaSelected);
+                });
+
+                initVis();
+
+            }
+
+            startHere();
+            
+        })
+    </script>
+</body>
+</html>

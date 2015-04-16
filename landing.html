@@ -24,7 +24,6 @@ svg {
     <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
     <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
 
-
     <!--Stylesheets-->
     <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
 
@@ -40,18 +39,16 @@ svg {
 </head>
 <body>
     <div class="container">
-        <h1>Florida Court Performance</h1>
+        <h1 id="headline">Florida Court Performance</h1>
 
         <div class="row">
-            <div class="col-md-12" id="showreelVis">
-            </div>
+					<div class="col-md-12" id="showreelVis">
+					</div>
         </div>
 				
         <div class="row">
             <div class="col-md-6" id="blankVis">
 						    <form>
-<!-- 									<label>Show: <input type="radio" class="ra" name="show" value="false" checked></input>Data </label>
-									<label><input type="radio" class="ra" name="show" value="true"></input>Growth </label> -->
 									<span style="padding-left:10px"> </span>
 									<label> Dataset: 
 									<select class="sf">
@@ -83,7 +80,9 @@ svg {
 								</form>
             </div>
             <div class="col-md-6" id="menuVis">
-						Actual Menu Elements Over Here...
+				Actual Menu Elements...
+				<span style="padding-left:50px"> </span>Go 
+            	<a href="discovery.html">Forward to Discovery Page</a>
             </div>
 				</div>
 
@@ -125,7 +124,6 @@ svg {
 								d3.selectAll('.ra').on('change', function () {
 									$(document).trigger("menuChange");
 									growthFlag = this.value=="true";
-									//d3.select(".srsvg.g").remove();
 									delete sr_obj;
 									setTimeout(initVis, 1);
 									//initVis();
@@ -135,7 +133,6 @@ svg {
 								d3.select('.sf').on("change", function() {
 									$(document).trigger("menuChange");
 									whichFile = this.options[this.selectedIndex].value;
-									//d3.selectAll(".srsvg.g").remove();
 									delete sr_obj;
 									setTimeout(initVis, 1);
 								});
@@ -144,7 +141,6 @@ svg {
 								d3.select('.sv').on("change", function() {
 									$(document).trigger("menuChange");
 									whichViz = this.options[this.selectedIndex].value;
-									//d3.selectAll(".srsvg.g").remove();
 									delete sr_obj;
 									setTimeout(initVis, 1);
 								});

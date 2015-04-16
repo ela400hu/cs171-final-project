@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<style type="text/css">
+
+svg {
+  font: 12px sans-serif;
+  font-family: "Helvetica Neue", Helvetica;
+}
+
+div.scroll {
+    overflow: scroll;
+}
+
+.line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 2px;
+}
+
+.background path {
+  fill: none;
+  stroke: none;
+  stroke-width: 20px;
+  pointer-events: stroke;
+}
+
+.foreground path {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.axis .title {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.axis line,
+.axis path {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis.string {
+  font-size: 6px;
+}
+
+.label {
+  -webkit-transition: fill 125ms linear;
+}
+
+.active .label:not(.inactive) {
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.label.inactive {
+  fill: #ccc;
+}
+
+.foreground path.inactive {
+  stroke: #ccc;
+  stroke-opacity: .5;
+  stroke-width: 1px;
+}
+
+</style>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Florida Court Performance Discovery</title>
+
+    <!-- ADD Libraries-->
+    <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+		<script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
+    <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+
+    <!--Stylesheets-->
+    <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+
+    <!-- Get some nice font-->
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+
+    <!-- add own vis classes-->
+    <script src = "js/detailsVis.js"></script>
+
+    <!-- add own stylesheet-->
+    <link rel="stylesheet" type="text/css" href="css/myStyle.css">
+
+</head>
+<body>
+    <div class="container">
+        <h1 id="headline">Florida Court Performance Discovery</h1>
+
+        <div class="row">
+					<div class="col-md-12" id="divtop">
+					divtop
+					</div>
+        </div>
+				
+        <div class="row">
+            <div class="col-md-3" id="divnav">
+            Tooltips<br>
+						<br>
+						Mini map of Florida<br>
+						<br>
+						Viz controls<br>
+						</div>
+            <div class="col-md-9" id="divmain">
+								<div class="col-md-9" id="divmainhead">
+								divmainhead
+								</div>
+								<div class="col-md-9" id="divmainbody">
+								</div>
+            </div>
+				</div>
+        
+				<div class="row">
+					<div class="col-md-3" id="divbotl">
+					divbotl
+					</div>
+					<div class="col-md-9" id="divbotr">
+					Time sliders/brushes?
+					</div>					
+        </div>
+				
+    </div>
+
+    <script>
+        $(function(){ // this function is called after the HTML document is fully loaded
+
+            // variables keeping global knowledge of the data
+
+
+            // call this function after Data is loaded, reformatted and bound to the variables
+            var initVis = function(){
+
+                //Create an eventHandler
+                var MyEventHandler = new Object();
+
+                //Instantiate all Vis Objects here
+								var det_obj = new DetailsVis(d3.select("#divmain"), MyEventHandler);
+																
+                // Bind the eventHandler to the Vis Objects
+															
+            }
+
+            var startHere = function(){
+
+                initVis();
+
+            }
+
+            startHere();
+        })
+    </script>
+</body>
+</html>
