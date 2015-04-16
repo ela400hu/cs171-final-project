@@ -63,9 +63,9 @@ background: url(beach_painted.jpg) no-repeat center center fixed;*/
 
 </head>
 <body>
-    <div class="jumbotron">
-        <h1 id="headline">Florida Court Performance</h1><br>
-        <img style="z-index: 10; position:absolute;" src="StephensBig2.png" alt="BigStephens"  />
+    <div class="jumbotron"><div class="row">
+       <div class="col-md-12" > <h1 id="headline" style="margin-left:50px;">Florida Court Performance</h1></div></div>
+        <img id="Stephens" style="z-index: 10; position:absolute; height: 670px;" src="StephensBig700PlayRTRounded.png" alt="BigStephens"  />
 
         <div class="row">
             <div class="col-md-12" id="showreelVis">
@@ -114,6 +114,14 @@ background: url(beach_painted.jpg) no-repeat center center fixed;*/
 
     <script>
         $(function(){ // this function is called after the HTML document is fully loaded
+
+        	$("#Stephens").click(function() {
+  alert( "Play Video." );
+
+  $( this ).fadeOut( "slow", function() {
+    // Animation complete.
+  });
+});
 
             // variables keeping global knowledge of the data
 						whichFile = "0";
