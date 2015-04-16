@@ -256,7 +256,12 @@ ShowreelVis.prototype.srVis = function () {
 				.attr("height", h / symbols.length - 20);
 
 		var color2 = d3.scale.ordinal()
-				.range(["#c6dbef", "#9ecae1", "#6baed6"]);
+		// .range(["#00FF66", "#66FF66", "#55AE3A"]);
+				 .range(["#c6dbef", "#9ecae1", "#6baed6"]);
+
+
+
+				//	#00FF33 : spring, #00FF66: neon avacado, #66FF66 : wasabi, #55AE3A: leaf
 
 		var g = svg.selectAll(".symbol")
 				.attr("clip-path", "url(#clip)");

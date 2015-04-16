@@ -207,7 +207,8 @@ ShowreelVis.prototype.srVis = function () {
 			e.append("circle")
 					.attr("r", 5)
 					.style("fill", function(d) { return color(d.key); })
-					.style("stroke", "#000")
+					.style("stroke", "#000b95")
+					.style("opacity", ".7")
 					.style("stroke-width", "2px");
 
 			e.append("text")
