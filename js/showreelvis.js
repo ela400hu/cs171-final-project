@@ -21,8 +21,8 @@ ShowreelVis = function(_parentElement, _whichFile, _growthFlag, _whichSlide, _ev
 		this.showFlag = true;
 		
 		numViz = 9;
-		if (this.whichFile == "0") { this.file = "sr_ag_pop.csv" };
-		if (this.whichFile == "1") { this.file = "sr_wl_fd.csv" };
+		if (this.whichFile == "0") { this.file = "sr_wl_fd.csv" };
+		if (this.whichFile == "1") { this.file = "sr_ag_pop.csv" };
 		if (this.whichFile == "2") { this.file = "sr_wl_fil.csv" };
 		if (this.whichFile == "3") { this.file = "sr_wl_dis.csv" };
 		if (this.whichFile == "4") { this.file = "sr_fl_bud.csv" };
