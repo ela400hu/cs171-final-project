@@ -3,14 +3,33 @@
 <meta charset="utf-8">
 <style type="text/css">
 
+body {
+
+font-color:#000b95;
+
+background: #fcd2b5; /* Old browsers */
+background: #fed57e; /* Old browsers */
+background: -moz-linear-gradient(top, #fed57e 0%, #fcd2b5 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fed57e), color-stop(100%,#fcd2b5)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top, #fed57e 0%,#fcd2b5 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top, #fed57e 0%,#fcd2b5 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top, #fed57e 0%,#fcd2b5 100%); /* IE10+ */
+background: linear-gradient(to bottom, #fed57e 0%,#fcd2b5 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fed57e', endColorstr='#fcd2b5',GradientType=0 ); /* IE6-9 */
+
+
+
+
+}
 svg {
   font: 12px sans-serif;
   font-family: "Helvetica Neue", Helvetica;
+  color:#000b95;
 }
 
 .line {
   fill: none;
-  stroke: #000;
+  stroke: #000b95;
   stroke-width: 2px;
 }
 
@@ -19,58 +38,68 @@ svg {
   stroke: none;
   stroke-width: 20px;
   pointer-events: stroke;
+  color:#000b95;
 }
 
 .foreground path {
   fill: none;
-  stroke: steelblue;
+  stroke: #e81d5e;
   stroke-width: 1.5px;
 }
 
 .axis .title {
   font-size: 11px;
   font-weight: bold;
+  color:#000b95;
   text-transform: uppercase;
 }
 
 .axis line,
 .axis path {
   fill: none;
-  stroke: #000;
+  stroke: #000b95;
+  color:#000b95;
   shape-rendering: crispEdges;
 }
 
 .axis.string {
   font-size: 6px;
+  color:#000b95;
 }
 
 .label {
   -webkit-transition: fill 125ms linear;
+  color:#000b95;
 }
 
 .active .label:not(.inactive) {
   font-weight: bold;
   font-size: 11px;
+  fill: #e81d5e;
 }
 
 .label.inactive {
-  fill: #ccc;
+  fill: #e09e11
 }
 
 .foreground path.inactive {
-  stroke: #ccc;
-  stroke-opacity: .5;
+stroke: #e09e11; 
+
+
+
+  /*stroke: #cfee35;*/
+  stroke-opacity: .7;
   stroke-width: 1px;
 }
 
 path.cpath {
-	fill: #ccc;
-	stroke: #fff;
+	fill: #faab02;
+	stroke: #fa2f02;
 	stroke-width: .5px;
 }
 
 path.cpath:hover {
-	fill: steelblue;
+	fill: #e81d5e;
 }
 
 </style>
@@ -100,14 +129,14 @@ path.cpath:hover {
 </head>
 <body>
     <div class="container">
-        <h1 id="headline">Florida Court Performance Discovery</h1>
+        <h1 id="headline" style="color:#000b95;">Florida Court Performance Discovery</h1>
 
         <div class="row">
 					<div class="col-md-12" id="divtop"></div>
         </div>
 				
         <div class="row">
-            <div class="col-md-3" id="divnav">
+            <div class="col-md-3" id="divnav" >
 						<br><br><br><br>
               <form>
                 <label> Dataset: 
