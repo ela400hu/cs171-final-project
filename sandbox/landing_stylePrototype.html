@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<style type="text/css">
+svg {
+    font-family: "Helvetica Neue", Helvetica;
+}
+
+.line {
+    fill: none;
+    stroke: #000b95;
+    opacity: .7;
+    stroke-width: 2px;
+}
+
+.jumbotron {
+    background: url(images/beach_treeGreen.jpg) no-repeat center center fixed;
+
+    
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    /*background-color: black;*/
+}
+</style>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Florida Court Performance</title>
+
+    <!-- ADD Libraries-->
+    <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
+    <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+
+
+    <!--Stylesheets-->
+    <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+
+    <!-- Get some nice font-->
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+
+
+    <!--------------------------------->
+    <!-- FROM HERE ON IT IS HW3 stuff-->
+    <!--------------------------------->
+
+    <!-- add own vis classes-->
+    <script src="js/showreelvis_styled.js"></script>
+
+    <!-- add own stylesheet-->
+    <link rel="stylesheet" type="text/css" href="css/myStyle.css">
+
+</head>
+
+<body>
+    <div class="jumbotron">
+        <div class="row">
+            <div class="col-md-12">
+                <h1 id="headline" style="margin-left:50px;">Florida Court Performance</h1></div>
+        </div>
+        <a id="Stephens" href="#" data-toggle="modal" data-target="#myModal">
+            <img style="z-index: 10; position:absolute; height: 670px;" src="images/StephensBig700PlayRTRounded.png" alt="BigStephens" /></a>
+
+        <div class="row">
+            <div class="col-md-12" id="showreelVis">
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-5" id="blankVis">
+                <form>
+                    <!-- 									<label>Show: <input type="radio" class="ra" name="show" value="false" checked></input>Data </label>
+									<label><input type="radio" class="ra" name="show" value="true"></input>Growth </label> -->
+                    <span style="padding-left:10px"> </span>
+                    <label> Dataset:
+                        <select class="sf">
+                            <option value="0">Age Demographics</option>
+                            <option value="1">Filings & Dispositions</option>
+                            <option value="2">Filings</option>
+                            <option value="3">Dispositions</option>
+                            <option value="4">Florida Budget</option>
+                            <option value="5">Judicial Budget</option>
+                        </select>
+                    </label>
+                    <span style="padding-left:10px"> </span>
+                    <label> Slide:
+                        <select class="sv">
+                            <option value="0">All</option>
+                            <option value="1">Lines</option>
+                            <option value="2">Horizons</option>
+                            <option value="3">Areas</option>
+                            <option value="4">Stacked Area</option>
+                            <option value="5">Streamgraph</option>
+                            <option value="6">Overlapping Area</option>
+                            <option value="7">Grouped Bar</option>
+                            <option value="8">Stacked Bar</option>
+                        </select>
+                    </label>
+                </form>
+            </div>
+            <div class="col-md-2" id="menuVis">
+
+            </div>
+            <div class="col-md-4">
+                Placeholder for force graph controls.
+            </div>
+        </div>
+
+    </div>
+    <!--     <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+  Launch demo modal
+</button> -->
+
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Video Placeholder</h4>
+                </div>
+                <div class="modal-body">
+                    <p>The court cases we hear about most often involve something extreme, but what is the usual, day-to-day business of the courts? We have put together a series of interactive views designed to give you a look under the hood of a large state judicial system you may have heard about, the Florida courts. </p>
+                    <p>We hope to shed light on questions about the structure of the court system, the volume and type of cases it handles, and how the cases are resolved. For all of these questions, the answers can vary over time, over geography and over the types of events and resolutions being examined.
+                    </p>
+                    </p>
+                    <p>The opening view is anchored on the domain expert of the data, Judge Stephens. His opening video orients and anchors the viewer to the data landscape and directs the users attention to the interesting questions presented by the data. Eye-catching force node buttons present data views that illustrate key narratives, such as the hypothesis that case filings are driven by population growth and economic conditions. </p>
+
+                    <p>Once the video is complete the user can appreciate an unobstructed view of the opening animation. This kinetic presentation functions as a teaser and gives an overview of the changes in <a href="#FilingsandDispositions">case filings and dispositions</a> over time, classified by the type of case. Since population growth and economic activity are believed to influence court caseloads, the display also shows economic and demographic data for the same timeframe. </p>
+                    <p>This display initially features an animated tour of the different forms of vizualization available for the various data elements; you can select a single form and focus on the time path of a specific data item, or in some cases two items displayed together. </p>
+
+                    <p>The second view is descriptive. It shows how case filings and resolutions can vary over time in different geographic areas. The map of Florida visualizes the structure of the state courts system and permits the user to compare filng data and detailed resolution data. You can choose to make comparisons at the county level, or to aggregate by circuit (a grouping of counties) or district (a grouping of circuits). Making one selection compares the selected region to statewide averages, and a second selection compares that region to the first one. The comparisons of disposition are further broken down into the type of disposition- whether the case was resolved by jury trial, by pretrial rulings, or by settlement. This does not try to include who won or lost, since that is only meaningful relative to the parties' negotiations which take place privately.</p>
+
+                    <p>References and Sources</p>
+                    <p>
+                        <a id="FilingsandDispositions"></a> Case filings and dispositions. Data provided upon request by State of Florida Office of State Courts Administrator from OSCA's <a href="http://flcourts.org/publications-reports-stats/statistics/">Summary Reporting System</a>. </p>
+                    <p><a href="http://www.courtstatistics.org/Appellate/20123Appellate.aspx">Population Size and Caseload are Often Related</a> National Center for State Courts.</p>
+                    <p><a href="http://www.courtstatistics.org/~/media/Microsites/Files/CSP/DATA%20PDF/CSP_DEC.ashx">National Trend declining case filings</a>. Examining the Work of State Courts, National Center for State Courts (2012) (using 2010 data)</p>
+                    <p>&nbsp;</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+$(function() { // this function is called after the HTML document is fully loaded
+
+    $("#Stephens").click(function() {
+        $(this).fadeOut("slow", function() {
+            // Animation complete.
+        });
+    });
+
+    // variables keeping global knowledge of the data
+    whichFile = "0";
+    whichViz = "0";
+    growthFlag = false;
+
+    // call this function after Data is loaded, reformatted and bound to the variables
+    var initVis = function() {
+
+        //TODO: Create an eventHandler  --> DONE :)
+        var MyEventHandler = new Object();
+
+        //TODO: Instantiate all Vis Objects here
+        var sr_obj = new ShowreelVis(d3.select("#showreelVis"), whichFile, growthFlag, whichViz, MyEventHandler);
+
+
+        // TODO: bind the eventHandler to the Vis Objects
+        // events will be created from the CountVis object (nothing to do here)
+        // events will be consumed by the PrioVis and AgeVis object (binding should happen here)
+        $(document).on("menuChange",
+            function(MyEventHandler) {
+                sr_obj.onSelectionChange()
+            });
+
+    }
+
+    var startHere = function() {
+
+        //
+        // Event Handlers
+        //
+
+        // Which visualization
+        d3.selectAll('.ra').on('change', function() {
+            $(document).trigger("menuChange");
+            growthFlag = this.value == "true";
+            //d3.select(".srsvg.g").remove();
+            delete sr_obj;
+            setTimeout(initVis, 1);
+            //initVis();
+        });
+
+        // Which File
+        d3.select('.sf').on("change", function() {
+            $(document).trigger("menuChange");
+            whichFile = this.options[this.selectedIndex].value;
+            //d3.selectAll(".srsvg.g").remove();
+            delete sr_obj;
+            setTimeout(initVis, 1);
+        });
+
+        // Which Viz
+        d3.select('.sv').on("change", function() {
+            $(document).trigger("menuChange");
+            whichViz = this.options[this.selectedIndex].value;
+            //d3.selectAll(".srsvg.g").remove();
+            delete sr_obj;
+            setTimeout(initVis, 1);
+        });
+
+        initVis();
+
+    }
+
+    startHere();
+})
+    </script>
+    <script>
+var width = 100,
+    height = 100,
+    root;
+
+var force = d3.layout.force()
+    .size([width, height])
+    .on("tick", tick);
+
+var svg = d3.select("#menuVis").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var link = svg.selectAll(".link"),
+    node = svg.selectAll(".node");
+
+d3.json("js/readme2.json", function(json) {
+    root = json;
+    update();
+});
+
+function update() {
+    var nodes = flatten(root),
+        links = d3.layout.tree().links(nodes);
+
+    // Restart the force layout.
+    force
+        .nodes(nodes)
+        .links(links)
+        .start();
+
+    // Update the links…
+    link = link.data(links, function(d) {
+        return d.target.id;
+    });
+
+    // Exit any old links.
+    link.exit().remove();
+
+    // Enter any new links.
+    link.enter().insert("line", ".node")
+        .attr("class", "link")
+        .attr("x1", function(d) {
+            return d.source.x;
+        })
+        .attr("y1", function(d) {
+            return d.source.y;
+        })
+        .attr("x2", function(d) {
+            return d.target.x;
+        })
+        .attr("y2", function(d) {
+            return d.target.y;
+        });
+
+    // Update the nodes…
+    node = node.data(nodes, function(d) {
+        return d.id;
+    }).style("fill", color);
+
+    // Exit any old nodes.
+    node.exit().remove();
+
+    // Enter any new nodes.
+    node.enter().append("circle")
+        .attr("class", "node")
+        .attr("cx", function(d) {
+            return d.x;
+        })
+        .attr("cy", function(d) {
+            return d.y;
+        })
+        .attr("r", function(d) {
+            return Math.sqrt(d.size) / 10 || 10;
+        })
+        .style("fill", color)
+
+    .on("click", click)
+        .call(force.drag);
+
+
+
+}
+
+function tick() {
+    link.attr("x1", function(d) {
+            return d.source.x;
+        })
+        .attr("y1", function(d) {
+            return d.source.y;
+        })
+        .attr("x2", function(d) {
+            return d.target.x;
+        })
+        .attr("y2", function(d) {
+            return d.target.y;
+        });
+
+    node.attr("cx", function(d) {
+            return d.x;
+        })
+        .attr("cy", function(d) {
+            return d.y;
+        });
+}
+
+// Color leaf nodes orange, and packages white or blue.
+function color(d) {
+    return d._children ? "#3182bd" : d.children ? "#c6dbef" : "#fd8d3c";
+}
+
+// Toggle children on click.
+function click(d) {
+    if (!d3.event.defaultPrevented) {
+        if (d.children) {
+            d._children = d.children;
+            d.children = null;
+        } else {
+            d.children = d._children;
+            d._children = null;
+        }
+        update();
+    }
+}
+
+// Returns a list of all nodes under the root.
+function flatten(root) {
+    var nodes = [],
+        i = 0;
+
+    function recurse(node) {
+        if (node.children) node.children.forEach(recurse);
+        if (!node.id) node.id = ++i;
+        nodes.push(node);
+    }
+
+    recurse(root);
+    return nodes;
+}
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,13 @@
+{
+     "name": "operator",
+     "children": [
+      
+      {"name": "IOperator", "size": 0},
+    
+      {"name": "Operator", "size": 0},
+      {"name": "OperatorList", "size": 0},
+      {"name": "OperatorSequence", "size": 0},
+      {"name": "OperatorSwitch", "size": 0},
+      {"name": "SortOperator", "size": 0}
+     ]
+}
