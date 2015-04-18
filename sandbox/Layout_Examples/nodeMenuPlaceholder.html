@@ -29,7 +29,7 @@ var force = d3.layout.force()
     .size([width, height])
     .on("tick", tick);
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#menuVis").append("svg")
     .attr("width", width)
     .attr("height", height);
 
