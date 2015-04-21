@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  margin: auto;
+  position: relative;
+  width: 960px;
+}
+
+form {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+.node {
+  border: solid 1px white;
+  font: 10px sans-serif;
+  line-height: 12px;
+  overflow: hidden;
+  position: absolute;
+  text-indent: 2px;
+}
+
+</style>
+<form>
+  <label><input type="radio" name="mode" value="size" checked> Size</label>
+  <label><input type="radio" name="mode" value="count"> Count</label>
+</form>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="libs/jquery/jquery-2.1.1.min.js"></script>
+
+<script>
+
+var margin = {top: 40, right: 10, bottom: 10, left: 10},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var color = d3.scale.category20c();
+
+var treemap = d3.layout.treemap()
+    .size([width, height])
+    .sticky(true)
+    .value(function(d) { return d.size; });
+
+var div = d3.select("body").append("div")
+    .style("position", "relative")
+    .style("width", (width + margin.left + margin.right) + "px")
+    .style("height", (height + margin.top + margin.bottom) + "px")
+    .style("left", margin.left + "px")
+    .style("top", margin.top + "px");
+
+/////////////////////////////////////////////////////////Data Acquisition//////////////// 
+d3.csv("data/dispodetail.csv", function(error, rdata){
+	// beat the data into shape.  the example uses data structured 
+	// "name": name, "flare". "children": [ {"name": "analytics", "children": [ { "name": "cluster", "children: [ {"name": "Agcluster", "size": 3456"} <other children of cluster> ]
+
+// filter the data by county and year
+var county = "Escambia";
+var year = "2013"
+var fdata=[]
+var rdata = rdata.filter(function(d){
+		return d["County"]== county})
+for(i=0;i<rdata.length;i++)
+fdata[i] = {
+	"division": rdata[i].DivisionOfCourt,
+	"ctype": rdata[i].TypeOfCase,
+	"dtype": rdata[i].TypeOfDisposition,
+	"year": year,
+	"size": rdata[i][year]
+	}
+
+var newData = { name :"root", children : [] },
+    levels = ["division","ctype"];
+// clever recursive tree traversal adapted from http://stackoverflow.com/questions/19317115/convert-flat-json-file-to-hierarchical-json-data-like-flare-json-d3-example-fil
+// For each data row, loop through the expected levels traversing the output tree
+fdata.forEach(function(d){
+    // Keep this as a reference to the current level
+    var depthCursor = newData.children;
+    // Go down one level at a time
+    levels.forEach(function( property, depth ){
+        // Look to see if a branch has already been created
+        var index;
+        depthCursor.forEach(function(child,i){
+            if ( d[property] == child.name ) index = i;
+        });
+        // Add a branch if it isn't there
+        if ( isNaN(index) ) {
+            depthCursor.push({ name : d[property], children : []});
+            index = depthCursor.length - 1;
+        }
+        // Now reference the new child array as we go deeper into the tree
+        depthCursor = depthCursor[index].children;
+        // This is a leaf, so add the last element to the specified branch
+        if ( depth === levels.length - 1 ) depthCursor.push({ name : d.dtype, size : d.size });
+    });
+});
+/////////////////////////////////////////////////////////////#End Data Acquisition///////
+root = newData  
+	
+  var node = div.datum(root).selectAll(".node")
+      .data(treemap.nodes)
+    .enter().append("div")
+      .attr("class", "node")
+      .call(position)
+      .style("background", function(d) { return d.children ? color(d.name) : null; })
+      .text(function(d) { return d.children ? null : d.name; });
+
+  d3.selectAll("input").on("change", function change() {
+    var value = this.value === "count"
+        ? function() { return 1; }
+        : function(d) { return d.size; };
+
+    node
+        .data(treemap.value(value).nodes)
+      .transition()
+        .duration(1500)
+        .call(position);
+  });
+});
+
+function position() {
+  this.style("left", function(d) { return d.x + "px"; })
+      .style("top", function(d) { return d.y + "px"; })
+      .style("width", function(d) { return Math.max(0, d.dx - 1) + "px"; })
+      .style("height", function(d) { return Math.max(0, d.dy - 1) + "px"; });
+}
+
+//	})
+
+</script>

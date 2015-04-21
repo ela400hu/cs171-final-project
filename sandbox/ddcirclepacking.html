@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+circle {
+  fill: rgb(31, 119, 180);
+  fill-opacity: .25;
+  stroke: rgb(31, 119, 180);
+  stroke-width: 1px;
+}
+
+.leaf circle {
+  fill: #ff7f0e;
+  fill-opacity: 1;
+}
+
+text {
+  font: 10px sans-serif;
+}
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+var diameter = 960,
+    format = d3.format(",d");
+
+var pack = d3.layout.pack()
+    .size([diameter - 4, diameter - 4])
+    .value(function(d) { return d.size; });
+
+var svg = d3.select("body").append("svg")
+    .attr("width", diameter)
+    .attr("height", diameter)
+  .append("g")
+    .attr("transform", "translate(2,2)");
+
+//d3.json("flare.json", function(error, root) {
+	/////////////////////////////////////////////////////////Data Acquisition//////////////// 
+d3.csv("data/dispodetail.csv", function(error, rdata){
+	// beat the data into shape.  the example uses data structured 
+	// "name": name, "flare". "children": [ {"name": "analytics", "children": [ { "name": "cluster", "children: [ {"name": "Agcluster", "size": 3456"} <other children of cluster> ]
+
+// filter the data by county and year
+var county = "Escambia";
+var year = "2013"
+var fdata=[]
+var rdata = rdata.filter(function(d){
+		return d["County"]== county})
+for(i=0;i<rdata.length;i++)
+fdata[i] = {
+	"division": rdata[i].DivisionOfCourt,
+	"ctype": rdata[i].TypeOfCase,
+	"dtype": rdata[i].TypeOfDisposition,
+	"year": year,
+	"size": rdata[i][year]
+	}
+
+var newData = { name :"root", children : [] },
+    levels = ["division","ctype"];
+// clever recursive tree traversal adapted from http://stackoverflow.com/questions/19317115/convert-flat-json-file-to-hierarchical-json-data-like-flare-json-d3-example-fil
+// For each data row, loop through the expected levels traversing the output tree
+fdata.forEach(function(d){
+    // Keep this as a reference to the current level
+    var depthCursor = newData.children;
+    // Go down one level at a time
+    levels.forEach(function( property, depth ){
+        // Look to see if a branch has already been created
+        var index;
+        depthCursor.forEach(function(child,i){
+            if ( d[property] == child.name ) index = i;
+        });
+        // Add a branch if it isn't there
+        if ( isNaN(index) ) {
+            depthCursor.push({ name : d[property], children : []});
+            index = depthCursor.length - 1;
+        }
+        // Now reference the new child array as we go deeper into the tree
+        depthCursor = depthCursor[index].children;
+        // This is a leaf, so add the last element to the specified branch
+        if ( depth === levels.length - 1 ) depthCursor.push({ name : d.dtype, size : d.size });
+    });
+});
+/////////////////////////////////////////////////////////////#End Data Acquisition///////
+root = newData 
+	
+  var node = svg.datum(root).selectAll(".node")
+      .data(pack.nodes)
+    .enter().append("g")
+      .attr("class", function(d) { return d.children ? "node" : "leaf node"; })
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+  node.append("title")
+      .text(function(d) { return d.name + (d.children ? "" : ": " + format(d.size)); });
+
+  node.append("circle")
+      .attr("r", function(d) { return d.r; });
+
+  node.filter(function(d) { return !d.children; }).append("text")
+      .attr("dy", ".3em")
+      .style("text-anchor", "middle")
+      .text(function(d) { return d.name.substring(0, d.r / 3); });
+});
+
+d3.select(self.frameElement).style("height", diameter + "px");
+
+</script>
