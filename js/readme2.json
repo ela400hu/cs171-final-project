@@ -1,13 +1,14 @@
 {
-     "name": "operator",
+     "name": "Layouts",
+     "size": 100000,
      "children": [
-      
-      {"name": "IOperator", "size": 0},
     
-      {"name": "Operator", "size": 0},
-      {"name": "OperatorList", "size": 0},
-      {"name": "OperatorSequence", "size": 0},
-      {"name": "OperatorSwitch", "size": 0},
-      {"name": "SortOperator", "size": 0}
+      {"name": "Lines", "size": 0},
+      {"name": "Horizons", "size": 0},
+      {"name": "Stacked Area", "size": 0},
+      {"name": "Streamgraph", "size": 0},
+      {"name": "Overlapping Area", "size": 0},
+      {"name": "Grouped Bar", "size": 0},
+      {"name": "Stacked Bar", "size": 0}
      ]
 }

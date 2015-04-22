@@ -233,6 +233,8 @@ var force = d3.layout.force()
     .size([width, height])
     .on("tick", tick);
 
+
+
 var svg = d3.select("#menuVis").append("svg")
     .attr("width", width)
     .attr("height", height);
@@ -245,6 +247,8 @@ d3.json("js/readme2.json", function(json) {
     update();
 });
 
+
+
 function update() {
     var nodes = flatten(root),
         links = d3.layout.tree().links(nodes);
@@ -254,6 +258,8 @@ function update() {
         .nodes(nodes)
         .links(links)
         .start();
+
+        force.linkDistance(10000);
 
     // Update the links…
     link = link.data(links, function(d) {

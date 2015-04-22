@@ -13,15 +13,22 @@
   fill: none;
   stroke: #9ecae1;
   stroke-width: 1.5px;
+
+d3-tip {
+    line-height: 1;
+    color: black;
+}
+
 }
 
 </style>
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
+<script type='text/javascript' src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"> </script>
 <script>
 
-var width = 960,
-    height = 500,
+var width = 130,
+    height = 130,
     root;
 
 var force = d3.layout.force()
@@ -35,15 +42,14 @@ var svg = d3.select("body").append("svg")
 var link = svg.selectAll(".link"),
     node = svg.selectAll(".node");
 
-
-
 d3.json("readme2.json", function(json) {
   root = json;
-
+cheese = root;
 
   update();
 });
 
+ 
 
 
 function update() {
@@ -51,7 +57,7 @@ function update() {
       links = d3.layout.tree().links(nodes);
 
 force.linkDistance(function(link) {
-       return link.graph === 0 ? height/12 : height/12;
+       return link.graph === 0 ? height/3 : height/3;
     });
 
   // Restart the force layout.
@@ -61,7 +67,7 @@ force.linkDistance(function(link) {
       .start();
 
       force.linkDistance(function(link) {
-       return link.graph === 0 ? height/12 : height/12;
+       return link.graph === 0 ? height/3 : height/3;
     });
 
   // Update the links…
@@ -94,7 +100,9 @@ force.linkDistance(function(link) {
       .attr("r", function(d) { return Math.sqrt(d.size) / 10 || 4.5; })
       .style("fill", color)
       .on("click", click)
-      .call(force.drag);
+      .call(force.drag)
+      .on('mouseover', tip.show) //Added
+      .on('mouseout', tip.hide); //Added ;
 
 
 
@@ -144,6 +152,17 @@ function flatten(root) {
   recurse(root);
   return nodes;
 }
+
+
+
+//Set up tooltip
+var tip = d3.tip()
+    .attr('class', 'd3-tip')
+    .offset([-10, 0])
+    .html(function (d) {
+    return  d.name + "";
+})
+svg.call(tip);
 
 
 
