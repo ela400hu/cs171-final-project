@@ -81,8 +81,6 @@ force.linkDistance(function(link) {
   // Update the nodes…
   node = node.data(nodes, function(d) { return d.id; }).style("fill", color);
 
-
-
   // Exit any old nodes.
   node.exit().remove();
 
@@ -96,9 +94,20 @@ force.linkDistance(function(link) {
       .on("click", click)
       .call(force.drag);
 
+    title = svg.selectAll("text.title")    // WOMBAT
+         .data(nodes);
+    
+    // Enter any new titles.
+    title.enter()
+        .append("text")
+        .attr("class", "title")
+        .text(function(d) { return d.name; });
+    
+    // Exit any old titles.
+    title.exit().remove();
 
 
-      
+
 
 }
 
@@ -110,6 +119,9 @@ function tick() {
 
   node.attr("cx", function(d) { return d.x; })
       .attr("cy", function(d) { return d.y; });
+
+
+      title.attr("transform", function(d){ return "translate("+d.x+","+d.y+")"; }); //WOMBAT
 }
 
 // Color leaf nodes orange, and packages white or blue.
