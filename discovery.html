@@ -30,6 +30,11 @@ svg {
   stroke-width: 2px;
 }
 
+.aline {
+  fill: none;
+  stroke-width: 2px;
+}
+
 .background path {
   fill: none;
   stroke: none;
@@ -121,13 +126,20 @@ div.tooltip {
   fill-opacity:0.4;
 }
 
-.chart text {
+.agerect {
+  fill: rgb(44, 160, 44);
+  fill-opacity:0.4;
+}
+
+.chart text,
+.charta text {
   fill: black;
   font: 11px sans-serif;
   text-anchor: start;
 }
 
-.clickable {
+.clickable,
+.clickabla {
 	stroke:#fff;
 	fill:#fff;
 	fill-opacity:0;
@@ -177,35 +189,23 @@ div.tooltip {
 				
         <div class="row">
             <div class="col-md-3" id="divnav" >
-              <label>Division of Court and Case Type:</label><br>
-							<svg class="chart"></svg>
 						  <form>
-<!--                 <label> Division and Case Type: </label><br>
-                  <select class="cc">
-                    <option value="0">--Select Division of Court--</option>
-                    <option value="1">Circuit Civil</option>
-                    <option value="2">Circuit Criminal</option>
-                    <option value="3">County Civil</option>
-                    <option value="4">County Criminal</option>
-                    <option value="5">Family Court</option>
-                    <option value="6">Probate</option>
-                    <option value="7">Traffic</option>
-                  </select> -->
-<!--                 <div id="ddnav" >
-                  <br>
-                </div> -->
-								<br>
-                <label>Show Data: </label>
-                <input type="radio" class="cd" name="display" value="0" checked></input> Raw 
-                <input type="radio" class="cd" name="display" value="1"></input> Indexed 
-								<br>
-								<br>
                 <label>Select by: </label><br>
                 <input type="radio" class="cs" name="select" value="0" checked></input> County 
                 <input type="radio" class="cs" name="select" value="1"></input> Circuit 
                 <input type="radio" class="cs" name="select" value="2"></input> District 
                 <input type="radio" class="cs" name="select" value="3"></input> All
+								<div id="divmap"></div>
+								<label>Show Data: </label>
+                <input type="radio" class="cd" name="display" value="0" checked></input> Raw 
+                <input type="radio" class="cd" name="display" value="1"></input> Indexed 
+								<br>
+								<br>
 							</form>
+              <label>Division of Court and Case Type:</label><br>
+							<svg class="chart"></svg>
+              <label>Age Group:</label><br>
+							<svg class="charta"></svg>
 						</div>
             <div class="col-md-9" id="divmain">
 								<div id="divmainhead"></div>
@@ -256,6 +256,7 @@ div.tooltip {
 
 							var selDoc = "";
 							var selToc = "";
+							var selAge = 0;
 							var selGeo = [];
 							var allGeo = [];
               //
@@ -291,22 +292,21 @@ div.tooltip {
 												 "Substance Abuse Act","Trusts"],
 										"7":["Civil Traffic Infractions","DUI","Non DUI Criminal Traffic"]
 									};
+							
+							var agegrp = ["Age < 0","Age 1-4","Age 5-9","Age 10-14","Age 15-19","Age 20-24","Age 25-34","Age 35-44","Age 45-54","Age 55-64","Age 65-74","Age 75-84","Age 85+"];
 
 							// Set up Florida map
 							//
 							var width = 250;
 							var height = 190;
 							
-              d3.select("#divnav").append("div")
-                  .attr("id", "divmap");
-
 							var svg2 = d3.select("#divmap").append("svg")
 									.attr("width", width)
 									.attr("height", height);
 
 							var projection = d3.geo.albersUsa()
 									.scale(1800)
-									.translate([-225,-210]);
+									.translate([-230,-210]);
 
 							var path = d3.geo.path()
 									.projection(projection);
@@ -317,7 +317,7 @@ div.tooltip {
 
               //offsets for tooltips
               var offsetL = document.getElementById('divmap').offsetLeft+10;
-              var offsetT = document.getElementById('divmap').offsetTop+50;
+              var offsetT = document.getElementById('divmap').offsetTop+30;
 
               var fldata;
 
@@ -360,9 +360,10 @@ div.tooltip {
                 queue()
                   .defer(d3.csv, 'Dispositions.csv')
                   .defer(d3.csv, 'data/Filings.csv')
+                  .defer(d3.csv, 'data/Population.csv')
                   .await(allLoaded);
 
-                function allLoaded(error, dData, fData) {
+                function allLoaded(error, dData, fData, pData) {
 
 									filings = fData.map(function (d) {
                     var fid = +d.id;
@@ -401,8 +402,28 @@ div.tooltip {
                               .key(function (d) { return d.year })
                               .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
                               .entries(dispositions);
+															
+                  populations = pData.map(function (d) {
+                    var fid = +d.id;
+                    return {
+                      id: fid,
+                      circ: countyCircuit[fid],
+                      dist: countyDistrict[fid],
+											agrp: +d.group,
+                      year: +d.year,
+                      count: +d.population
+                    };
+
+                  });
+
+                  popData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(populations);
 
 									docGraph();
+									
+									ageGraph();
 									
 									mainGraph();
 
@@ -460,11 +481,38 @@ div.tooltip {
 										} else {
 											d.total = d.values.total;
 										};
-									});																		
+									});						
 									
-									var margin = {top: 10, right: 10, bottom: 40, left: 70},
-											width = window.innerWidth - 400 - margin.left - margin.right,
-											height = window.innerHeight*0.5 - margin.top - margin.bottom;
+
+                  popData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(populations
+																			.filter(function(d) { 
+                                        if (selAge != 0 && selAge != d.agrp) { return false; }
+                                        if (selGeo.length == 68) { return true; }
+                                        return d3.set(selGeo).has(d.id);
+																			})
+																		);
+																		
+									var firstOne = 0.0;
+									popData.forEach( function (d) {
+										if (vizSelected == 1) {
+											if (firstOne == 0) {
+												firstOne = d.values.total;
+												d.total = 100.0;
+											} else {
+												d.total = 100.0 * (d.values.total / firstOne);
+											};
+										} else {
+											d.total = d.values.total;
+										};
+									});																		
+
+									
+									var margin = {top: 10, right: 75, bottom: 40, left: 70},
+											width = document.getElementById("headline").offsetWidth - 300 - margin.left - margin.right,
+											height = window.innerHeight*0.4 - margin.top - margin.bottom;
 
 									var color = d3.scale.category10();
 									
@@ -492,6 +540,11 @@ div.tooltip {
 											.y0(height)
 											.y1(function(d) { return y(d.total); });
 
+									var line = d3.svg.line()
+                      .interpolate("basis") 
+											.x(function(d) { return x(d.key); })
+											.y(function(d) { return ay(d.total); });
+											
                   var xRange = d3.extent(filData, function(d) { return d.key; });
                   var fRange = d3.extent(filData, function(d) { return d.total; });
                   var dRange = d3.extent(disData, function(d) { return d.total; });
@@ -503,8 +556,13 @@ div.tooltip {
 										.append("g")
 											.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                  x.domain(xRange);
+									x.domain(xRange);
                   y.domain(yRange);
+									
+									var ay = d3.scale.linear()
+														.range([height, 0])
+														.domain(d3.extent(popData, function(d) { return d.total; }));
+									var ayAxis = d3.svg.axis().scale(ay).orient("right");
 
 									svg.append("path")
 											.datum(filData)
@@ -525,6 +583,13 @@ div.tooltip {
 											.style("fill", function(d) { return color(2) } )
 											.style("fill-opacity", .5);											
 									
+									svg.append("path")
+											.datum(popData)
+											.attr("class", "aline")
+											.attr("d", line)
+											.attr("data-legend","Population")
+											.style("stroke", function(d) { return color(3) } );
+									
 									svg.append("g")
 											.attr("class", "x axis")
 											.attr("transform", "translate(0," + height + ")")
@@ -540,6 +605,12 @@ div.tooltip {
 									svg.append("g")
 											.attr("class", "y axis")
 											.call(yAxis);
+											
+									svg.append("g")
+											.attr("class", "ay axis")
+											.attr("transform", "translate(" + width + " ,0)")
+											.style("fill", "rgb(44, 160, 44)")
+											.call(ayAxis);
 
 									// Legend code borrowed from
 									// http://zeroviscosity.com/d3-js-step-by-step/step-3-adding-a-legend
@@ -569,8 +640,10 @@ div.tooltip {
 										.text(function(d,i) { 
 															if (i == 0) {
 																return "Filings"
-															} else {
+															} else if (i == 1) {
 																return "Dispositions"
+															} else {
+																return "Population"
 															};
 														});
 
@@ -632,9 +705,37 @@ div.tooltip {
                     };
                   });                                   
                   
-                  var margin = {top: 10, right: 10, bottom: 40, left: 70},
-                      width = window.innerWidth - 400 - margin.left - margin.right,
-                      height = window.innerHeight*0.5 - margin.top - margin.bottom;
+
+                  popData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(populations
+																			.filter(function(d) { 
+                                        if (selAge != 0 && selAge != d.agrp) { return false; }
+                                        if (selGeo.length == 68) { return true; }
+                                        return d3.set(selGeo).has(d.id);
+																			})
+																		);
+																		
+									var firstOne = 0.0;
+									popData.forEach( function (d) {
+										if (vizSelected == 1) {
+											if (firstOne == 0) {
+												firstOne = d.values.total;
+												d.total = 100.0;
+											} else {
+												d.total = 100.0 * (d.values.total / firstOne);
+											};
+										} else {
+											d.total = d.values.total;
+										};
+									});																		
+									
+									
+									
+                  var margin = {top: 10, right: 75, bottom: 40, left: 70},
+                      width = document.getElementById("headline").offsetWidth - 300 - margin.left - margin.right,
+                      height = window.innerHeight*0.4 - margin.top - margin.bottom;
 
                   var color = d3.scale.category10();
                                     
@@ -659,7 +760,12 @@ div.tooltip {
                       .x(function(d) { return x(d.key); })
                       .y0(height)
                       .y1(function(d) { return y(d.total); });
-
+											
+									var line = d3.svg.line()
+                      .interpolate("basis") 
+											.x(function(d) { return x(d.key); })
+											.y(function(d) { return ay(d.total); });
+											
                   var xRange = d3.extent(filData, function(d) { return d.key; });
                   var fRange = d3.extent(filData, function(d) { return d.total; });
                   var dRange = d3.extent(disData, function(d) { return d.total; });
@@ -674,6 +780,12 @@ div.tooltip {
 
                   x.domain(xRange);
                   y.domain(yRange);
+									
+									var ay = d3.scale.linear()
+														.range([height, 0])
+														.domain(d3.extent(popData, function(d) { return d.total; }));
+									var ayAxis = d3.svg.axis().scale(ay).orient("right");
+									
 
                   // svg.append("path")
                   //     .datum(filData)
@@ -731,6 +843,12 @@ div.tooltip {
                   //     .style("fill", function(d) { return color(2) } )
                   //     .style("fill-opacity", .5);
                   // path.exit().remove()                     
+
+									path = svg.selectAll('.aline').datum(popData)
+                            .transition()
+                            .duration(1000)
+                            .attr("d", line);
+														
                   
                   d3.select(".x.axis").remove();
                   svg.append("g")
@@ -749,10 +867,17 @@ div.tooltip {
                   svg.append("g")
                       .attr("class", "y axis")
                       .call(yAxis);
+											
+                  d3.select(".ay.axis").remove();
+									svg.append("g")
+											.attr("class", "ay axis")
+											.attr("transform", "translate(" + width + " ,0)")
+											.style("fill", "rgb(44, 160, 44)")
+											.call(ayAxis);											
 
                   // Legend code borrowed from
                   // http://zeroviscosity.com/d3-js-step-by-step/step-3-adding-a-legend
-                  d3.selectAll(".legend").remove();
+/*                  d3.selectAll(".legend").remove();
                   var legendRectSize = 15;
                   var legendSpacing = 4;
                   var legend = svg.selectAll('.legend')
@@ -783,6 +908,7 @@ div.tooltip {
                                 return "Dispositions"
                               };
                             });
+*/
 
                 };
 
@@ -844,6 +970,52 @@ div.tooltip {
 										d3.select(".clickable").remove();
 										
 										chart.append("rect")
+												.attr("class","clickable")
+												.attr("width", cwidth)
+												.attr("height", cheight)
+												.on('click', function(d) { docClicked(d3.mouse(this)) });
+									};
+									
+									
+									function docUpdate() {
+
+										// Set up Division of Court bar charts
+										//
+										var cwidth = 250,
+												cheight = 180;
+												barHeight = 15;
+										
+										docData = d3.nest()
+                              .key(function (d) { return d.doc })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(dispositions
+																			.filter(function(d) { 
+																				if (selGeo.length == 68) {
+																					return true;
+																				} else {
+																					return d3.set(selGeo).has(d.id); 
+																				}
+																			})
+															);
+
+										var cmin = d3.min(docData, function(d) { 
+																	return d.values.total;} );
+										var cmax = d3.max(docData, function(d) { 
+																	return d.values.total;} );
+																	
+										var x = d3.scale.linear()
+												.domain([0,cmax])
+												.range([0, cwidth-20]);
+
+										d3.selectAll(".docrect")
+											.data(docData)
+												.transition()
+												.duration(500)
+												.attr("width", function (d) { return x(d.values.total); });
+
+										d3.select(".clickable").remove();
+										
+										d3.select(".chart").append("rect")
 												.attr("class","clickable")
 												.attr("width", cwidth)
 												.attr("height", cheight)
@@ -927,6 +1099,202 @@ div.tooltip {
 												.on('click', function(d) { tocClicked(d3.mouse(this)) });
 													
 									};
+									
+									
+									function tocUpdate() {
+
+										// Set up Type of Case bar charts
+										//
+										var cwidth = 250,
+												cheight = 180;
+												barHeight = 15;
+												
+										var tocData = d3.nest()
+														.key(function (d) { return d.toc })
+														.rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+														.entries(dispositions
+																			.filter(function(d) { 
+																				if (d.doc == selDoc) {
+																					if (selGeo.length == 68) {
+																						return true;
+																					} else {
+																						return d3.set(selGeo).has(d.id); 
+																					}
+																				}
+																			})
+																		);
+																		
+										var ctmin = d3.min(tocData, function(d) { 
+																	return d.values.total;} );
+										var ctmax = d3.max(tocData, function(d) { 
+																	return d.values.total;} );
+																	
+										var xt = d3.scale.linear()
+																	.domain([0,ctmax])
+																	.range([10, cwidth-20]);
+															
+										d3.selectAll(".tocrect")
+											.data(tocData)
+												.transition()
+												.duration(500)
+												.attr("width", function (d) { return xt(d.values.total); });
+										
+										d3.select(".clickable").remove();
+										
+										d3.select(".chart").append("rect")
+												.attr("class","clickable")
+												.attr("width", cwidth)
+												.attr("height", cheight)
+												.on('click', function(d) { tocClicked(d3.mouse(this)) });
+													
+									};
+									
+									
+								
+									function ageGraph() {
+
+										selAge = 0;
+									
+										// Set up Age Group bar chart
+										//
+										var cwidth = 250,
+												cheight = 210;
+												barHeight = 15;
+										
+										ageData = d3.nest()
+                              .key(function (d) { return d.agrp })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(populations
+																			.filter(function(d) { 
+																				if (selGeo.length == 68) {
+																					return true;
+																				} else {
+																					return d3.set(selGeo).has(d.id); 
+																				}
+																			})
+															);
+
+										var cmin = d3.min(ageData, function(d) { 
+																	return d.values.total;} );
+										var cmax = d3.max(ageData, function(d) { 
+																	return d.values.total;} );
+																	
+										var x = d3.scale.linear()
+												.domain([0,cmax])
+												.range([0, cwidth-20]);
+
+										var chart = d3.select(".charta")
+												.attr("width", cwidth)
+												.attr("height", cheight);
+
+										chart.append("text")
+												.attr("x", 2)
+												.attr("y", 6)
+												.attr("dy", ".35em")
+												.text("Select All Ages")
+													.style("font-weight","bold");
+
+										var bar = chart.selectAll("g")
+												.data(ageData)
+											.enter().append("g")
+												.attr("class","agebars")
+												.attr("transform", function(d, i) { 
+																return "translate(0," + (i+1) * barHeight + ")";
+																});
+
+										bar.append("rect")
+												.attr("class","agerect")
+												.attr("width", function (d) { return x(d.values.total); })
+												.attr("height", barHeight - 2);
+
+										bar.append("text")
+												.attr("x", 3)
+												.attr("y", barHeight / 2 - 1)
+												.attr("dy", ".35em")
+												.text(function(d) { return agegrp[+d.key-1]; })
+													.style("font-weight","normal");		
+
+										d3.select(".clickabla").remove();
+										
+										chart.append("rect")
+												.attr("class","clickabla")
+												.attr("width", cwidth)
+												.attr("height", cheight)
+												.on('click', function(d) { ageClicked(d3.mouse(this)) });
+									};
+									
+									
+									function ageUpdate() {
+
+										// Set up Age Group bar chart
+										//
+										var cwidth = 250,
+												cheight = 210;
+												barHeight = 15;
+										
+										ageData = d3.nest()
+                              .key(function (d) { return d.agrp })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(populations
+																			.filter(function(d) { 
+																				if (selGeo.length == 68) {
+																					return true;
+																				} else {
+																					return d3.set(selGeo).has(d.id); 
+																				}
+																			})
+															);
+
+										var cmin = d3.min(ageData, function(d) { 
+																	return d.values.total;} );
+										var cmax = d3.max(ageData, function(d) { 
+																	return d.values.total;} );
+																	
+										var x = d3.scale.linear()
+												.domain([0,cmax])
+												.range([0, cwidth-20]);
+
+										d3.selectAll(".agerect")
+											.data(ageData)
+												.transition()
+												.duration(500)
+												.attr("width", function (d) { return x(d.values.total); });
+
+										d3.select(".clickabla").remove();
+										
+										d3.select(".charta").append("rect")
+												.attr("class","clickabla")
+												.attr("width", cwidth)
+												.attr("height", cheight)
+												.on('click', function(d) { ageClicked(d3.mouse(this)) });
+									};
+									
+									
+									
+									function ageClicked(mouse) {
+									
+										var whichAge = Math.floor(mouse[1]/15);
+
+										if (whichAge == 0) {
+											selAge = 0;
+											d3.select(".charta text").style("font-weight","bold")
+										} else {
+											d3.select(".charta text").style("font-weight","normal")
+											//selAge = (whichAge + 1).toString();
+											selAge = whichAge;
+                      d3.select(".charta").selectAll(".agebars").select("text").style("font-weight",
+												function (d, i) { 
+														if (whichAge == i+1) {
+															return "bold"
+														} else {
+															return "normal"} 
+												});
+										};
+										
+                    updateMain();
+					
+									};
+									
 								
 									function docClicked(mouse) {
 									
@@ -1141,6 +1509,11 @@ div.tooltip {
 
 									//d3.select("#divmainbody svg").remove();
 									//mainGraph();
+									docUpdate();
+									if (selDoc != "") {
+										tocUpdate();
+									};
+									ageUpdate();
 									updateMain();
 
                 };
