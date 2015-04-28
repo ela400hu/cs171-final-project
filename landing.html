@@ -48,36 +48,36 @@ svg {
 				
         <div class="row">
             <div class="col-md-6" id="blankVis">
-						    <form>
-									<span style="padding-left:10px"> </span>
-									<label> Dataset: 
-									<select class="sf">
-										<option value="0">Filings & Dispositions</option>
-										<option value="6">Age Demo by 4</option>
-										<option value="7">Days to Close</option>
-										<option value="8">Clearance Rate</option>
-										<option value="1">Age Demographics</option>
-										<option value="2">Filings</option>
-										<option value="3">Dispositions</option>
-										<option value="4">Florida Budget</option>
-										<option value="5">Judicial Budget</option>
-									</select>
-									</label>
-									<span style="padding-left:10px"> </span>
-									<label> Slide: 
-									<select class="sv">
-										<option value="0">All</option>
-										<option value="1">Lines</option>
-										<option value="2">Horizons</option>
-										<option value="3">Areas</option>
-										<option value="4">Stacked Area</option>
-										<option value="5">Streamgraph</option>
-										<option value="6">Overlapping Area</option>
-										<option value="7">Grouped Bar</option>
-										<option value="8">Stacked Bar</option>
-									</select>
-									</label>
-								</form>
+		    <form>
+					<span style="padding-left:10px"> </span>
+					<label> Dataset: 
+					<select class="sf">
+						<option value="0">Filings & Dispositions</option>
+						<option value="6">Age Demo by 4</option>
+						<option value="7">Days to Close</option>
+						<option value="8">Clearance Rate</option>
+						<option value="1">Age Demographics</option>
+						<option value="2">Filings</option>
+						<option value="3">Dispositions</option>
+						<option value="4">Florida Budget</option>
+						<option value="5">Judicial Budget</option>
+					</select>
+					</label>
+					<span style="padding-left:10px"> </span>
+					<label> Slide: 
+					<select class="sv">
+						<option value="0">All</option>
+						<option value="1">Lines</option>
+						<option value="2">Horizons</option>
+						<option value="3">Areas</option>
+						<option value="4">Stacked Area</option>
+						<option value="5">Streamgraph</option>
+						<option value="6">Overlapping Area</option>
+						<option value="7">Grouped Bar</option>
+						<option value="8">Stacked Bar</option>
+					</select>
+					</label>
+				</form>
             </div>
             <div class="col-md-6" id="menuVis">
 				Actual Menu Elements...
@@ -92,58 +92,57 @@ svg {
         $(function(){ // this function is called after the HTML document is fully loaded
 
             // variables keeping global knowledge of the data
-						whichFile = "0";
-						whichViz = "0";
-						growthFlag = false;
+			whichFile = "0";
+			whichViz = "0";
+			growthFlag = false;
 
             // call this function after Data is loaded, reformatted and bound to the variables
             var initVis = function(){
 
-                //Create an eventHandler
-                var MyEventHandler = new Object();
+	            //Create an eventHandler
+	            var MyEventHandler = new Object();
 
-                //Instantiate all Vis Objects here
-								var sr_obj = new ShowreelVis(d3.select("#showreelVis"), whichFile, growthFlag, whichViz, MyEventHandler);
-
-																
-                // Bind the eventHandler to the Vis Objects
-                $(document).on("menuChange",
-														function (MyEventHandler) { 
-															sr_obj.onSelectionChange()
-															});
+	            //Instantiate all Vis Objects here
+				var sr_obj = new ShowreelVis(d3.select("#showreelVis"), whichFile, growthFlag, whichViz, MyEventHandler);
+										
+	            // Bind the eventHandler to the Vis Objects
+	            $(document).on("menuChange",
+					function (MyEventHandler) { 
+						sr_obj.onSelectionChange()
+					});
 															
             }
 
             var startHere = function(){
 						
-								//
-								// Event Handlers
-								//
+				//
+				// Event Handlers
+				//
 
-								// Which visualization
-								d3.selectAll('.ra').on('change', function () {
-									$(document).trigger("menuChange");
-									growthFlag = this.value=="true";
-									delete sr_obj;
-									setTimeout(initVis, 1);
-									//initVis();
-								});
+				// Which visualization
+				d3.selectAll('.ra').on('change', function () {
+					$(document).trigger("menuChange");
+					growthFlag = this.value=="true";
+					delete sr_obj;
+					setTimeout(initVis, 1);
+					//initVis();
+				});
 
-								// Which File
-								d3.select('.sf').on("change", function() {
-									$(document).trigger("menuChange");
-									whichFile = this.options[this.selectedIndex].value;
-									delete sr_obj;
-									setTimeout(initVis, 1);
-								});
+				// Which File
+				d3.select('.sf').on("change", function() {
+					$(document).trigger("menuChange");
+					whichFile = this.options[this.selectedIndex].value;
+					delete sr_obj;
+					setTimeout(initVis, 1);
+				});
 
-								// Which Viz
-								d3.select('.sv').on("change", function() {
-									$(document).trigger("menuChange");
-									whichViz = this.options[this.selectedIndex].value;
-									delete sr_obj;
-									setTimeout(initVis, 1);
-								});
+				// Which Viz
+				d3.select('.sv').on("change", function() {
+					$(document).trigger("menuChange");
+					whichViz = this.options[this.selectedIndex].value;
+					delete sr_obj;
+					setTimeout(initVis, 1);
+				});
 
                 initVis();
 

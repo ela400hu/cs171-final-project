@@ -17,9 +17,6 @@ background: -ms-linear-gradient(top, #fed57e 0%,#fcd2b5 100%); /* IE10+ */
 background: linear-gradient(to bottom, #fed57e 0%,#fcd2b5 100%); /* W3C */
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fed57e', endColorstr='#fcd2b5',GradientType=0 ); /* IE6-9 */
 
-
-
-
 }
 svg {
   font: 12px sans-serif;
@@ -103,10 +100,52 @@ path.cpath:hover {
 	fill: #e81d5e;
 }
 
+div.tooltip {
+  color: #222; 
+  background: #fff; 
+  padding: .5em; 
+  text-shadow: #f5f5f5 0 1px 0;
+  border-radius: 2px; 
+  box-shadow: 0px 0px 2px 0px #a6a6a6; 
+  opacity: 0.9; 
+  position: absolute;
+}
+
+.docrect {
+  fill: rgb(31, 119, 180);
+  fill-opacity:0.4;
+}
+
+.tocrect {
+  fill: rgb(255, 127, 14);
+  fill-opacity:0.4;
+}
+
+.chart text {
+  fill: black;
+  font: 11px sans-serif;
+  text-anchor: start;
+}
+
+.clickable {
+	stroke:#fff;
+	fill:#fff;
+	fill-opacity:0;
+	stroke-opacity:0;
+}
+
+.legend {
+	font-size: 12px;
+}
+
+.legend rect {
+	stroke-width: 2;
+}
+	
 </style>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>Florida Court Performance Discovery</title>
+    <title>The Real Business of the Courts</title>
 
     <!-- ADD Libraries-->
     <script src="libs/d3/d3.min.js" charset="utf-8"></script>
@@ -130,7 +169,7 @@ path.cpath:hover {
 </head>
 <body>
     <div class="container">
-        <h1 id="headline" style="color:#000b95;">Florida Court Performance Discovery</h1>
+        <h1 id="headline" style="color:#000b95;">The Real Business of the Courts</h1>
 
         <div class="row">
 					<div class="col-md-12" id="divtop"></div>
@@ -138,28 +177,34 @@ path.cpath:hover {
 				
         <div class="row">
             <div class="col-md-3" id="divnav" >
-						<br><br><br><br>
-              <form>
-                <label> Dataset: 
+              <label>Division of Court and Case Type:</label><br>
+							<svg class="chart"></svg>
+						  <form>
+<!--                 <label> Division and Case Type: </label><br>
                   <select class="cc">
-                    <option value="0">Population by Age</option>
-                    <option value="1">Filings by Division of Court</option>
-                    <option value="2">Filings by Type of Case</option>
-                    <option value="3">Dispositions by Division of Court</option>
-                    <option value="4">Dispositions by Type of Case</option>
-                  </select>
-                  </label>
+                    <option value="0">--Select Division of Court--</option>
+                    <option value="1">Circuit Civil</option>
+                    <option value="2">Circuit Criminal</option>
+                    <option value="3">County Civil</option>
+                    <option value="4">County Criminal</option>
+                    <option value="5">Family Court</option>
+                    <option value="6">Probate</option>
+                    <option value="7">Traffic</option>
+                  </select> -->
+<!--                 <div id="ddnav" >
+                  <br>
+                </div> -->
 								<br>
-                <label>Show Data: </label><br>
-                <input type="radio" class="cd" name="display" value="0" checked></input> Raw <br>
-                <input type="radio" class="cd" name="display" value="1"></input> Indexed <br>
-<!--                 <input type="radio" class="cd" name="display" value="2"></input> Per Capita <br> -->
+                <label>Show Data: </label>
+                <input type="radio" class="cd" name="display" value="0" checked></input> Raw 
+                <input type="radio" class="cd" name="display" value="1"></input> Indexed 
+								<br>
 								<br>
                 <label>Select by: </label><br>
                 <input type="radio" class="cs" name="select" value="0" checked></input> County 
                 <input type="radio" class="cs" name="select" value="1"></input> Circuit 
                 <input type="radio" class="cs" name="select" value="2"></input> District 
-                <input type="radio" class="cs" name="select" value="3"></input> All<br>
+                <input type="radio" class="cs" name="select" value="3"></input> All
 							</form>
 						</div>
             <div class="col-md-9" id="divmain">
@@ -169,11 +214,12 @@ path.cpath:hover {
 				</div>
 
 				<div class="row">
-					<div class="col-md-3" id="divbotl"><br>Tooltips<br>
-						<img src="images/scott_sm2.jpg" alt="Scott" style="width:95px;height:120px">
+					<div class="col-md-3" id="divbotl">
+          <!-- <br>Tooltips<br>
+						<img src="images/scott_sm2.jpg" alt="Scott" style="width:95px;height:120px"> -->
 					</div>
 					<div class="col-md-9" id="divbotr">
-            <br>Time sliders/brushes?
+            <!-- <br>Time sliders/brushes? -->
             <span style="padding-left:100px"> </span>Go 
             <a href="landing.html">Back to Landing Page</a>
           </div>
@@ -196,7 +242,7 @@ path.cpath:hover {
                 var MyEventHandler = new Object();
 
                 //Instantiate all Vis Objects here
-								var det_obj = new DetailsVis(d3.select("#divmain"), datSelected, vizSelected, MyEventHandler);
+								//var det_obj = new DetailsVis(d3.select("#divmain"), datSelected, vizSelected, MyEventHandler);
 																
                 // Bind the eventHandler to the Vis Objects
                 $(document).on("menuChange",
@@ -204,17 +250,57 @@ path.cpath:hover {
                               det_obj.onSelectionChange()
                               });
 
-
             }
 
             var startHere = function(){
+
+							var selDoc = "";
+							var selToc = "";
+							var selGeo = [];
+							var allGeo = [];
+              //
+              // Division of Court / Type of Case Dropdown
+              var doclist = ["Circuit Civil",
+															"Circuit Criminal",
+															"County Civil",
+															"County Criminal",
+															"Family Court",
+															"Probate",
+															"Traffic"];
+															
+              var doctoc = {
+										"1":["Auto Negligence","Condominium","Contract & Indebtedness",
+												 "Eminent Domain","Other Circuit Civil","Other Negligence",
+												 "Products Liability","Professional Malpractice",
+												 "Real Property/Mortgage Foreclosure"],
+										"2":["Burglary","Capital Murder","Drugs","Non Capital Murder",
+												 "Other Crimes Against Person","Other Crimes Against Property",
+												 "Other Felonies","Robbery","Sexual Offenses",
+												 "Theft, Forgery, Fraud","Worthless Checks (Felony)"],
+										"3":["Civil ($5,001 to $15,000)","Evictions",
+												 "Other Civil (non-monetary)","Replevins",
+												 "Small Claims (up to $5,000)"],
+										"4":["County Ordinances","Misdemeanors","Municipal Ordinances",
+												 "Worthless Checks (Misdemeanors)"],
+										"5":["Child Support","Dissolution","Domestic Violence",
+												 "Juvenile Delinquency","Juvenile Dependency",
+												 "Other Domestic Relations","Repeat Violence",
+												 "Simplified Dissolution","Termination of Parental Rights",
+												 "UIFSA"],
+										"6":["Baker Act","Guardianship","Other Social","Probate",
+												 "Substance Abuse Act","Trusts"],
+										"7":["Civil Traffic Infractions","DUI","Non DUI Criminal Traffic"]
+									};
 
 							// Set up Florida map
 							//
 							var width = 250;
 							var height = 190;
 							
-							var svg2 = d3.select("#divnav").append("svg")
+              d3.select("#divnav").append("div")
+                  .attr("id", "divmap");
+
+							var svg2 = d3.select("#divmap").append("svg")
 									.attr("width", width)
 									.attr("height", height);
 
@@ -225,59 +311,908 @@ path.cpath:hover {
 							var path = d3.geo.path()
 									.projection(projection);
 
-							// Create counties
-							//
-							d3.json("maps/us.json", function(error, topology) {
+              // Most of the Tooltip logic came from:
+              // http://techslides.com/demos/d3/worldmap-template.html
+              var tooltip = d3.select("#divmap").append("div").attr("class", "tooltip hidden");
 
-								// Extract only Florida counties
-								//
-								newgeo = [];
-								topology.objects.counties.geometries.forEach(function (e) {
-									if (e.id > 12000 && e.id < 13000) { newgeo.push(e) }
-								});
-								topology.objects.counties.geometries = newgeo;
+              //offsets for tooltips
+              var offsetL = document.getElementById('divmap').offsetLeft+10;
+              var offsetT = document.getElementById('divmap').offsetTop+50;
+
+              var fldata;
+
+              d3.json("data/floridacourtsystem.json", function(error, json) {
+
+                fldata = json;
+
+                var countyId = {};
+                var countyName = {};
+                var countyCircuit = {};
+                var countyDistrict = {};
+                var countyCircuitIds = {};
+                var countyDistrictIds = {};
+
+                //
+                // Build county lookups
+                fldata.forEach( function (county) {
+									allGeo.push(county.id);
+                  countyName[county.id] = county.name;
+                  countyId[county.name] = county.id;
+                  countyCircuit[county.id] = county.circuit;
+                  countyDistrict[county.id] = county.district;
+                  if (countyCircuitIds[county.circuit] != null) {
+                    countyCircuitIds[county.circuit].push(county.id);
+                  } else {
+                    countyCircuitIds[county.circuit] = [county.id];
+                  };
+                  if (countyDistrictIds[county.district] != null) {
+                    countyDistrictIds[county.district].push(county.id);
+                  } else {
+                    countyDistrictIds[county.district] = [county.id];
+                  };                  
+                });
+								
+								selGeo = copy(allGeo);
+
+                // Load Filings and Dispositions
+                //
+
+                queue()
+                  .defer(d3.csv, 'Dispositions.csv')
+                  .defer(d3.csv, 'data/Filings.csv')
+                  .await(allLoaded);
+
+                function allLoaded(error, dData, fData) {
+
+									filings = fData.map(function (d) {
+                    var fid = +d.id;
+                    return {
+                      id: fid,
+                      circ: countyCircuit[fid],
+                      dist: countyDistrict[fid],
+                      doc: +d.doc,
+                      toc: +d.toc,
+                      year: +d.variable,
+                      count: +d.value
+                    };
+
+                  });
+
+                  filData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(filings);
+
+                  dispositions = dData.map(function (d) {
+                    var fid = +d.id;
+                    return {
+                      id: fid,
+                      circ: countyCircuit[fid],
+                      dist: countyDistrict[fid],
+                      doc: +d.doc,
+                      toc: +d.toc,
+                      year: +d.variable,
+                      count: +d.value
+                    };
+
+                  });
+
+                  disData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(dispositions);
+
+									docGraph();
+									
+									mainGraph();
+
+                };
+								
+								function mainGraph() {
+								
+								  filData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(filings
+																			.filter(function(d) {
+                                        if (selDoc != "" && selDoc != d.doc) { return false; }
+                                        if (selToc != "" && selToc != d.toc) { return false; }
+																				if (selGeo.length == 68) { return true; }
+																				return d3.set(selGeo).has(d.id);
+																			})
+																		);
+																		
+									var firstOne = 0.0;
+									filData.forEach( function (d) {
+										if (vizSelected == 1) {
+											if (firstOne == 0) {
+												firstOne = d.values.total;
+												d.total = 100.0;
+											} else {
+												d.total = 100.0 * (d.values.total / firstOne);
+											};
+										} else {
+											d.total = d.values.total;
+										};
+									});
+									
+                  disData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(dispositions
+																			.filter(function(d) { 
+                                        if (selDoc != "" && selDoc != d.doc) { return false; }
+                                        if (selToc != "" && selToc != d.toc) { return false; }
+                                        if (selGeo.length == 68) { return true; }
+                                        return d3.set(selGeo).has(d.id);
+																			})
+																		);
+																		
+									var firstOne = 0.0;
+									disData.forEach( function (d) {
+										if (vizSelected == 1) {
+											if (firstOne == 0) {
+												firstOne = d.values.total;
+												d.total = 100.0;
+											} else {
+												d.total = 100.0 * (d.values.total / firstOne);
+											};
+										} else {
+											d.total = d.values.total;
+										};
+									});																		
+									
+									var margin = {top: 10, right: 10, bottom: 40, left: 70},
+											width = window.innerWidth - 400 - margin.left - margin.right,
+											height = window.innerHeight*0.5 - margin.top - margin.bottom;
+
+									var color = d3.scale.category10();
+									
+									//var parse = d3.time.format("%Y").parse;
+									
+									var x = d3.scale.linear()
+											.range([0, width]);
+
+									var y = d3.scale.linear()
+											.range([height, 0]);
+
+									var xAxis = d3.svg.axis()
+											.scale(x)
+											.ticks(28)
+											.tickFormat(d3.format("0000"))
+											.orient("bottom");
+
+									var yAxis = d3.svg.axis()
+											.scale(y)
+											.orient("left");
+
+									var area = d3.svg.area()
+                      .interpolate("basis") 
+											.x(function(d) { return x(d.key); })
+											.y0(height)
+											.y1(function(d) { return y(d.total); });
+
+                  var xRange = d3.extent(filData, function(d) { return d.key; });
+                  var fRange = d3.extent(filData, function(d) { return d.total; });
+                  var dRange = d3.extent(disData, function(d) { return d.total; });
+                  var yRange = [d3.min([fRange[0],dRange[0]]),d3.max([fRange[1],dRange[1]])];                      
+
+									var svg = d3.select("#divmainbody").append("svg")
+											.attr("width", width + margin.left + margin.right)
+											.attr("height", height + margin.top + margin.bottom)
+										.append("g")
+											.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                  x.domain(xRange);
+                  y.domain(yRange);
+
+									svg.append("path")
+											.datum(filData)
+											.attr("class", "farea")
+											.attr("d", area)
+											.attr("data-legend","Filings")
+											.style("fill", function(d) { return color(1) } )
+											.style("fill-opacity", .5);			
+
+									// x.domain(d3.extent(disData, function(d) { return d.key; }));
+									// y.domain(d3.extent(disData, function(d) { return d.total; }));
+
+									svg.append("path")
+											.datum(disData)
+											.attr("class", "darea")
+											.attr("d", area)
+											.attr("data-legend","Dispositions")
+											.style("fill", function(d) { return color(2) } )
+											.style("fill-opacity", .5);											
+									
+									svg.append("g")
+											.attr("class", "x axis")
+											.attr("transform", "translate(0," + height + ")")
+											.call(xAxis)
+											.selectAll("text")  
+												.style("text-anchor", "end")
+												.attr("dx", "-.8em")
+												.attr("dy", ".15em")
+												.attr("transform", function(d) {
+														return "rotate(-65)" 
+														});
+
+									svg.append("g")
+											.attr("class", "y axis")
+											.call(yAxis);
+
+									// Legend code borrowed from
+									// http://zeroviscosity.com/d3-js-step-by-step/step-3-adding-a-legend
+									var legendRectSize = 15;
+									var legendSpacing = 4;
+									var legend = svg.selectAll('.legend')
+											.data(color.domain())
+											.enter()
+											.append('g')
+											.attr('class', 'legend')
+											.attr('transform', function(d, i) {
+												var height = legendRectSize + legendSpacing;
+												var offset =  height * 2 / 2;
+												var horz = 2 * legendRectSize;
+												var vert = i * height + offset;
+												return 'translate(' + horz + ',' + vert + ')';
+											});
+									legend.append('rect')
+										.attr('width', legendRectSize)
+										.attr('height', legendRectSize)
+										.style('fill', color)
+										.style("fill-opacity", .5)
+										.style('stroke', color);
+									legend.append('text')
+										.attr('x', legendRectSize + legendSpacing)
+										.attr('y', legendRectSize - legendSpacing)
+										.text(function(d,i) { 
+															if (i == 0) {
+																return "Filings"
+															} else {
+																return "Dispositions"
+															};
+														});
+
+                };
+
+
+
+                function updateMain() {
+                
+                  filData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(filings
+                                      .filter(function(d) {
+                                        if (selDoc != "" && selDoc != d.doc) { return false; }
+                                        if (selToc != "" && selToc != d.toc) { return false; }
+                                        if (selGeo.length == 68) { return true; }
+                                        return d3.set(selGeo).has(d.id);
+                                      })
+                                    );
+                                    
+                  var firstOne = 0.0;
+                  filData.forEach( function (d) {
+                    if (vizSelected == 1) {
+                      if (firstOne == 0) {
+                        firstOne = d.values.total;
+                        d.total = 100.0;
+                      } else {
+                        d.total = 100.0 * (d.values.total / firstOne);
+                      };
+                    } else {
+                      d.total = d.values.total;
+                    };
+                  });
+                  
+                  disData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(dispositions
+                                      .filter(function(d) { 
+                                        if (selDoc != "" && selDoc != d.doc) { return false; }
+                                        if (selToc != "" && selToc != d.toc) { return false; }
+                                        if (selGeo.length == 68) { return true; }
+                                        return d3.set(selGeo).has(d.id);
+                                      })
+                                    );
+                                    
+                  var firstOne = 0.0;
+                  disData.forEach( function (d) {
+                    if (vizSelected == 1) {
+                      if (firstOne == 0) {
+                        firstOne = d.values.total;
+                        d.total = 100.0;
+                      } else {
+                        d.total = 100.0 * (d.values.total / firstOne);
+                      };
+                    } else {
+                      d.total = d.values.total;
+                    };
+                  });                                   
+                  
+                  var margin = {top: 10, right: 10, bottom: 40, left: 70},
+                      width = window.innerWidth - 400 - margin.left - margin.right,
+                      height = window.innerHeight*0.5 - margin.top - margin.bottom;
+
+                  var color = d3.scale.category10();
+                                    
+                  var x = d3.scale.linear()
+                      .range([0, width]);
+
+                  var y = d3.scale.linear()
+                      .range([height, 0]);
+
+                  var xAxis = d3.svg.axis()
+                      .scale(x)
+                      .ticks(28)
+                      .tickFormat(d3.format("0000"))
+                      .orient("bottom");
+
+                  var yAxis = d3.svg.axis()
+                      .scale(y)
+                      .orient("left");
+
+                  var area = d3.svg.area()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y0(height)
+                      .y1(function(d) { return y(d.total); });
+
+                  var xRange = d3.extent(filData, function(d) { return d.key; });
+                  var fRange = d3.extent(filData, function(d) { return d.total; });
+                  var dRange = d3.extent(disData, function(d) { return d.total; });
+                  var yRange = [d3.min([fRange[0],dRange[0]]),d3.max([fRange[1],dRange[1]])];
+
+
+                  var svg = d3.select("#divmainbody svg g")//.append("svg")
+                  //     .attr("width", width + margin.left + margin.right)
+                  //     .attr("height", height + margin.top + margin.bottom)
+                  //   .append("g")
+                  //     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                  x.domain(xRange);
+                  y.domain(yRange);
+
+                  // svg.append("path")
+                  //     .datum(filData)
+                  //     .attr("class", "farea")
+                  //     .attr("d", area)
+                  //     .attr("data-legend","Filings")
+                  //     .style("fill", function(d) { return color(1) } )
+                  //     .style("fill-opacity", .5);
+
+                  path = svg.selectAll('.farea').datum(filData)
+                            .transition()
+                            .duration(1000)
+                            .attr("d", area);
+                  // path.attr('d', function(d) {return line(d) + 'Z'})
+                  //     .style('stroke-width', 1)
+                  //     .style('stroke', 'steelblue');
+                  // path.enter().append('svg:path').attr('d', function(d){return line(d) + 'Z'})
+                  //     .style('stroke-width', 1)
+                  //     .style('stroke', 'steelblue');
+
+                  // path.enter().append("svg:path")
+                  //     .attr("class", "farea")
+                  //     .attr("d", area)
+                  //     .attr("data-legend","Filings")
+                  //     .style("fill", function(d) { return color(1) } )
+                  //     .style("fill-opacity", .5);
+                  // path.exit().remove()                      
+
+                  // x.domain(d3.extent(disData, function(d) { return d.key; }));
+                  // y.domain(d3.extent(disData, function(d) { return d.total; }));
+
+                  // svg.append("path")
+                  //     .datum(disData)
+                  //     .attr("class", "darea")
+                  //     .attr("d", area)
+                  //     .attr("data-legend","Dispositions")
+                  //     .style("fill", function(d) { return color(2) } )
+                  //     .style("fill-opacity", .5);
+
+                  path = svg.selectAll('.darea').datum(disData)
+                            .transition()
+                            .duration(1000)
+                            .attr("d", area);
+                  // path.attr('d', function(d) {return line(d) + 'Z'})
+                  //     .style('stroke-width', 1)
+                  //     .style('stroke', 'steelblue');
+                  // path.enter().append('svg:path').attr('d', function(d){return line(d) + 'Z'})
+                  //     .style('stroke-width', 1)
+                  //     .style('stroke', 'steelblue');
+
+                  // path.enter().append("svg:path")
+                  //     .attr("class", "darea")
+                  //     .attr("d", area)
+                  //     .attr("data-legend","Dispositions")
+                  //     .style("fill", function(d) { return color(2) } )
+                  //     .style("fill-opacity", .5);
+                  // path.exit().remove()                     
+                  
+                  d3.select(".x.axis").remove();
+                  svg.append("g")
+                      .attr("class", "x axis")
+                      .attr("transform", "translate(0," + height + ")")
+                      .call(xAxis)
+                      .selectAll("text")  
+                        .style("text-anchor", "end")
+                        .attr("dx", "-.8em")
+                        .attr("dy", ".15em")
+                        .attr("transform", function(d) {
+                            return "rotate(-65)" 
+                            });
+
+                  d3.select(".y.axis").remove();
+                  svg.append("g")
+                      .attr("class", "y axis")
+                      .call(yAxis);
+
+                  // Legend code borrowed from
+                  // http://zeroviscosity.com/d3-js-step-by-step/step-3-adding-a-legend
+                  d3.selectAll(".legend").remove();
+                  var legendRectSize = 15;
+                  var legendSpacing = 4;
+                  var legend = svg.selectAll('.legend')
+                      .data(color.domain())
+                      .enter()
+                      .append('g')
+                      .attr('class', 'legend')
+                      .attr('transform', function(d, i) {
+                        var height = legendRectSize + legendSpacing;
+                        var offset =  height * 2 / 2;
+                        var horz = 2 * legendRectSize;
+                        var vert = i * height + offset;
+                        return 'translate(' + horz + ',' + vert + ')';
+                      });
+                  legend.append('rect')
+                    .attr('width', legendRectSize)
+                    .attr('height', legendRectSize)
+                    .style('fill', color)
+                    .style("fill-opacity", .5)
+                    .style('stroke', color);
+                  legend.append('text')
+                    .attr('x', legendRectSize + legendSpacing)
+                    .attr('y', legendRectSize - legendSpacing)
+                    .text(function(d,i) { 
+                              if (i == 0) {
+                                return "Filings"
+                              } else {
+                                return "Dispositions"
+                              };
+                            });
+
+                };
+
+
+								
+									function docGraph() {
+
+										selDoc = "";
+									
+										// Set up Division of Court bar charts
+										//
+										var cwidth = 250,
+												cheight = 180;
+												barHeight = 15;
+										
+										docData = d3.nest()
+                              .key(function (d) { return d.doc })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(dispositions
+																			.filter(function(d) { 
+																				if (selGeo.length == 68) {
+																					return true;
+																				} else {
+																					return d3.set(selGeo).has(d.id); 
+																				}
+																			})
+															);
+
+										var cmin = d3.min(docData, function(d) { 
+																	return d.values.total;} );
+										var cmax = d3.max(docData, function(d) { 
+																	return d.values.total;} );
+										var x = d3.scale.linear()
+												.domain([0,cmax])
+												.range([0, cwidth-20]);
+
+										var chart = d3.select(".chart")
+												.attr("width", cwidth)
+												.attr("height", cheight);
+
+										var bar = chart.selectAll("g")
+												.data(docData)
+											.enter().append("g")
+												.attr("class","docbars")
+												.attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
+
+										bar.append("rect")
+												.attr("class","docrect")
+												.attr("width", function (d) { return x(d.values.total); })
+												.attr("height", barHeight - 2);
+
+										bar.append("text")
+												.attr("x", 3)
+												.attr("y", barHeight / 2 - 1)
+												.attr("dy", ".35em")
+												.text(function(d) { return doclist[+d.key-1]; })
+													.style("font-weight","normal");		
+
+										d3.select(".clickable").remove();
+										
+										chart.append("rect")
+												.attr("class","clickable")
+												.attr("width", cwidth)
+												.attr("height", cheight)
+												.on('click', function(d) { docClicked(d3.mouse(this)) });
+									};
+								
+								
+									function tocGraph(whichDoc) {
+
+										selToc = "";
+									
+										// Set up Type of Case bar charts
+										//
+										var cwidth = 250,
+												cheight = 180;
+												barHeight = 15;
 												
-								// Draw counties
-								//
-								svg2.selectAll(".cpath")
-											.data(topojson.feature(topology, topology.objects.counties).features)
-									.enter().append("path")
-											.attr("class", "cpath")
-											.attr("id", function (d) { return d.id })
-											.attr("d", path);
-											//.on("click", function (d) { countyClick(d); });
+										var bar = d3.select(".chart").selectAll(".docbars")
+												.transition()
+												.duration(500)
+												.attr("transform", function(d, i) { 
+																if (i != +whichDoc ) {
+																	return "translate(0,-20)";
+																} else {
+																	return "translate(0,0)";
+																}
+															});
+															
+										var tocData = d3.nest()
+														.key(function (d) { return d.toc })
+														.rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+														.entries(dispositions
+																			.filter(function(d) { 
+																				if (d.doc == selDoc) {
+																					if (selGeo.length == 68) {
+																						return true;
+																					} else {
+																						return d3.set(selGeo).has(d.id); 
+																					}
+																				}
+																			})
+																		);
+																		
+										var ctmin = d3.min(tocData, function(d) { 
+																	return d.values.total;} );
+										var ctmax = d3.max(tocData, function(d) { 
+																	return d.values.total;} );
+										var xt = d3.scale.linear()
+																	.domain([0,ctmax])
+																	.range([10, cwidth-20]);
+															
+										var bart = d3.select(".chart").selectAll(".tocbars")
+												.data(tocData)
+											.enter().append("g")
+												.attr("class","tocbars")
+												.attr("transform", function(d, i) { return "translate(10,200)"; });
 
-							});
-						
-						
+										bart.append("rect")
+												.attr("class","tocrect")
+												.attr("width", function (d) { return xt(d.values.total); })
+												.attr("height", barHeight - 2);
+
+										bart.append("text")
+												.attr("x", 3)
+												.attr("y", barHeight / 2 - 1)
+												.attr("dy", ".35em")
+												.text(function(d) { return doctoc[selDoc][+d.key-1]; });		
+
+										d3.select(".chart").selectAll(".tocbars")
+												.transition()
+												.duration(500)
+												.attr("transform", function(d, i) { return "translate(10," + (i+1) * barHeight + ")";
+															});												
+												
+										d3.select(".clickable").remove();
+										
+										d3.select(".chart").append("rect")
+												.attr("class","clickable")
+												.attr("width", cwidth)
+												.attr("height", cheight)
+												.on('click', function(d) { tocClicked(d3.mouse(this)) });
+													
+									};
+								
+									function docClicked(mouse) {
+									
+										var whichDoc = Math.floor(mouse[1]/15);
+										
+										if (whichDoc <= 6) {
+											selDoc = (whichDoc + 1).toString();
+											tocGraph(whichDoc);
+											setTimeout(function() {d3.select(".chart").selectAll(".docbars").select("text").style("font-weight","bold")},500);
+                      updateMain();
+										};
+							
+									};
+								
+									function tocClicked(mouse) {
+									
+										var whichToc = Math.floor(mouse[1]/15);
+										
+										if (whichToc <= 0) {
+										
+											d3.select(".chart").selectAll(".docbars").select("text")
+													.style("font-weight","normal");	
+													
+											var bar = d3.select(".chart").selectAll(".docbars")
+													.transition()
+													.duration(500)
+													.attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
+
+/*													
+											var bart = d3.select(".chart").selectAll(".tocbars")
+													.transition()
+													.duration(500)
+													.attr("transform", function(d, i) { return "translate(10,200)"; });
+*/
+
+											d3.select(".chart").selectAll(".tocbars").remove();
+										
+											selDoc = "";
+                      selToc = "";
+											docGraph();
+
+										} else {
+											
+                      d3.select(".chart").selectAll(".tocbars").select("text").style("font-weight",
+												function (d, i) { 
+														if (whichToc == i+1) {
+															selToc = whichToc;
+															return "bold"
+														} else {
+															return "normal"} 
+												});
+
+										};
+
+                    updateMain();
+										
+									};
+									
+  							// Create counties
+  							//
+  							d3.json("maps/us.json", function(error, topology) {
+
+                  //if (error) return console.warn(error);
+  								// Extract only Florida counties
+  								//
+  								newgeo = [];
+                  topology.objects.counties.geometries.forEach(function (e) {
+                    if (e.id > 12000 && e.id < 13000) { 
+                      newgeo.push(e) 
+                    }
+                  });
+  								topology.objects.counties.geometries = newgeo;
+  								
+  								// Draw counties
+  								//
+  								svg2.selectAll(".cpath")
+  											.data(topojson.feature(topology, topology.objects.counties).features)
+  									.enter().append("path")
+  											.attr("class", "cpath county")
+  											.attr("id", function (d) { return d.id })
+  											.attr("d", path)
+                        .on("click", function (d) { geoClick({
+                          "level":"county", "id":d.id}
+                        )
+                        })
+                        .on("mousemove", function (d,i) {
+                          var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
+
+                          tooltip.classed("hidden", false)
+                                 .attr("style", "left:"+(mouse[0]+offsetL)+"px;top:"+(mouse[1]+offsetT)+"px")
+                                 .html(countyName[d.id]);
+
+                          })
+                        .on("mouseout",  function(d,i) {
+                            tooltip.classed("hidden", true);
+                          });
+
+                  //
+                  // Merge counties for circuits, districts, and FL
+                  // Most merge logic came from: http://bl.ocks.org/mbostock/5416405
+                  //
+                  // Circuits
+                  for (var i = 1; i <= 20; i++) {
+                    svg2.append("path")
+                      .datum(topojson.merge(topology, topology.objects.counties.geometries.filter(function(d) { return d3.set(countyCircuitIds[i]).has(d.id); })))
+                      .attr("class", "cpath circuit")
+                      .attr("id", i)
+                      .attr("visibility", "hidden")
+                      .attr("d", path)
+                      .on("click", function (d) { geoClick({"level":"Circuit", "id":+d3.select(this).attr("id")}) }
+                      )
+                      .on("mousemove", function (d,i) {
+                        var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
+
+                        tooltip.classed("hidden", false)
+                               .attr("style", "left:"+(mouse[0]+offsetL)+"px;top:"+(mouse[1]+offsetT)+"px")
+                               .html("Circuit "+d3.select(this).attr("id"));
+
+                        })
+                      .on("mouseout",  function(d,i) {
+                          tooltip.classed("hidden", true);
+                        });                      
+                  };
+
+                  //
+                  // Districts
+                  for (var i = 1; i <= 6; i++) {
+                    svg2.append("path")
+                      .datum(topojson.merge(topology, topology.objects.counties.geometries.filter(function(d) { return d3.set(countyDistrictIds[i]).has(d.id); })))
+                      .attr("class", "cpath district")
+                      .attr("id", i)
+                      .attr("visibility", "hidden")
+                      .attr("d", path)
+                      .on("click", function (d) { geoClick({
+                          "level":"District", "id":+d3.select(this).attr("id")}
+                        )
+                      })
+                      .on("mousemove", function (d,i) {
+                        var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
+
+                        tooltip.classed("hidden", false)
+                               .attr("style", "left:"+(mouse[0]+offsetL)+"px;top:"+(mouse[1]+offsetT)+"px")
+                               .html("District "+d3.select(this).attr("id"));
+
+                        })
+                      .on("mouseout",  function(d,i) {
+                          tooltip.classed("hidden", true);
+                        });                      
+                  };
+
+                  //
+                  // All
+                  svg2.append("path")
+                    .datum(topojson.merge(topology, topology.objects.counties.geometries.filter(function(d) { return true })))
+                    .attr("class", "cpath florida")
+                    .attr("id", "fl")
+                    .attr("visibility", "hidden")
+                    .attr("d", path)
+                    .on("click", function (d) { geoClick({
+                          "level":"All of", "id":"Florida"}
+                        )
+                    })
+                    .on("mousemove", function (d,i) {
+                      var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
+
+                      tooltip.classed("hidden", false)
+                             .attr("style", "left:"+(mouse[0]+offsetL)+"px;top:"+(mouse[1]+offsetT)+"px")
+                             .html("All of Florida");
+
+                      })
+                    .on("mouseout",  function(d,i) {
+                        tooltip.classed("hidden", true);
+                      });                        
+
+  							});
+
+                var geoClick = function(d){
+
+                  //
+                  //
+                  d3.selectAll(".showtext").remove();
+      
+                  svg2.append("text")
+                    .attr("class", "showtext")
+                    .attr("x",20)
+                    .attr("y",100)
+                    .text("Selected:");
+      
+                  if (d.level == "county") {
+                    svg2.append("text")
+                      .attr("class", "showtext")
+                      .attr("x",30)
+                      .attr("y",120)
+                      .text(countyName[d.id]);
+                  } else {
+                    svg2.append("text")
+                      .attr("class", "showtext")
+                      .attr("x",30)
+                      .attr("y",120)
+                      .text(d.level + " " + d.id);
+                  };
+									
+                  if (d.level == "All of") {
+										selGeo = copy(allGeo);
+									} else if (d.level == "District") {
+										selGeo = copy(countyDistrictIds[d.id]);
+									} else if (d.level == "Circuit") {
+										selGeo = copy(countyCircuitIds[d.id]);
+									} else {
+										selGeo = [d.id];
+									};
+
+									//d3.select("#divmainbody svg").remove();
+									//mainGraph();
+									updateMain();
+
+                };
+
+					
                 //
                 // Event Handlers
                 //
+/*                function change() {
+                  //var selectedIndex = select.property('selectedIndex'),
+                  //    data = options[0][selectedIndex].__data__;
+                  if (this.value != "--Select Type of Case--") {
+                    console.log(this.value);
+                  };
+                };
 
                 // Which data
                 d3.selectAll('.cc').on('change', function () {
-                  $(document).trigger("menuChange");
+                  //$(document).trigger("menuChange");
                   datSelected = this.value;
-									console.log(datSelected);
-                  delete det_obj;
-                  setTimeout(initVis, 500);
+									//console.log(datSelected);
+                  d3.select("#ddnav select").remove();
+                  //delete det_obj;
+                  //setTimeout(initVis, 500);
+                  if (this.value != "0") {
+                    // D3 Dropdown Menu logic came from:
+                    // http://stackoverflow.com/questions/11903709/adding-drop-down-menu-using-d3-js
+                    d3.select("#ddnav br").remove();
+                    var select  = d3.select("#ddnav").append("select").on("change", change),
+                        options = select.selectAll('option').data(doctoc[+datSelected]); // Data join
+                    // Enter selection
+                    options.enter().append("option").text(function (d) { return d; });
+                  } else {
+                    d3.select("#ddnav").append("br");
+                  };
                 });
-
+*/
                 // Which visualization
                 d3.selectAll('.cd').on('change', function () {
-                  $(document).trigger("menuChange");
-                  vizSelected = this.value;
-									console.log(vizSelected);
-                  delete det_obj;
-                  setTimeout(initVis, 500);
+                  //$(document).trigger("menuChange");
+                  vizSelected = +this.value;
+									//console.log(vizSelected);
+                  //delete det_obj;
+                  //setTimeout(initVis, 500);
+									
+                  updateMain();
+                  //d3.select("#divmainbody svg").remove();
+									//mainGraph();
                 });
 
                 // Which select
                 d3.selectAll('.cs').on('change', function () {
                   flaSelected = this.value;
-									console.log(flaSelected);
+                  d3.selectAll(".county").attr("visibility", "hidden");
+                  d3.selectAll(".circuit").attr("visibility", "hidden");
+                  d3.selectAll(".district").attr("visibility", "hidden");
+                  d3.selectAll(".florida").attr("visibility", "hidden");
+                  if (flaSelected == "0") {
+                    d3.selectAll(".county").attr("visibility", "visible");
+                  };
+                  if (flaSelected == "1") {
+                    d3.selectAll(".circuit").attr("visibility", "visible");
+                  };
+                  if (flaSelected == "2") {
+                    d3.selectAll(".district").attr("visibility", "visible");
+                  };
+                  if (flaSelected == "3") {
+                    d3.selectAll(".florida").attr("visibility", "visible");
+                  };
                 });
-
+              
+							});
                 initVis();
 
             }
@@ -285,6 +1220,19 @@ path.cpath:hover {
             startHere();
             
         })
+				
+				// Copy array logic from:
+				// http://stackoverflow.com/questions/7486085/copying-array-by-value-in-javascript
+        function copy(o) {
+           var out, v, key;
+           out = Array.isArray(o) ? [] : {};
+           for (key in o) {
+               v = o[key];
+               out[key] = (typeof v === "object") ? copy(v) : v;
+           };
+           return out;
+        };
+				
     </script>
 </body>
 </html>
