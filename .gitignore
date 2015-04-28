@@ -12,9 +12,7 @@ Project/data/floridacourtsystem.json
 cases2.json
 casetypes.html
 circpackzoom.html
-*.json
 data/dispodetail.bak
-*.csv
 ddatagg.html
 data/floridacourtsystem.json
 ddsankey.html
