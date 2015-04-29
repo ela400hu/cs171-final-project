@@ -1,162 +1,7 @@
 <!DOCTYPE html>
 <html>
 <meta charset="utf-8">
-<style type="text/css">
-
-body {
-
-font-color:#000b95;
-
-background: #fcd2b5; /* Old browsers */
-background: #fed57e; /* Old browsers */
-background: -moz-linear-gradient(top, #fed57e 0%, #fcd2b5 100%); /* FF3.6+ */
-background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fed57e), color-stop(100%,#fcd2b5)); /* Chrome,Safari4+ */
-background: -webkit-linear-gradient(top, #fed57e 0%,#fcd2b5 100%); /* Chrome10+,Safari5.1+ */
-background: -o-linear-gradient(top, #fed57e 0%,#fcd2b5 100%); /* Opera 11.10+ */
-background: -ms-linear-gradient(top, #fed57e 0%,#fcd2b5 100%); /* IE10+ */
-background: linear-gradient(to bottom, #fed57e 0%,#fcd2b5 100%); /* W3C */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fed57e', endColorstr='#fcd2b5',GradientType=0 ); /* IE6-9 */
-
-}
-svg {
-  font: 12px sans-serif;
-  font-family: "Helvetica Neue", Helvetica;
-  color:#000b95;
-}
-
-.line {
-  fill: none;
-  stroke: #000b95;
-  stroke-width: 2px;
-}
-
-.aline,
-.alinect,
-.alinecc {
-  fill: none;
-  stroke-width: 2px;
-}
-
-.background path {
-  fill: none;
-  stroke: none;
-  stroke-width: 20px;
-  pointer-events: stroke;
-  color:#000b95;
-}
-
-.foreground path {
-  fill: none;
-  stroke: #e81d5e;
-  stroke-width: 1.5px;
-}
-
-.axis .title {
-  font-size: 11px;
-  font-weight: bold;
-  color:#000b95;
-  text-transform: uppercase;
-}
-
-.axis line,
-.axis path {
-  fill: none;
-  stroke: #000b95;
-  color:#000b95;
-  shape-rendering: crispEdges;
-}
-
-.axis.string {
-  font-size: 6px;
-  color:#000b95;
-}
-
-.label {
-  -webkit-transition: fill 125ms linear;
-  color:#000b95;
-}
-
-.active .label:not(.inactive) {
-  font-weight: bold;
-  font-size: 11px;
-  fill: #e81d5e;
-}
-
-.label.inactive {
-  /*fill: #e09e11;*/
-  fill: #c98e0f;
-}
-
-.foreground path.inactive {
-/*stroke: #e09e11; */
-stroke: #c98e0f;
-
-
-  /*stroke: #cfee35;*/
-  stroke-opacity: .7;
-  stroke-width: 1px;
-}
-
-path.cpath {
-	fill: #faab02;
-	stroke: #fa2f02;
-	stroke-width: .5px;
-}
-
-path.cpath:hover {
-	fill: #e81d5e;
-}
-
-div.tooltip {
-  color: #222; 
-  background: #fff; 
-  padding: .5em; 
-  text-shadow: #f5f5f5 0 1px 0;
-  border-radius: 2px; 
-  box-shadow: 0px 0px 2px 0px #a6a6a6; 
-  opacity: 0.9; 
-  position: absolute;
-}
-
-.docrect {
-  fill: rgb(31, 119, 180);
-  fill-opacity:0.4;
-}
-
-.tocrect {
-  fill: rgb(255, 127, 14);
-  fill-opacity:0.4;
-}
-
-.agerect {
-  fill: rgb(44, 160, 44);
-  fill-opacity:0.4;
-}
-
-.chart text,
-.charta text {
-  fill: black;
-  font: 11px sans-serif;
-  text-anchor: start;
-}
-
-.clickable,
-.clickabla {
-	stroke:#fff;
-	fill:#fff;
-	fill-opacity:0;
-	stroke-opacity:0;
-}
-
-.legend {
-	font-size: 12px;
-}
-
-.legend rect {
-	stroke-width: 2;
-}
-	
-</style>
+<style type="text/css"></style>
 <head lang="en">
     <meta charset="UTF-8">
     <title>The Real Business of the Courts</title>
@@ -206,7 +51,7 @@ div.tooltip {
 							</form>
               <label>Division of Court and Case Type:</label><br>
 							<svg class="chart"></svg>
-              <label>Age Group:</label><br>
+              <label>Population by Age Group:</label><br>
 							<svg class="charta"></svg>
 						</div>
             <div class="col-md-9" id="divmain">
@@ -217,11 +62,8 @@ div.tooltip {
 
 				<div class="row">
 					<div class="col-md-3" id="divbotl">
-          <!-- <br>Tooltips<br>
-						<img src="images/scott_sm2.jpg" alt="Scott" style="width:95px;height:120px"> -->
 					</div>
 					<div class="col-md-9" id="divbotr">
-            <!-- <br>Time sliders/brushes? -->
             <span style="padding-left:100px"> </span>Go 
             <a href="landing.html">Back to Landing Page</a>
           </div>
@@ -233,9 +75,12 @@ div.tooltip {
         $(function(){ // this function is called after the HTML document is fully loaded
 
             // variables keeping global knowledge of the data
-            datSelected = 0;
-            vizSelected = 0;
-            flaSelected = 0;
+            vizSelected = 0; // Raw (0) or Indexed (1) selected
+						selDoc = ""; // Selected Division of Court
+						selToc = ""; // Selected Type of Case
+						selAge = 0; // Selected Age Group
+						selGeo = []; // Selected Counties by id
+						allGeo = []; // All Counties by id
 
             // call this function after Data is loaded, reformatted and bound to the variables
             var initVis = function(){
@@ -244,7 +89,7 @@ div.tooltip {
                 var MyEventHandler = new Object();
 
                 //Instantiate all Vis Objects here
-								//var det_obj = new DetailsVis(d3.select("#divmain"), datSelected, vizSelected, MyEventHandler);
+								//var det_obj = new DetailsVis(d3.select("#divmain"), vizSelected, MyEventHandler);
 																
                 // Bind the eventHandler to the Vis Objects
                 $(document).on("menuChange",
@@ -256,13 +101,42 @@ div.tooltip {
 
             var startHere = function(){
 
-							var selDoc = "";
-							var selToc = "";
-							var selAge = 0;
-							var selGeo = [];
-							var allGeo = [];
+							var mapWidth = 250;
+							var mapHeight = 190;
+							var mapScale = 1800;
+							var mapOffsetX = -230;
+							var mapOffsetY = -210;
+							var tooltipOffsetL = 10;
+							var tooltipOffsetT = 20;
+							var numCounties = 68;
+							var mainWidthAdjust = 250;
+							var mainHeightPct = 0.5;
+							var margin = {top: 10, right: 75, bottom: 40, left: 70};
+							var width = document.getElementById("headline").offsetWidth - mainWidthAdjust - margin.left - margin.right;
+							var height = window.innerHeight*mainHeightPct - margin.top - margin.bottom;
+							var color = d3.scale.category10();
+							var numYears = 28;
+							var yearAxisLabelX = 15;
+							var yearAxisLabelY = -15;
+							var overlappingPathOpacity = 0.5;
+							var legendRectSize = 15;
+							var legendSpacing = 4;
+							var mainTransitionDur = 1000;
+							var barTransitionDur = 500;
+							var cwidth = 250;
+							var cheight = 180;
+							var barHeight = 15;
+							var barWidthTrim = 20;
+							var barHeightTrim = 2;
+							var barTextX = 3;
+							var aheight = 210;
+							var cidMin = 12000;
+							var cidMax = 13000;
+							var numCircuits = 20;
+							var numDistricts = 6;							
+							
               //
-              // Division of Court / Type of Case Dropdown
+              // Division of Court / Type of Case
               var doclist = ["Circuit Civil",
 															"Circuit Criminal",
 															"County Civil",
@@ -299,27 +173,26 @@ div.tooltip {
 
 							// Set up Florida map
 							//
-							var width = 250;
-							var height = 190;
-							
 							var svg2 = d3.select("#divmap").append("svg")
-									.attr("width", width)
-									.attr("height", height);
+									.attr("width", mapWidth)
+									.attr("height", mapHeight);
 
 							var projection = d3.geo.albersUsa()
-									.scale(1800)
-									.translate([-230,-210]);
+									.scale(mapScale)
+									.translate([mapOffsetX,mapOffsetY]);
 
 							var path = d3.geo.path()
 									.projection(projection);
 
               // Most of the Tooltip logic came from:
               // http://techslides.com/demos/d3/worldmap-template.html
-              var tooltip = d3.select("#divmap").append("div").attr("class", "tooltip hidden");
+              var tooltip = d3.select("#divmap")
+															.append("div")
+															.attr("class", "tooltip hidden");
 
               //offsets for tooltips
-              var offsetL = document.getElementById('divmap').offsetLeft+10;
-              var offsetT = document.getElementById('divmap').offsetTop+20;
+              var offsetL = document.getElementById('divmap').offsetLeft+tooltipOffsetL;
+              var offsetT = document.getElementById('divmap').offsetTop+tooltipOffsetT;
 
               var fldata;
 
@@ -356,12 +229,9 @@ div.tooltip {
 								
 								selGeo = copy(allGeo);
 
-                // Load Filings and Dispositions
+                // Load Filings, Dispositions, and Population
                 //
-
                 queue()
-                  //.defer(d3.csv, 'Dispositions.csv')
-                  //.defer(d3.csv, 'data/Filings.csv')
                   .defer(d3.csv, 'data/FDCombined.csv')
                   .defer(d3.csv, 'data/Population.csv')
                   .await(allLoaded);
@@ -388,25 +258,6 @@ div.tooltip {
                               .rollup(function (leaves) { return {"totalf":d3.sum(leaves, function (d) { return d.fcount }),
                                                                   "totald":d3.sum(leaves, function (d) { return d.dcount })}})
                               .entries(bothFilDis);
-
-                  // dispositions = dData.map(function (d) {
-                  //   var fid = +d.id;
-                  //   return {
-                  //     id: fid,
-                  //     circ: countyCircuit[fid],
-                  //     dist: countyDistrict[fid],
-                  //     doc: +d.doc,
-                  //     toc: +d.toc,
-                  //     year: +d.variable,
-                  //     count: +d.value
-                  //   };
-
-                  // });
-
-                  // disData = d3.nest()
-                  //             .key(function (d) { return d.year })
-                  //             .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
-                  //             .entries(dispositions);
 															
                   populations = pData.map(function (d) {
                     var fid = +d.id;
@@ -444,7 +295,7 @@ div.tooltip {
 																			.filter(function(d) {
                                         if (selDoc != "" && selDoc != d.doc) { return false; }
                                         if (selToc != "" && selToc != d.toc) { return false; }
-																				if (selGeo.length == 68) { return true; }
+																				if (selGeo.length == numCounties) { return true; }
 																				return d3.set(selGeo).has(d.id);
 																			})
 																		);
@@ -489,40 +340,13 @@ div.tooltip {
 
 									});
 									
-         //          disData = d3.nest()
-         //                      .key(function (d) { return d.year })
-         //                      .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
-         //                      .entries(dispositions
-									// 										.filter(function(d) { 
-         //                                if (selDoc != "" && selDoc != d.doc) { return false; }
-         //                                if (selToc != "" && selToc != d.toc) { return false; }
-         //                                if (selGeo.length == 68) { return true; }
-         //                                return d3.set(selGeo).has(d.id);
-									// 										})
-									// 									);
-																		
-									// var firstOne = 0.0;
-									// disData.forEach( function (d) {
-									// 	if (vizSelected == 1) {
-									// 		if (firstOne == 0) {
-									// 			firstOne = d.values.total;
-									// 			d.total = 100.0;
-									// 		} else {
-									// 			d.total = 100.0 * (d.values.total / firstOne);
-									// 		};
-									// 	} else {
-									// 		d.total = d.values.total;
-									// 	};
-									// });						
-									
-
                   popData = d3.nest()
                               .key(function (d) { return d.year })
                               .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
                               .entries(populations
 																			.filter(function(d) { 
                                         if (selAge != 0 && selAge != d.agrp) { return false; }
-                                        if (selGeo.length == 68) { return true; }
+                                        if (selGeo.length == numCounties) { return true; }
                                         return d3.set(selGeo).has(d.id);
 																			})
 																		);
@@ -542,13 +366,6 @@ div.tooltip {
 									});																		
 
 									
-									var margin = {top: 10, right: 75, bottom: 40, left: 70},
-											width = document.getElementById("headline").offsetWidth - 300 - margin.left - margin.right,
-											height = window.innerHeight*0.6 - margin.top - margin.bottom;
-
-									var color = d3.scale.category10();
-									
-									//var parse = d3.time.format("%Y").parse;
 									
 									var x = d3.scale.linear()
 											.range([0, width]);
@@ -558,7 +375,7 @@ div.tooltip {
 
 									var xAxis = d3.svg.axis()
 											.scale(x)
-											.ticks(28)
+											.ticks(numYears)
 											.tickFormat(d3.format("0000"))
 											.orient("bottom");
 
@@ -586,13 +403,13 @@ div.tooltip {
                   var linect = d3.svg.line()
                       .interpolate("basis") 
                       .x(function(d) { return x(d.key); })
-                      .y(function(d) { return ayct(d.clearThis); });
+                      .y(function(d) { return aycr(d.clearThis); });
                   
                   var linecc = d3.svg.line()
                       .interpolate("basis") 
                       .x(function(d) { return x(d.key); })
-                      .y(function(d) { return aycc(d.clearCum); });
-
+                      .y(function(d) { return aycr(d.clearCum); });
+											
                   var xRange = d3.extent(fildisData, function(d) { return d.key; });
                   var fRange = d3.extent(fildisData, function(d) { return d.totalf; });
                   var dRange = d3.extent(fildisData, function(d) { return d.totald; });
@@ -605,10 +422,46 @@ div.tooltip {
 											.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
                   d3.select("#divmainbody svg").append("text")
-                    .attr("x",15)
-                    .attr("y",height + margin.top + margin.bottom - 15)
+                    .attr("x",yearAxisLabelX)
+                    .attr("y",height + margin.top + margin.bottom + yearAxisLabelY)
                     .text("Year:");                      
 
+                  svg.append("line")
+                    .attr("class", "alineaxt")
+										.attr("visibility","hidden")
+                    .attr("x1",0)
+                    .attr("y1",height/2)
+                    .attr("x2",width)
+                    .attr("y2",height/2)
+										.style("stroke","rgb(214,39,40)")
+										.style("stroke-dasharray","10,10");
+										
+                  svg.append("line")
+                    .attr("class", "alineaxc")
+										.attr("visibility","hidden")
+                    .attr("x1",10)
+                    .attr("y1",height/2+1)
+                    .attr("x2",width-10)
+                    .attr("y2",height/2+1)
+										.style("stroke","rgb(148,103,189)")
+										.style("stroke-dasharray","10,10");
+									
+									d3.select("#divmainbody svg").append("text")
+                    .attr("class", "alineaxt")
+										.attr("visibility","hidden")
+                    .attr("x",margin.left-8)
+                    .attr("y",margin.top+height/2)
+                    .text("1")
+										.style("fill","rgb(214,39,40)");
+										
+									d3.select("#divmainbody svg").append("text")
+                    .attr("class", "alineaxc")
+										.attr("visibility","hidden")
+                    .attr("x",margin.left-8)
+                    .attr("y",margin.top+height/2)
+                    .text("1")
+										.style("fill","rgb(148,103,189)");
+									
 									x.domain(xRange);
                   y.domain(yRange);
 									
@@ -618,55 +471,38 @@ div.tooltip {
 									var ayAxis = d3.svg.axis().scale(ay).orient("right");
 
                   var ctRange = d3.extent(fildisData, function(d) { return d.clearThis; });
-                  var ctDiff0 = Math.abs(ctRange[0]-1);
-                  var ctDiff1 = Math.abs(ctRange[1]-1);
-                  if (ctDiff0 > ctDiff1) {
-                    ctRange = [(1-ctDiff0),(1+ctDiff0)];
-                  } else {
-                    ctRange = [(1-ctDiff1),(1+ctDiff1)];
-                  };
-
-                  var ayct = d3.scale.linear()
-                            .range([height, 0])
-                            .domain(ctRange);
-                            
                   var ccRange = d3.extent(fildisData, function(d) { return d.clearCum; });
-                  var ccDiff0 = Math.abs(ccRange[0]-1);
-                  var ccDiff1 = Math.abs(ccRange[1]-1);
-                  if (ccDiff0 > ccDiff1) {
-                    ccRange = [(1-ccDiff0),(1+ccDiff0)];
-                  } else {
-                    ccRange = [(1-ccDiff1),(1+ccDiff1)];
-                  };
+                  var cDiff = d3.max([Math.abs(ctRange[0]-1), Math.abs(ctRange[1]-1), Math.abs(ccRange[0]-1), Math.abs(ccRange[1]-1)]);
+                  var crRange = [(1-cDiff),(1+cDiff)];
 
-                  var aycc = d3.scale.linear()
+                  var aycr = d3.scale.linear()
                             .range([height, 0])
-                            .domain(ccRange);
+                            .domain(crRange);
 
 									svg.append("path")
 											.datum(fildisData)
 											.attr("class", "farea")
 											.attr("d", areaf)
 											.attr("data-legend","Filings")
+											.attr("visibility","visible")
 											.style("fill", function(d) { return color(1) } )
-											.style("fill-opacity", .5);			
-
-									// x.domain(d3.extent(disData, function(d) { return d.key; }));
-									// y.domain(d3.extent(disData, function(d) { return d.total; }));
+											.style("fill-opacity", overlappingPathOpacity);			
 
 									svg.append("path")
 											.datum(fildisData)
 											.attr("class", "darea")
 											.attr("d", aread)
 											.attr("data-legend","Dispositions")
+											.attr("visibility","visible")
 											.style("fill", function(d) { return color(2) } )
-											.style("fill-opacity", .5);											
+											.style("fill-opacity", overlappingPathOpacity);											
 									
                   svg.append("path")
                       .datum(popData)
                       .attr("class", "aline")
                       .attr("d", line)
                       .attr("data-legend","Population")
+											.attr("visibility","hidden")
                       .style("stroke", function(d) { return color(3) } );
 
                   svg.append("path")
@@ -674,6 +510,7 @@ div.tooltip {
                       .attr("class", "alinect")
                       .attr("d", linect)
                       .attr("data-legend","Clearance Rate")
+											.attr("visibility","hidden")
                       .style("stroke", function(d) { return color(4) } );
 
                   svg.append("path")
@@ -681,6 +518,7 @@ div.tooltip {
                       .attr("class", "alinecc")
                       .attr("d", linecc)
                       .attr("data-legend","Cumulative Clearance Rate")
+											.attr("visibility","hidden")
                       .style("stroke", function(d) { return color(5) } );
 									
 									svg.append("g")
@@ -701,14 +539,13 @@ div.tooltip {
 											
 									svg.append("g")
 											.attr("class", "ay axis")
+											.attr("visibility","hidden")
 											.attr("transform", "translate(" + width + " ,0)")
 											.style("fill", "rgb(44, 160, 44)")
 											.call(ayAxis);
 
 									// Legend code borrowed from
 									// http://zeroviscosity.com/d3-js-step-by-step/step-3-adding-a-legend
-									var legendRectSize = 15;
-									var legendSpacing = 4;
 									var legend = svg.selectAll('.legend')
 											.data(color.domain())
 											.enter()
@@ -725,7 +562,7 @@ div.tooltip {
 										.attr('width', legendRectSize)
 										.attr('height', legendRectSize)
 										.style('fill', color)
-										.style("fill-opacity", .5)
+										.style("fill-opacity", overlappingPathOpacity)
 										.style('stroke', color);
 									legend.append('text')
 										.attr('x', legendRectSize + legendSpacing)
@@ -743,6 +580,15 @@ div.tooltip {
                                 return "Cumulative Clearance Rate"
                               };
 														});
+														
+									d3.select(".clickableLegend").remove();
+									
+									svg.append("rect")
+											.attr("class","clickableLegend")
+											.attr("width", legendRectSize)
+											.attr("height", (legendRectSize + legendSpacing) * 5)
+											.attr('transform','translate(30,19)')
+											.on('click', function(d) { legClicked(d3.mouse(this)) });
 
                 };
 
@@ -753,12 +599,12 @@ div.tooltip {
                   fildisData = d3.nest()
                               .key(function (d) { return d.year })
                               .rollup(function (leaves) { return {"totalf":d3.sum(leaves, function (d) { return d.fcount }),
-                                                                  "totald":d3.sum(leaves, function (d) { return d.dcount })}})
+																						"totald":d3.sum(leaves, function (d) { return d.dcount })}})
                               .entries(bothFilDis
                                       .filter(function(d) {
                                         if (selDoc != "" && selDoc != d.doc) { return false; }
                                         if (selToc != "" && selToc != d.toc) { return false; }
-                                        if (selGeo.length == 68) { return true; }
+                                        if (selGeo.length == numCounties) { return true; }
                                         return d3.set(selGeo).has(d.id);
                                       })
                                     );
@@ -802,33 +648,6 @@ div.tooltip {
                     };
 
                   });
-                  
-                  // disData = d3.nest()
-                  //             .key(function (d) { return d.year })
-                  //             .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
-                  //             .entries(dispositions
-                  //                     .filter(function(d) { 
-                  //                       if (selDoc != "" && selDoc != d.doc) { return false; }
-                  //                       if (selToc != "" && selToc != d.toc) { return false; }
-                  //                       if (selGeo.length == 68) { return true; }
-                  //                       return d3.set(selGeo).has(d.id);
-                  //                     })
-                  //                   );
-                                    
-                  // var firstOne = 0.0;
-                  // disData.forEach( function (d) {
-                  //   if (vizSelected == 1) {
-                  //     if (firstOne == 0) {
-                  //       firstOne = d.values.total;
-                  //       d.total = 100.0;
-                  //     } else {
-                  //       d.total = 100.0 * (d.values.total / firstOne);
-                  //     };
-                  //   } else {
-                  //     d.total = d.values.total;
-                  //   };
-                  // });                                   
-                  
 
                   popData = d3.nest()
                               .key(function (d) { return d.year })
@@ -836,7 +655,7 @@ div.tooltip {
                               .entries(populations
 																			.filter(function(d) { 
                                         if (selAge != 0 && selAge != d.agrp) { return false; }
-                                        if (selGeo.length == 68) { return true; }
+                                        if (selGeo.length == numCounties) { return true; }
                                         return d3.set(selGeo).has(d.id);
 																			})
 																		);
@@ -855,14 +674,6 @@ div.tooltip {
 										};
 									});																		
 									
-									
-									
-                  var margin = {top: 10, right: 75, bottom: 40, left: 70},
-                      width = document.getElementById("headline").offsetWidth - 300 - margin.left - margin.right,
-                      height = window.innerHeight*0.6 - margin.top - margin.bottom;
-
-                  var color = d3.scale.category10();
-                                    
                   var x = d3.scale.linear()
                       .range([0, width]);
 
@@ -871,7 +682,7 @@ div.tooltip {
 
                   var xAxis = d3.svg.axis()
                       .scale(x)
-                      .ticks(28)
+                      .ticks(numYears)
                       .tickFormat(d3.format("0000"))
                       .orient("bottom");
 
@@ -899,12 +710,12 @@ div.tooltip {
                   var linect = d3.svg.line()
                       .interpolate("basis") 
                       .x(function(d) { return x(d.key); })
-                      .y(function(d) { return ayct(d.clearThis); });
+                      .y(function(d) { return aycr(d.clearThis); });
                   
                   var linecc = d3.svg.line()
                       .interpolate("basis") 
                       .x(function(d) { return x(d.key); })
-                      .y(function(d) { return aycc(d.clearCum); });                      
+                      .y(function(d) { return aycr(d.clearCum); });                      
 											
                   var xRange = d3.extent(fildisData, function(d) { return d.key; });
                   var fRange = d3.extent(fildisData, function(d) { return d.totalf; });
@@ -912,11 +723,7 @@ div.tooltip {
                   var yRange = [d3.min([fRange[0],dRange[0]]),d3.max([fRange[1],dRange[1]])];
 
 
-                  var svg = d3.select("#divmainbody svg g")//.append("svg")
-                  //     .attr("width", width + margin.left + margin.right)
-                  //     .attr("height", height + margin.top + margin.bottom)
-                  //   .append("g")
-                  //     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                  var svg = d3.select("#divmainbody svg g")
 
                   x.domain(xRange);
                   y.domain(yRange);
@@ -927,101 +734,37 @@ div.tooltip {
 									var ayAxis = d3.svg.axis().scale(ay).orient("right");
 
                   var ctRange = d3.extent(fildisData, function(d) { return d.clearThis; });
-                  var ctDiff0 = Math.abs(ctRange[0]-1);
-                  var ctDiff1 = Math.abs(ctRange[1]-1);
-                  if (ctDiff0 > ctDiff1) {
-                    ctRange = [(1-ctDiff0),(1+ctDiff0)];
-                  } else {
-                    ctRange = [(1-ctDiff1),(1+ctDiff1)];
-                  };
-
-                  var ayct = d3.scale.linear()
-                            .range([height, 0])
-                            .domain(ctRange);
-                            
                   var ccRange = d3.extent(fildisData, function(d) { return d.clearCum; });
-                  var ccDiff0 = Math.abs(ccRange[0]-1);
-                  var ccDiff1 = Math.abs(ccRange[1]-1);
-                  if (ccDiff0 > ccDiff1) {
-                    ccRange = [(1-ccDiff0),(1+ccDiff0)];
-                  } else {
-                    ccRange = [(1-ccDiff1),(1+ccDiff1)];
-                  };
+                  var cDiff = d3.max([Math.abs(ctRange[0]-1), Math.abs(ctRange[1]-1), Math.abs(ccRange[0]-1), Math.abs(ccRange[1]-1)]);
+                  var crRange = [(1-cDiff),(1+cDiff)];
 
-                  var aycc = d3.scale.linear()
+                  var aycr = d3.scale.linear()
                             .range([height, 0])
-                            .domain(ccRange);						
-
-                  // svg.append("path")
-                  //     .datum(filData)
-                  //     .attr("class", "farea")
-                  //     .attr("d", area)
-                  //     .attr("data-legend","Filings")
-                  //     .style("fill", function(d) { return color(1) } )
-                  //     .style("fill-opacity", .5);
+                            .domain(crRange);					
 
                   path = svg.selectAll('.farea').datum(fildisData)
                             .transition()
-                            .duration(1000)
+                            .duration(mainTransitionDur)
                             .attr("d", areaf);
-                  // path.attr('d', function(d) {return line(d) + 'Z'})
-                  //     .style('stroke-width', 1)
-                  //     .style('stroke', 'steelblue');
-                  // path.enter().append('svg:path').attr('d', function(d){return line(d) + 'Z'})
-                  //     .style('stroke-width', 1)
-                  //     .style('stroke', 'steelblue');
-
-                  // path.enter().append("svg:path")
-                  //     .attr("class", "farea")
-                  //     .attr("d", area)
-                  //     .attr("data-legend","Filings")
-                  //     .style("fill", function(d) { return color(1) } )
-                  //     .style("fill-opacity", .5);
-                  // path.exit().remove()                      
-
-                  // x.domain(d3.extent(disData, function(d) { return d.key; }));
-                  // y.domain(d3.extent(disData, function(d) { return d.total; }));
-
-                  // svg.append("path")
-                  //     .datum(disData)
-                  //     .attr("class", "darea")
-                  //     .attr("d", area)
-                  //     .attr("data-legend","Dispositions")
-                  //     .style("fill", function(d) { return color(2) } )
-                  //     .style("fill-opacity", .5);
 
                   path = svg.selectAll('.darea').datum(fildisData)
                             .transition()
-                            .duration(1000)
+                            .duration(mainTransitionDur)
                             .attr("d", aread);
-                  // path.attr('d', function(d) {return line(d) + 'Z'})
-                  //     .style('stroke-width', 1)
-                  //     .style('stroke', 'steelblue');
-                  // path.enter().append('svg:path').attr('d', function(d){return line(d) + 'Z'})
-                  //     .style('stroke-width', 1)
-                  //     .style('stroke', 'steelblue');
-
-                  // path.enter().append("svg:path")
-                  //     .attr("class", "darea")
-                  //     .attr("d", area)
-                  //     .attr("data-legend","Dispositions")
-                  //     .style("fill", function(d) { return color(2) } )
-                  //     .style("fill-opacity", .5);
-                  // path.exit().remove()                     
 
 									path = svg.selectAll('.aline').datum(popData)
                             .transition()
-                            .duration(1000)
+                            .duration(mainTransitionDur)
                             .attr("d", line);
 
                   path = svg.selectAll('.alinect').datum(fildisData)
                             .transition()
-                            .duration(1000)
+                            .duration(mainTransitionDur)
                             .attr("d", linect);
 
                   path = svg.selectAll('.alinecc').datum(fildisData)
                             .transition()
-                            .duration(1000)
+                            .duration(mainTransitionDur)
                             .attr("d", linecc);
                   
                   d3.select(".x.axis").remove();
@@ -1042,50 +785,121 @@ div.tooltip {
                       .attr("class", "y axis")
                       .call(yAxis);
 											
+									var popVisible = "";
+									d3.select(".aline")
+											.attr("visibility", function() {
+															if (d3.select(this).attr("visibility") == "visible") {
+																popVisible = "visible";
+																return "visible";
+															} else {
+																popVisible = "hidden";
+																return "hidden";
+															}});
+											
                   d3.select(".ay.axis").remove();
 									svg.append("g")
 											.attr("class", "ay axis")
+											.attr("visibility", popVisible)
 											.attr("transform", "translate(" + width + " ,0)")
 											.style("fill", "rgb(44, 160, 44)")
 											.call(ayAxis);											
 
-                  // Legend code borrowed from
-                  // http://zeroviscosity.com/d3-js-step-by-step/step-3-adding-a-legend
-/*                  d3.selectAll(".legend").remove();
-                  var legendRectSize = 15;
-                  var legendSpacing = 4;
-                  var legend = svg.selectAll('.legend')
-                      .data(color.domain())
-                      .enter()
-                      .append('g')
-                      .attr('class', 'legend')
-                      .attr('transform', function(d, i) {
-                        var height = legendRectSize + legendSpacing;
-                        var offset =  height * 2 / 2;
-                        var horz = 2 * legendRectSize;
-                        var vert = i * height + offset;
-                        return 'translate(' + horz + ',' + vert + ')';
-                      });
-                  legend.append('rect')
-                    .attr('width', legendRectSize)
-                    .attr('height', legendRectSize)
-                    .style('fill', color)
-                    .style("fill-opacity", .5)
-                    .style('stroke', color);
-                  legend.append('text')
-                    .attr('x', legendRectSize + legendSpacing)
-                    .attr('y', legendRectSize - legendSpacing)
-                    .text(function(d,i) { 
-                              if (i == 0) {
-                                return "Filings"
-                              } else {
-                                return "Dispositions"
-                              };
-                            });
-*/
 
+									d3.select(".clickableLegend").remove();
+									
+									svg.append("rect")
+											.attr("class","clickableLegend")
+											.attr("width", legendRectSize)
+											.attr("height", (legendRectSize + legendSpacing) * 5)
+											.attr('transform','translate(30,19)')
+											.on('click', function(d) { legClicked(d3.mouse(this)) });
+											
                 };
 
+									
+								function legClicked(mouse) {
+								
+
+									var whichLeg = Math.floor(mouse[1]/(legendRectSize + legendSpacing));
+
+									if (whichLeg == 0) {
+										d3.select(".farea")
+											.attr("visibility", function() {
+															if (d3.select(this).attr("visibility") == "visible") {
+																return "hidden";
+															} else {
+																return "visible";
+															}});
+									};
+									
+
+									if (whichLeg == 1) {
+										d3.select(".darea")
+											.attr("visibility", function() {
+															if (d3.select(this).attr("visibility") == "visible") {
+																return "hidden";
+															} else {
+																return "visible";
+															}});
+									};
+									
+									if (whichLeg == 2) {
+										d3.select(".aline")
+											.attr("visibility", function() {
+															if (d3.select(this).attr("visibility") == "visible") {
+																return "hidden";
+															} else {
+																return "visible";
+															}});
+															
+										d3.select(".ay.axis")
+											.attr("visibility", function() {
+															if (d3.select(this).attr("visibility") == "visible") {
+																return "hidden";
+															} else {
+																return "visible";
+															}});															
+									};
+
+									if (whichLeg == 3) {
+										d3.select(".alinect")
+											.attr("visibility", function() {
+															if (d3.select(this).attr("visibility") == "visible") {
+																return "hidden";
+															} else {
+																return "visible";
+															}});
+															
+										d3.selectAll(".alineaxt")
+											.attr("visibility", function() {
+															if (d3.select(this).attr("visibility") == "visible") {
+																return "hidden";
+															} else {
+																return "visible";
+															}});	
+															
+									};
+									
+									if (whichLeg == 4) {
+										d3.select(".alinecc")
+											.attr("visibility", function() {
+															if (d3.select(this).attr("visibility") == "visible") {
+																return "hidden";
+															} else {
+																return "visible";
+															}});
+															
+										d3.selectAll(".alineaxc")
+											.attr("visibility", function() {
+															if (d3.select(this).attr("visibility") == "visible") {
+																return "hidden";
+															} else {
+																return "visible";
+															}});	
+																														
+									};
+									
+								};
 
 								
 									function docGraph() {
@@ -1094,16 +908,12 @@ div.tooltip {
 									
 										// Set up Division of Court bar charts
 										//
-										var cwidth = 250,
-												cheight = 180;
-												barHeight = 15;
-										
 										docData = d3.nest()
                               .key(function (d) { return d.doc })
                               .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.dcount })}})
                               .entries(bothFilDis
 																			.filter(function(d) { 
-																				if (selGeo.length == 68) {
+																				if (selGeo.length == numCounties) {
 																					return true;
 																				} else {
 																					return d3.set(selGeo).has(d.id); 
@@ -1118,7 +928,7 @@ div.tooltip {
 
 										var x = d3.scale.linear()
 												.domain([0,cmax])
-												.range([0, cwidth-20]);
+												.range([0, cwidth-barWidthTrim]);
 
 										var chart = d3.select(".chart")
 												.attr("width", cwidth)
@@ -1133,10 +943,10 @@ div.tooltip {
 										bar.append("rect")
 												.attr("class","docrect")
 												.attr("width", function (d) { return x(d.values.total); })
-												.attr("height", barHeight - 2);
+												.attr("height", barHeight - barHeightTrim);
 
 										bar.append("text")
-												.attr("x", 3)
+												.attr("x", barTextX)
 												.attr("y", barHeight / 2 - 1)
 												.attr("dy", ".35em")
 												.text(function(d) { return doclist[+d.key-1]; })
@@ -1156,16 +966,12 @@ div.tooltip {
 
 										// Set up Division of Court bar charts
 										//
-										var cwidth = 250,
-												cheight = 180;
-												barHeight = 15;
-										
 										docData = d3.nest()
                               .key(function (d) { return d.doc })
                               .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.dcount })}})
                               .entries(bothFilDis
 																			.filter(function(d) { 
-																				if (selGeo.length == 68) {
+																				if (selGeo.length == numCounties) {
 																					return true;
 																				} else {
 																					return d3.set(selGeo).has(d.id); 
@@ -1180,12 +986,12 @@ div.tooltip {
 																	
 										var x = d3.scale.linear()
 												.domain([0,cmax])
-												.range([0, cwidth-20]);
+												.range([0, cwidth-barWidthTrim]);
 
 										d3.selectAll(".docrect")
 											.data(docData)
 												.transition()
-												.duration(500)
+												.duration(barTransitionDur)
 												.attr("width", function (d) { return x(d.values.total); });
 
 										d3.select(".clickable").remove();
@@ -1204,13 +1010,9 @@ div.tooltip {
 									
 										// Set up Type of Case bar charts
 										//
-										var cwidth = 250,
-												cheight = 180;
-												barHeight = 15;
-												
 										var bar = d3.select(".chart").selectAll(".docbars")
 												.transition()
-												.duration(500)
+												.duration(barTransitionDur)
 												.attr("transform", function(d, i) { 
 																if (i != +whichDoc ) {
 																	return "translate(0,-20)";
@@ -1225,7 +1027,7 @@ div.tooltip {
 														.entries(bothFilDis
 																			.filter(function(d) { 
 																				if (d.doc == selDoc) {
-																					if (selGeo.length == 68) {
+																					if (selGeo.length == numCounties) {
 																						return true;
 																					} else {
 																						return d3.set(selGeo).has(d.id); 
@@ -1240,7 +1042,7 @@ div.tooltip {
 																	return d.values.total;} );
 										var xt = d3.scale.linear()
 																	.domain([0,ctmax])
-																	.range([10, cwidth-20]);
+																	.range([10, cwidth-barWidthTrim]);
 															
 										var bart = d3.select(".chart").selectAll(".tocbars")
 												.data(tocData)
@@ -1254,14 +1056,14 @@ div.tooltip {
 												.attr("height", barHeight - 2);
 
 										bart.append("text")
-												.attr("x", 3)
+												.attr("x", barTextX)
 												.attr("y", barHeight / 2 - 1)
 												.attr("dy", ".35em")
 												.text(function(d) { return doctoc[selDoc][+d.key-1]; });		
 
 										d3.select(".chart").selectAll(".tocbars")
 												.transition()
-												.duration(500)
+												.duration(barTransitionDur)
 												.attr("transform", function(d, i) { return "translate(10," + (i+1) * barHeight + ")";
 															});												
 												
@@ -1280,17 +1082,13 @@ div.tooltip {
 
 										// Set up Type of Case bar charts
 										//
-										var cwidth = 250,
-												cheight = 180;
-												barHeight = 15;
-												
 										var tocData = d3.nest()
 														.key(function (d) { return d.toc })
 														.rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.dcount })}})
 														.entries(bothFilDis
 																			.filter(function(d) { 
 																				if (d.doc == selDoc) {
-																					if (selGeo.length == 68) {
+																					if (selGeo.length == numCounties) {
 																						return true;
 																					} else {
 																						return d3.set(selGeo).has(d.id); 
@@ -1306,7 +1104,7 @@ div.tooltip {
 																	
 										var xt = d3.scale.linear()
 																	.domain([0,ctmax])
-																	.range([10, cwidth-20]);
+																	.range([10, cwidth-barWidthTrim]);
 															
 										d3.selectAll(".tocrect")
 											.data(tocData)
@@ -1332,16 +1130,12 @@ div.tooltip {
 									
 										// Set up Age Group bar chart
 										//
-										var cwidth = 250,
-												cheight = 210;
-												barHeight = 15;
-										
 										ageData = d3.nest()
                               .key(function (d) { return d.agrp })
                               .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
                               .entries(populations
 																			.filter(function(d) { 
-																				if (selGeo.length == 68) {
+																				if (selGeo.length == numCounties) {
 																					return true;
 																				} else {
 																					return d3.set(selGeo).has(d.id); 
@@ -1356,11 +1150,11 @@ div.tooltip {
 																	
 										var x = d3.scale.linear()
 												.domain([0,cmax])
-												.range([0, cwidth-20]);
+												.range([0, cwidth-barWidthTrim]);
 
 										var chart = d3.select(".charta")
 												.attr("width", cwidth)
-												.attr("height", cheight);
+												.attr("height", aheight);
 
 										chart.append("text")
 												.attr("x", 2)
@@ -1394,7 +1188,7 @@ div.tooltip {
 										chart.append("rect")
 												.attr("class","clickabla")
 												.attr("width", cwidth)
-												.attr("height", cheight)
+												.attr("height", aheight)
 												.on('click', function(d) { ageClicked(d3.mouse(this)) });
 									};
 									
@@ -1403,16 +1197,12 @@ div.tooltip {
 
 										// Set up Age Group bar chart
 										//
-										var cwidth = 250,
-												cheight = 210;
-												barHeight = 15;
-										
 										ageData = d3.nest()
                               .key(function (d) { return d.agrp })
                               .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
                               .entries(populations
 																			.filter(function(d) { 
-																				if (selGeo.length == 68) {
+																				if (selGeo.length == numCounties) {
 																					return true;
 																				} else {
 																					return d3.set(selGeo).has(d.id); 
@@ -1427,12 +1217,12 @@ div.tooltip {
 																	
 										var x = d3.scale.linear()
 												.domain([0,cmax])
-												.range([0, cwidth-20]);
+												.range([0, cwidth-barWidthTrim]);
 
 										d3.selectAll(".agerect")
 											.data(ageData)
 												.transition()
-												.duration(500)
+												.duration(barTransitionDur)
 												.attr("width", function (d) { return x(d.values.total); });
 
 										d3.select(".clickabla").remove();
@@ -1440,7 +1230,7 @@ div.tooltip {
 										d3.select(".charta").append("rect")
 												.attr("class","clickabla")
 												.attr("width", cwidth)
-												.attr("height", cheight)
+												.attr("height", aheight)
 												.on('click', function(d) { ageClicked(d3.mouse(this)) });
 									};
 									
@@ -1478,7 +1268,7 @@ div.tooltip {
 										if (whichDoc <= 6) {
 											selDoc = (whichDoc + 1).toString();
 											tocGraph(whichDoc);
-											setTimeout(function() {d3.select(".chart").selectAll(".docbars").select("text").style("font-weight","bold")},500);
+											setTimeout(function() {d3.select(".chart").selectAll(".docbars").select("text").style("font-weight","bold")},barTransitionDur);
                       updateMain();
 										};
 							
@@ -1495,15 +1285,8 @@ div.tooltip {
 													
 											var bar = d3.select(".chart").selectAll(".docbars")
 													.transition()
-													.duration(500)
+													.duration(barTransitionDur)
 													.attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
-
-/*													
-											var bart = d3.select(".chart").selectAll(".tocbars")
-													.transition()
-													.duration(500)
-													.attr("transform", function(d, i) { return "translate(10,200)"; });
-*/
 
 											d3.select(".chart").selectAll(".tocbars").remove();
 										
@@ -1532,12 +1315,11 @@ div.tooltip {
   							//
   							d3.json("maps/us.json", function(error, topology) {
 
-                  //if (error) return console.warn(error);
   								// Extract only Florida counties
   								//
   								newgeo = [];
                   topology.objects.counties.geometries.forEach(function (e) {
-                    if (e.id > 12000 && e.id < 13000) { 
+                    if (e.id > cidMin && e.id < cidMax) { 
                       newgeo.push(e) 
                     }
                   });
@@ -1572,7 +1354,7 @@ div.tooltip {
                   // Most merge logic came from: http://bl.ocks.org/mbostock/5416405
                   //
                   // Circuits
-                  for (var i = 1; i <= 20; i++) {
+                  for (var i = 1; i <= numCircuits; i++) {
                     svg2.append("path")
                       .datum(topojson.merge(topology, topology.objects.counties.geometries.filter(function(d) { return d3.set(countyCircuitIds[i]).has(d.id); })))
                       .attr("class", "cpath circuit")
@@ -1596,7 +1378,7 @@ div.tooltip {
 
                   //
                   // Districts
-                  for (var i = 1; i <= 6; i++) {
+                  for (var i = 1; i <= numDistricts; i++) {
                     svg2.append("path")
                       .datum(topojson.merge(topology, topology.objects.counties.geometries.filter(function(d) { return d3.set(countyDistrictIds[i]).has(d.id); })))
                       .attr("class", "cpath district")
@@ -1649,7 +1431,6 @@ div.tooltip {
                 var geoClick = function(d){
 
                   //
-                  //
                   d3.selectAll(".showtext").remove();
       
                   svg2.append("text")
@@ -1682,8 +1463,6 @@ div.tooltip {
 										selGeo = [d.id];
 									};
 
-									//d3.select("#divmainbody svg").remove();
-									//mainGraph();
 									docUpdate();
 									if (selDoc != "") {
 										tocUpdate();
@@ -1697,51 +1476,19 @@ div.tooltip {
                 //
                 // Event Handlers
                 //
-/*                function change() {
-                  //var selectedIndex = select.property('selectedIndex'),
-                  //    data = options[0][selectedIndex].__data__;
-                  if (this.value != "--Select Type of Case--") {
-                    console.log(this.value);
-                  };
-                };
 
-                // Which data
-                d3.selectAll('.cc').on('change', function () {
-                  //$(document).trigger("menuChange");
-                  datSelected = this.value;
-									//console.log(datSelected);
-                  d3.select("#ddnav select").remove();
-                  //delete det_obj;
-                  //setTimeout(initVis, 500);
-                  if (this.value != "0") {
-                    // D3 Dropdown Menu logic came from:
-                    // http://stackoverflow.com/questions/11903709/adding-drop-down-menu-using-d3-js
-                    d3.select("#ddnav br").remove();
-                    var select  = d3.select("#ddnav").append("select").on("change", change),
-                        options = select.selectAll('option').data(doctoc[+datSelected]); // Data join
-                    // Enter selection
-                    options.enter().append("option").text(function (d) { return d; });
-                  } else {
-                    d3.select("#ddnav").append("br");
-                  };
-                });
-*/
                 // Which visualization
                 d3.selectAll('.cd').on('change', function () {
                   //$(document).trigger("menuChange");
                   vizSelected = +this.value;
-									//console.log(vizSelected);
                   //delete det_obj;
                   //setTimeout(initVis, 500);
-									
                   updateMain();
-                  //d3.select("#divmainbody svg").remove();
-									//mainGraph();
                 });
 
                 // Which select
                 d3.selectAll('.cs').on('change', function () {
-                  flaSelected = this.value;
+                  var flaSelected = this.value;
                   d3.selectAll(".county").attr("visibility", "hidden");
                   d3.selectAll(".circuit").attr("visibility", "hidden");
                   d3.selectAll(".district").attr("visibility", "hidden");
@@ -1757,6 +1504,7 @@ div.tooltip {
                   };
                   if (flaSelected == "3") {
                     d3.selectAll(".florida").attr("visibility", "visible");
+										geoClick({"level":"All of", "id":"Florida"});
                   };
                 });
               
