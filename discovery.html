@@ -605,7 +605,7 @@
 
 									function brushed () {
 										if (brush.extent()[0] != brush.extent()[1]) {
-											selYrs = [Math.floor(brush.extent()[0]),Math.floor(brush.extent()[1])];
+											selYrs = [Math.floor(brush.extent()[0]+0.5),Math.floor(brush.extent()[1]+0.5)];
 										} else {
 											selYrs = allYrs;
 										};
