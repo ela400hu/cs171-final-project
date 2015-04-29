@@ -1,0 +1,117 @@
+body{
+    font-family: 'PT Sans', sans-serif;
+}
+
+.cxaxis text,
+.cyaxis text,
+.pyaxis text,
+.ayaxis text {
+    font: 9px sans-serif;
+}
+
+.pxaxis text {
+    font: 11px sans-serif;
+}
+
+.cxaxis line,
+.cxaxis path,
+.cyaxis line,
+.cyaxis path,
+.pxaxis line,
+.pxaxis path,
+.pyaxis line,
+.pyaxis path,
+.pyaxis2 line,
+.pyaxis2 path,
+.ayaxis line,
+.ayaxis path {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.pyaxis2 text {
+  font: 9px sans-serif;
+  color: #505050;
+}
+
+.boundingBox{
+    cursor: pointer;
+    fill: grey;
+    fill-opacity: .3;
+    pointer-events: all;
+}
+
+.brush{
+    fill: darkgrey;
+    fill-opacity: .5;
+    pointer-events: none;
+}
+
+.cvsvg{
+/*		background-color: lightblue; */
+}
+
+.avsvg{
+/*		background-color: lightcoral; */
+}
+
+.pvsvg{
+/*		background-color: lightgreen; */
+}
+
+.carea {
+    fill: black;
+    stroke-width: 0;
+}
+
+.aareas {
+    fill: #505050;
+		fill-opacity: .5;
+		stroke: white;
+    stroke-width: 1;
+}
+
+/*
+.myButton {
+	background-color:#44c767;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #18ab29;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Trebuchet MS;
+	font-size:12px;
+	font-weight:bold;
+	padding:0px 24px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #2f6627;
+}
+.myButton:hover {
+	background-color:#5cbf2a;
+}
+.myButton:active {
+	position:relative;
+	top:1px;
+}
+*/
+
+.pbars,
+.pbarsdup {
+	stroke: #505050;
+	stroke-width: 1;
+	fill-opacity: 0.3;
+}
+
+.comprect {
+	stroke: black;
+  	stroke-width: 2;
+  	fill-opacity: 0;
+  	fill: white;
+}
+
+#snapRange {
+  font: 10px sans-serif;
+}

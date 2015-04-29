@@ -47,11 +47,13 @@
                 <input type="radio" class="cd" name="display" value="0" checked></input> Raw 
                 <input type="radio" class="cd" name="display" value="1"></input> Indexed 
 								<br>
-								<br>
+								<label>Selected Dates: </label><span style="padding-left:10px" id="brushInfo"></span>
 							</form>
-              <label>Division of Court and Case Type:</label><br>
+              <label>Division of Court and Case Type:</label>
+							<div id="docInfo"></div>
 							<svg class="chart"></svg>
-              <label>Population by Age Group:</label><br>
+              <label>Population by Age Group:</label>
+							<div id="ageInfo"></div>
 							<svg class="charta"></svg>
 						</div>
             <div class="col-md-9" id="divmain">
@@ -81,6 +83,8 @@
 						selAge = 0; // Selected Age Group
 						selGeo = []; // Selected Counties by id
 						allGeo = []; // All Counties by id
+						allYrs = [1986,2013]; // All Years (1986-2013)
+						selYrs = allYrs; // Selected Years (default 1986-2013)
 
             // call this function after Data is loaded, reformatted and bound to the variables
             var initVis = function(){
@@ -133,7 +137,9 @@
 							var cidMin = 12000;
 							var cidMax = 13000;
 							var numCircuits = 20;
-							var numDistricts = 6;							
+							var numDistricts = 6;
+							var loDate = selYrs[0];
+							var hiDate = selYrs[1];
 							
               //
               // Division of Court / Type of Case
@@ -171,6 +177,9 @@
 							
 							var agegrp = ["Age < 0","Age 1-4","Age 5-9","Age 10-14","Age 15-19","Age 20-24","Age 25-34","Age 35-44","Age 45-54","Age 55-64","Age 65-74","Age 75-84","Age 85+"];
 
+							d3.select("#brushInfo").text(selYrs[0] + " --> " + selYrs[1]);
+
+							
 							// Set up Florida map
 							//
 							var svg2 = d3.select("#divmap").append("svg")
@@ -581,6 +590,34 @@
                               };
 														});
 														
+									// Brushing
+									//
+									var visScale = d3.scale.linear()
+																				.domain([loDate, hiDate])
+																				.range([0, width]);
+
+									brush = d3.svg.brush().x(visScale).on("brush", brushed);
+
+									svg.append("g")
+												.attr("class", "brush").call(brush)
+												.selectAll("rect")
+												.attr("height", height);
+
+									function brushed () {
+										if (brush.extent()[0] != brush.extent()[1]) {
+											selYrs = [Math.floor(brush.extent()[0]),Math.floor(brush.extent()[1])];
+										} else {
+											selYrs = allYrs;
+										};
+										docUpdate();
+										if (selDoc != "") {
+											tocUpdate();
+										};
+										ageUpdate();
+										d3.select("#brushInfo").text(selYrs[0] + " --> " + selYrs[1]);
+										//$(document).trigger("brushChange", [begDate,endDate]);
+									};
+		
 									d3.select(".clickableLegend").remove();
 									
 									svg.append("rect")
@@ -795,7 +832,7 @@
 																popVisible = "hidden";
 																return "hidden";
 															}});
-											
+
                   d3.select(".ay.axis").remove();
 									svg.append("g")
 											.attr("class", "ay axis")
@@ -803,7 +840,6 @@
 											.attr("transform", "translate(" + width + " ,0)")
 											.style("fill", "rgb(44, 160, 44)")
 											.call(ayAxis);											
-
 
 									d3.select(".clickableLegend").remove();
 									
@@ -925,6 +961,8 @@
 																	return d.values.total;} );
 										var cmax = d3.max(docData, function(d) { 
 																	return d.values.total;} );
+																	
+										d3.select("#docInfo").text("Bars show number of cases (0 - " + d3.format(",d")(cmax) + ")");
 
 										var x = d3.scale.linear()
 												.domain([0,cmax])
@@ -970,12 +1008,15 @@
                               .key(function (d) { return d.doc })
                               .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.dcount })}})
                               .entries(bothFilDis
-																			.filter(function(d) { 
+																			.filter(function(d) {
+																				if (d.year < selYrs[0] || d.year > selYrs[1]) {
+																					return false;
+																				};
 																				if (selGeo.length == numCounties) {
 																					return true;
 																				} else {
 																					return d3.set(selGeo).has(d.id); 
-																				}
+																				};
 																			})
 															);
 
@@ -983,7 +1024,9 @@
 																	return d.values.total;} );
 										var cmax = d3.max(docData, function(d) { 
 																	return d.values.total;} );
-																	
+
+										d3.select("#docInfo").text("Bars show number of cases (0 - " + d3.format(",d")(cmax) + ")");
+										
 										var x = d3.scale.linear()
 												.domain([0,cmax])
 												.range([0, cwidth-barWidthTrim]);
@@ -1040,6 +1083,9 @@
 																	return d.values.total;} );
 										var ctmax = d3.max(tocData, function(d) { 
 																	return d.values.total;} );
+																	
+										d3.select("#docInfo").text("Bars show number of cases (0 - " + d3.format(",d")(ctmax) + ")");
+										
 										var xt = d3.scale.linear()
 																	.domain([0,ctmax])
 																	.range([10, cwidth-barWidthTrim]);
@@ -1086,14 +1132,17 @@
 														.key(function (d) { return d.toc })
 														.rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.dcount })}})
 														.entries(bothFilDis
-																			.filter(function(d) { 
+																			.filter(function(d) {
+																				if (d.year < selYrs[0] || d.year > selYrs[1]) {
+																					return false;
+																				};
 																				if (d.doc == selDoc) {
 																					if (selGeo.length == numCounties) {
 																						return true;
 																					} else {
 																						return d3.set(selGeo).has(d.id); 
-																					}
-																				}
+																					};
+																				};
 																			})
 																		);
 																		
@@ -1101,7 +1150,9 @@
 																	return d.values.total;} );
 										var ctmax = d3.max(tocData, function(d) { 
 																	return d.values.total;} );
-																	
+
+										d3.select("#docInfo").text("Bars show number of cases (0 - " + d3.format(",d")(ctmax) + ")");
+										
 										var xt = d3.scale.linear()
 																	.domain([0,ctmax])
 																	.range([10, cwidth-barWidthTrim]);
@@ -1134,12 +1185,12 @@
                               .key(function (d) { return d.agrp })
                               .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
                               .entries(populations
-																			.filter(function(d) { 
+																			.filter(function(d) {
 																				if (selGeo.length == numCounties) {
 																					return true;
 																				} else {
 																					return d3.set(selGeo).has(d.id); 
-																				}
+																				};
 																			})
 															);
 
@@ -1147,7 +1198,9 @@
 																	return d.values.total;} );
 										var cmax = d3.max(ageData, function(d) { 
 																	return d.values.total;} );
-																	
+
+										d3.select("#ageInfo").text("Bars show population (0 - " + d3.format(",d")(cmax) + ")");
+										
 										var x = d3.scale.linear()
 												.domain([0,cmax])
 												.range([0, cwidth-barWidthTrim]);
@@ -1201,12 +1254,15 @@
                               .key(function (d) { return d.agrp })
                               .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
                               .entries(populations
-																			.filter(function(d) { 
+																			.filter(function(d) {
+																				if (d.year < selYrs[0] || d.year > selYrs[1]) {
+																					return false;
+																				};
 																				if (selGeo.length == numCounties) {
 																					return true;
 																				} else {
 																					return d3.set(selGeo).has(d.id); 
-																				}
+																				};
 																			})
 															);
 
@@ -1214,7 +1270,9 @@
 																	return d.values.total;} );
 										var cmax = d3.max(ageData, function(d) { 
 																	return d.values.total;} );
-																	
+
+										d3.select("#ageInfo").text("Bars show population (0 - " + d3.format(",d")(cmax) + ")");
+										
 										var x = d3.scale.linear()
 												.domain([0,cmax])
 												.range([0, cwidth-barWidthTrim]);

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Homework 3 - MyWorld Data</title>
+
+    <!-- ADD Libraries-->
+    <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+		<script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
+    <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+
+
+    <!--Stylesheets-->
+    <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+
+    <!-- Get some nice font-->
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+
+
+    <!--------------------------------->
+    <!-- FROM HERE ON IT IS HW3 stuff-->
+    <!--------------------------------->
+
+    <!-- add own vis classes-->
+    <script src = "js/priovis.js"></script>
+    <script src = "js/agevis.js"></script>
+    <script src = "js/countvis.js"></script>
+
+    <!-- add own stylesheet-->
+    <link rel="stylesheet" type="text/css" href="css/myStyle.css">
+
+</head>
+<body>
+    <div class="container">
+        <h1>Homework 3 - MyWorld 2015 Data Visualization</h1>
+
+        <div class="row">
+            <div class="col-md-8 col-sm-12">
+               <p> The following visualization shows you the votes for MyWorld 2015.<br>You can select a time range to see changes in the distribution of votes and distribution of age of the voters.</p>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">
+                <button class="btn btn-sm btn-primary" id="fitInBtn"> <span class="glyphicon glyphicon-resize-horizontal"></span> reset zoom </button>
+            </div>
+
+            <div class="col-md-8">
+                <b>current brush:</b> <span id="brushInfo"></span>
+            </div>
+
+			<br><br>
+
+        </div>
+
+
+
+        <div class="row">
+            <div class="col-md-9">
+							<span style="background-color: #d3d3d3">
+							<strong>number of votes - scroll to zoom, brush to select range: </strong>
+							</span>
+            </div>
+            <div class="col-md-3">
+							<center>
+							<span style="background-color: #d3d3d3">
+							<strong>age distribution</strong>
+							</span>
+							</center>
+						</div>
+            <div class="col-md-9" id="countVis">
+            </div>
+            <div class="col-md-3" id="ageVis">
+            </div>
+				</div>
+
+        <div class="row">
+            <div class="col-md-12">
+							<span style="background-color: #d3d3d3">
+							<strong>distribution of priorities: </strong>
+							</span>
+							<span style="padding-left:355px"> </span>
+							<button class="btn btn-sm btn-primary" id="myBtn"> <span id="snapInfo"></span></button>
+							<span style="padding-left:10px" id="snapRange"></span>
+            </div>
+            <div class="col-md-12" id="prioVis">
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+        $(function(){ // this function is called after the HTML document is fully loaded
+
+
+            //==========================================
+            //--- HERE IS WHERE ALL THE MAGIC STARTS --
+            //==========================================
+
+
+            // variables keeping global knowledge of the data
+            var allData = [];
+            var metaData = {};
+
+            // this function can convert Date objects to a string
+            // it can also convert strings to Date objects
+            // see: https://github.com/mbostock/d3/wiki/Time-Formatting
+            var dateFormatter = d3.time.format("%Y-%m-%d");
+
+
+            // call this function after Data is loaded, reformatted and bound to the variables
+            var initVis = function(){
+
+                //TODO: Create an eventHandler  --> DONE :)
+                var MyEventHandler = new Object();
+
+
+                //TODO: Instantiate all Vis Objects here
+								var cv_obj = new CountVis(d3.select("#countVis"), allData, metaData, MyEventHandler);
+								var av_obj = new AgeVis(d3.select("#ageVis"), allData, metaData);
+								var pv_obj = new PrioVis(d3.select("#prioVis"), allData, metaData);
+
+																
+                // TODO: bind the eventHandler to the Vis Objects
+                // events will be created from the CountVis object (nothing to do here)
+                // events will be consumed by the PrioVis and AgeVis object (binding should happen here)
+                $(document).on("brushChange",
+														function (MyEventHandler, arg1, arg2) { 
+															av_obj.onSelectionChange(arg1,arg2)
+															});
+
+								$(document).on("brushChange",
+														function (MyEventHandler, arg1, arg2) { 
+															pv_obj.onSelectionChange(arg1,arg2)
+															});
+
+								$(document).on("clickSnapshot",
+														function () { 
+															av_obj.clickSnapshot();
+															});
+															
+            }
+
+            // call this function after both files are loaded -- error should be "null" if no error
+            var dataLoaded = function (error, _allData, _metaData) {
+
+                if (!error) {
+
+                    // make our data look nicer and more useful:
+                    // per Day we want to have an object looking like this:
+                    /*
+                    * {
+                    *   time: .. (should be a Date object)
+                    *   count: .. (number of all votes)
+                    *   prios: [..,..,..,...] (array of number of votes per priority -> array length =16)
+                    *   ages: [..,..,..,..] (array counts of votes per age 0-99)
+                    *
+                    * */
+
+
+                    allData = _allData.map(function (d) {
+                                var res = {
+                                    time: dateFormatter.parse(d.day),
+                                    count: parseInt(d["count(*)"])
+                                };
+
+                                // TODO: implement that  !!
+                                res.prios = []
+                                // should be an array of 16 numbers with the total count MAPping the prio values,
+                                //  [d["sum(p0)"], d["sum(p1)"], d["sum(p2)"],...]
+                                // Example:
+                                // [10,200,500,... ]
+																res.prios = [d["sum(p0)"], d["sum(p1)"], d["sum(p2)"],
+																						 d["sum(p3)"], d["sum(p4)"], d["sum(p5)"],
+																						 d["sum(p6)"], d["sum(p7)"], d["sum(p8)"],
+																						 d["sum(p9)"], d["sum(p10)"], d["sum(p11)"],
+																						 d["sum(p12)"], d["sum(p13)"], d["sum(p14)"],
+																						 d["sum(p15)"]];
+
+
+                                // This is ONE way to create an array of length 100
+                                // and set every value to "0")
+                                res.ages = d3.range(0,100). map(function(){return 0;})
+
+                                // TODO: Assign the count for each age to the index position
+                                // eg: res.ages[22] should contain the count value for age 22
+                                // BE AWARE THAT THE DATA MIGHT CONTAIN ages >99 which you have to handle especially
+                                // final result:
+                                // [0,0,0,..,1034,23,...] -- array length is 100
+																d.age.forEach( function (e) {
+																	var useage = isNaN(e.age) ? 0 : e.age;
+																	useage = e.age>99 ? 99 : e.age;
+																	res.ages[e.age] += e["count(*)"];
+																});
+																
+
+                                return res;
+                            }
+                    )
+
+                    metaData = _metaData;
+                    initVis();
+                }
+            }
+
+            var startHere = function(){
+
+                //TODO: load data here and call "dataLoaded" afterwards
+                // Hint: http://giscollective.org/d3-queue-js/
+								queue()
+									.defer(d3.json, 'data/MYWorld_fields.json')
+									.defer(d3.json, 'data/perDayData.json')
+									.await(function(error, MYWorld_fields, perDayData) { 
+													dataLoaded(error, perDayData, MYWorld_fields)
+												});
+
+                // bind reset zoom button to a function (-- ONLY FOR BONUS --)
+                d3.select("#fitInBtn").on("click", function() {
+                    // TODO: -- ONLY FOR BONUS --
+                });
+
+
+            }
+
+            startHere();
+        })
+    </script>
+</body>
+</html>

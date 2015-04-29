@@ -74,6 +74,11 @@ svg {
   color:#000b95;
 }
 
+#docInfo,
+#ageInfo {
+  font-size: 10px;
+}
+
 .label {
   -webkit-transition: fill 125ms linear;
   color:#000b95;
@@ -169,7 +174,7 @@ div.tooltip {
 
 .brush{
     fill: darkgrey;
-    fill-opacity: .5;
+    fill-opacity: .3;
     pointer-events: none;
 }
 
