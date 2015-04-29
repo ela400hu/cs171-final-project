@@ -617,12 +617,31 @@ div.tooltip {
 														.domain(d3.extent(popData, function(d) { return d.total; }));
 									var ayAxis = d3.svg.axis().scale(ay).orient("right");
 
+                  var ctRange = d3.extent(fildisData, function(d) { return d.clearThis; });
+                  var ctDiff0 = Math.abs(ctRange[0]-1);
+                  var ctDiff1 = Math.abs(ctRange[1]-1);
+                  if (ctDiff0 > ctDiff1) {
+                    ctRange = [(1-ctDiff0),(1+ctDiff0)];
+                  } else {
+                    ctRange = [(1-ctDiff1),(1+ctDiff1)];
+                  };
+
                   var ayct = d3.scale.linear()
                             .range([height, 0])
-                            .domain(d3.extent(fildisData, function(d) { return d.clearThis; }));
+                            .domain(ctRange);
+                            
+                  var ccRange = d3.extent(fildisData, function(d) { return d.clearCum; });
+                  var ccDiff0 = Math.abs(ccRange[0]-1);
+                  var ccDiff1 = Math.abs(ccRange[1]-1);
+                  if (ccDiff0 > ccDiff1) {
+                    ccRange = [(1-ccDiff0),(1+ccDiff0)];
+                  } else {
+                    ccRange = [(1-ccDiff1),(1+ccDiff1)];
+                  };
+
                   var aycc = d3.scale.linear()
                             .range([height, 0])
-                            .domain(d3.extent(fildisData, function(d) { return d.clearCum; }));
+                            .domain(ccRange);
 
 									svg.append("path")
 											.datum(fildisData)
@@ -907,12 +926,31 @@ div.tooltip {
 														.domain(d3.extent(popData, function(d) { return d.total; }));
 									var ayAxis = d3.svg.axis().scale(ay).orient("right");
 
+                  var ctRange = d3.extent(fildisData, function(d) { return d.clearThis; });
+                  var ctDiff0 = Math.abs(ctRange[0]-1);
+                  var ctDiff1 = Math.abs(ctRange[1]-1);
+                  if (ctDiff0 > ctDiff1) {
+                    ctRange = [(1-ctDiff0),(1+ctDiff0)];
+                  } else {
+                    ctRange = [(1-ctDiff1),(1+ctDiff1)];
+                  };
+
                   var ayct = d3.scale.linear()
                             .range([height, 0])
-                            .domain(d3.extent(fildisData, function(d) { return d.clearThis; }));
+                            .domain(ctRange);
+                            
+                  var ccRange = d3.extent(fildisData, function(d) { return d.clearCum; });
+                  var ccDiff0 = Math.abs(ccRange[0]-1);
+                  var ccDiff1 = Math.abs(ccRange[1]-1);
+                  if (ccDiff0 > ccDiff1) {
+                    ccRange = [(1-ccDiff0),(1+ccDiff0)];
+                  } else {
+                    ccRange = [(1-ccDiff1),(1+ccDiff1)];
+                  };
+
                   var aycc = d3.scale.linear()
                             .range([height, 0])
-                            .domain(d3.extent(fildisData, function(d) { return d.clearCum; }));									
+                            .domain(ccRange);						
 
                   // svg.append("path")
                   //     .datum(filData)
