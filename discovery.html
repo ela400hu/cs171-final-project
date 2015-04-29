@@ -30,7 +30,9 @@ svg {
   stroke-width: 2px;
 }
 
-.aline {
+.aline,
+.alinect,
+.alinecc {
   fill: none;
   stroke-width: 2px;
 }
@@ -317,7 +319,7 @@ div.tooltip {
 
               //offsets for tooltips
               var offsetL = document.getElementById('divmap').offsetLeft+10;
-              var offsetT = document.getElementById('divmap').offsetTop+30;
+              var offsetT = document.getElementById('divmap').offsetTop+20;
 
               var fldata;
 
@@ -358,50 +360,53 @@ div.tooltip {
                 //
 
                 queue()
-                  .defer(d3.csv, 'Dispositions.csv')
-                  .defer(d3.csv, 'data/Filings.csv')
+                  //.defer(d3.csv, 'Dispositions.csv')
+                  //.defer(d3.csv, 'data/Filings.csv')
+                  .defer(d3.csv, 'data/FDCombined.csv')
                   .defer(d3.csv, 'data/Population.csv')
                   .await(allLoaded);
 
-                function allLoaded(error, dData, fData, pData) {
+                function allLoaded(error, fdData, pData) {
 
-									filings = fData.map(function (d) {
-                    var fid = +d.id;
+									bothFilDis = fdData.map(function (d) {
+                    var fid = +d.id
                     return {
                       id: fid,
                       circ: countyCircuit[fid],
                       dist: countyDistrict[fid],
                       doc: +d.doc,
                       toc: +d.toc,
-                      year: +d.variable,
-                      count: +d.value
+                      year: +d.year,
+                      fcount: +d.filcount,
+                      dcount: +d.discount
                     };
 
                   });
 
-                  filData = d3.nest()
+                  fildisData = d3.nest()
                               .key(function (d) { return d.year })
-                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
-                              .entries(filings);
+                              .rollup(function (leaves) { return {"totalf":d3.sum(leaves, function (d) { return d.fcount }),
+                                                                  "totald":d3.sum(leaves, function (d) { return d.dcount })}})
+                              .entries(bothFilDis);
 
-                  dispositions = dData.map(function (d) {
-                    var fid = +d.id;
-                    return {
-                      id: fid,
-                      circ: countyCircuit[fid],
-                      dist: countyDistrict[fid],
-                      doc: +d.doc,
-                      toc: +d.toc,
-                      year: +d.variable,
-                      count: +d.value
-                    };
+                  // dispositions = dData.map(function (d) {
+                  //   var fid = +d.id;
+                  //   return {
+                  //     id: fid,
+                  //     circ: countyCircuit[fid],
+                  //     dist: countyDistrict[fid],
+                  //     doc: +d.doc,
+                  //     toc: +d.toc,
+                  //     year: +d.variable,
+                  //     count: +d.value
+                  //   };
 
-                  });
+                  // });
 
-                  disData = d3.nest()
-                              .key(function (d) { return d.year })
-                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
-                              .entries(dispositions);
+                  // disData = d3.nest()
+                  //             .key(function (d) { return d.year })
+                  //             .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                  //             .entries(dispositions);
 															
                   populations = pData.map(function (d) {
                     var fid = +d.id;
@@ -431,10 +436,11 @@ div.tooltip {
 								
 								function mainGraph() {
 								
-								  filData = d3.nest()
+								  fildisData = d3.nest()
                               .key(function (d) { return d.year })
-                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
-                              .entries(filings
+                              .rollup(function (leaves) { return {"totalf":d3.sum(leaves, function (d) { return d.fcount }),
+                                                                  "totald":d3.sum(leaves, function (d) { return d.dcount })}})
+                              .entries(bothFilDis
 																			.filter(function(d) {
                                         if (selDoc != "" && selDoc != d.doc) { return false; }
                                         if (selToc != "" && selToc != d.toc) { return false; }
@@ -443,45 +449,71 @@ div.tooltip {
 																			})
 																		);
 																		
-									var firstOne = 0.0;
-									filData.forEach( function (d) {
-										if (vizSelected == 1) {
-											if (firstOne == 0) {
-												firstOne = d.values.total;
-												d.total = 100.0;
+                  var firstOnef = 0.0;
+                  var firstOned = 0.0;
+                  var cumF = 0;
+                  var cumD = 0;
+
+									fildisData.forEach( function (d) {
+
+                    if (vizSelected == 1) {
+											if (firstOnef == 0) {
+												firstOnef = d.values.totalf;
+												d.totalf = 100.0;
 											} else {
-												d.total = 100.0 * (d.values.total / firstOne);
+												d.totalf = 100.0 * (d.values.totalf / firstOnef);
 											};
+                      if (firstOned == 0) {
+                        firstOned = d.values.totald;
+                        d.totald = 100.0;
+                      } else {
+                        d.totald = 100.0 * (d.values.totald / firstOned);
+                      };
 										} else {
-											d.total = d.values.total;
+                      d.totalf = d.values.totalf;
+                      d.totald = d.values.totald;
 										};
+
+                    if (d.totalf != 0) {
+                      d.clearThis = d.totald/d.totalf;
+                    } else {
+                      d.clearThis = 1;
+                    };
+                    cumF += d.totalf;
+                    cumD += d.totald;
+                    if (cumF != 0) {
+                      d.clearCum = cumD/cumF;
+                    } else {
+                      d.clearCum = 1;
+                    };
+
 									});
 									
-                  disData = d3.nest()
-                              .key(function (d) { return d.year })
-                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
-                              .entries(dispositions
-																			.filter(function(d) { 
-                                        if (selDoc != "" && selDoc != d.doc) { return false; }
-                                        if (selToc != "" && selToc != d.toc) { return false; }
-                                        if (selGeo.length == 68) { return true; }
-                                        return d3.set(selGeo).has(d.id);
-																			})
-																		);
+         //          disData = d3.nest()
+         //                      .key(function (d) { return d.year })
+         //                      .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+         //                      .entries(dispositions
+									// 										.filter(function(d) { 
+         //                                if (selDoc != "" && selDoc != d.doc) { return false; }
+         //                                if (selToc != "" && selToc != d.toc) { return false; }
+         //                                if (selGeo.length == 68) { return true; }
+         //                                return d3.set(selGeo).has(d.id);
+									// 										})
+									// 									);
 																		
-									var firstOne = 0.0;
-									disData.forEach( function (d) {
-										if (vizSelected == 1) {
-											if (firstOne == 0) {
-												firstOne = d.values.total;
-												d.total = 100.0;
-											} else {
-												d.total = 100.0 * (d.values.total / firstOne);
-											};
-										} else {
-											d.total = d.values.total;
-										};
-									});						
+									// var firstOne = 0.0;
+									// disData.forEach( function (d) {
+									// 	if (vizSelected == 1) {
+									// 		if (firstOne == 0) {
+									// 			firstOne = d.values.total;
+									// 			d.total = 100.0;
+									// 		} else {
+									// 			d.total = 100.0 * (d.values.total / firstOne);
+									// 		};
+									// 	} else {
+									// 		d.total = d.values.total;
+									// 	};
+									// });						
 									
 
                   popData = d3.nest()
@@ -512,7 +544,7 @@ div.tooltip {
 									
 									var margin = {top: 10, right: 75, bottom: 40, left: 70},
 											width = document.getElementById("headline").offsetWidth - 300 - margin.left - margin.right,
-											height = window.innerHeight*0.4 - margin.top - margin.bottom;
+											height = window.innerHeight*0.6 - margin.top - margin.bottom;
 
 									var color = d3.scale.category10();
 									
@@ -534,20 +566,36 @@ div.tooltip {
 											.scale(y)
 											.orient("left");
 
-									var area = d3.svg.area()
+                  var areaf = d3.svg.area()
                       .interpolate("basis") 
-											.x(function(d) { return x(d.key); })
-											.y0(height)
-											.y1(function(d) { return y(d.total); });
+                      .x(function(d) { return x(d.key); })
+                      .y0(height)
+                      .y1(function(d) { return y(d.totalf); });
+
+                  var aread = d3.svg.area()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y0(height)
+                      .y1(function(d) { return y(d.totald); });                      
 
 									var line = d3.svg.line()
                       .interpolate("basis") 
 											.x(function(d) { return x(d.key); })
 											.y(function(d) { return ay(d.total); });
-											
-                  var xRange = d3.extent(filData, function(d) { return d.key; });
-                  var fRange = d3.extent(filData, function(d) { return d.total; });
-                  var dRange = d3.extent(disData, function(d) { return d.total; });
+                  
+                  var linect = d3.svg.line()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y(function(d) { return ayct(d.clearThis); });
+                  
+                  var linecc = d3.svg.line()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y(function(d) { return aycc(d.clearCum); });
+
+                  var xRange = d3.extent(fildisData, function(d) { return d.key; });
+                  var fRange = d3.extent(fildisData, function(d) { return d.totalf; });
+                  var dRange = d3.extent(fildisData, function(d) { return d.totald; });
                   var yRange = [d3.min([fRange[0],dRange[0]]),d3.max([fRange[1],dRange[1]])];                      
 
 									var svg = d3.select("#divmainbody").append("svg")
@@ -555,6 +603,11 @@ div.tooltip {
 											.attr("height", height + margin.top + margin.bottom)
 										.append("g")
 											.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                  d3.select("#divmainbody svg").append("text")
+                    .attr("x",15)
+                    .attr("y",height + margin.top + margin.bottom - 15)
+                    .text("Year:");                      
 
 									x.domain(xRange);
                   y.domain(yRange);
@@ -564,10 +617,17 @@ div.tooltip {
 														.domain(d3.extent(popData, function(d) { return d.total; }));
 									var ayAxis = d3.svg.axis().scale(ay).orient("right");
 
+                  var ayct = d3.scale.linear()
+                            .range([height, 0])
+                            .domain(d3.extent(fildisData, function(d) { return d.clearThis; }));
+                  var aycc = d3.scale.linear()
+                            .range([height, 0])
+                            .domain(d3.extent(fildisData, function(d) { return d.clearCum; }));
+
 									svg.append("path")
-											.datum(filData)
+											.datum(fildisData)
 											.attr("class", "farea")
-											.attr("d", area)
+											.attr("d", areaf)
 											.attr("data-legend","Filings")
 											.style("fill", function(d) { return color(1) } )
 											.style("fill-opacity", .5);			
@@ -576,19 +636,33 @@ div.tooltip {
 									// y.domain(d3.extent(disData, function(d) { return d.total; }));
 
 									svg.append("path")
-											.datum(disData)
+											.datum(fildisData)
 											.attr("class", "darea")
-											.attr("d", area)
+											.attr("d", aread)
 											.attr("data-legend","Dispositions")
 											.style("fill", function(d) { return color(2) } )
 											.style("fill-opacity", .5);											
 									
-									svg.append("path")
-											.datum(popData)
-											.attr("class", "aline")
-											.attr("d", line)
-											.attr("data-legend","Population")
-											.style("stroke", function(d) { return color(3) } );
+                  svg.append("path")
+                      .datum(popData)
+                      .attr("class", "aline")
+                      .attr("d", line)
+                      .attr("data-legend","Population")
+                      .style("stroke", function(d) { return color(3) } );
+
+                  svg.append("path")
+                      .datum(fildisData)
+                      .attr("class", "alinect")
+                      .attr("d", linect)
+                      .attr("data-legend","Clearance Rate")
+                      .style("stroke", function(d) { return color(4) } );
+
+                  svg.append("path")
+                      .datum(fildisData)
+                      .attr("class", "alinecc")
+                      .attr("d", linecc)
+                      .attr("data-legend","Cumulative Clearance Rate")
+                      .style("stroke", function(d) { return color(5) } );
 									
 									svg.append("g")
 											.attr("class", "x axis")
@@ -642,9 +716,13 @@ div.tooltip {
 																return "Filings"
 															} else if (i == 1) {
 																return "Dispositions"
-															} else {
+															} else if (i == 2) {
 																return "Population"
-															};
+															} else if (i == 3) {
+                                return "Clearance Rate"
+                              } else if (i == 4) {
+                                return "Cumulative Clearance Rate"
+                              };
 														});
 
                 };
@@ -653,10 +731,11 @@ div.tooltip {
 
                 function updateMain() {
                 
-                  filData = d3.nest()
+                  fildisData = d3.nest()
                               .key(function (d) { return d.year })
-                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
-                              .entries(filings
+                              .rollup(function (leaves) { return {"totalf":d3.sum(leaves, function (d) { return d.fcount }),
+                                                                  "totald":d3.sum(leaves, function (d) { return d.dcount })}})
+                              .entries(bothFilDis
                                       .filter(function(d) {
                                         if (selDoc != "" && selDoc != d.doc) { return false; }
                                         if (selToc != "" && selToc != d.toc) { return false; }
@@ -665,45 +744,71 @@ div.tooltip {
                                       })
                                     );
                                     
-                  var firstOne = 0.0;
-                  filData.forEach( function (d) {
+                  var firstOnef = 0.0;
+                  var firstOned = 0.0;
+                  var cumF = 0;
+                  var cumD = 0;
+
+                  fildisData.forEach( function (d) {
+                    
                     if (vizSelected == 1) {
-                      if (firstOne == 0) {
-                        firstOne = d.values.total;
-                        d.total = 100.0;
+                      if (firstOnef == 0) {
+                        firstOnef = d.values.totalf;
+                        d.totalf = 100.0;
                       } else {
-                        d.total = 100.0 * (d.values.total / firstOne);
+                        d.totalf = 100.0 * (d.values.totalf / firstOnef);
+                      };
+                      if (firstOned == 0) {
+                        firstOned = d.values.totald;
+                        d.totald = 100.0;
+                      } else {
+                        d.totald = 100.0 * (d.values.totald / firstOned);
                       };
                     } else {
-                      d.total = d.values.total;
+                      d.totalf = d.values.totalf;
+                      d.totald = d.values.totald;
                     };
+
+                    if (d.totalf != 0) {
+                      d.clearThis = d.totald/d.totalf;
+                    } else {
+                      d.clearThis = 1;
+                    };
+                    cumF += d.totalf;
+                    cumD += d.totald;
+                    if (cumF != 0) {
+                      d.clearCum = cumD/cumF;
+                    } else {
+                      d.clearCum = 1;
+                    };
+
                   });
                   
-                  disData = d3.nest()
-                              .key(function (d) { return d.year })
-                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
-                              .entries(dispositions
-                                      .filter(function(d) { 
-                                        if (selDoc != "" && selDoc != d.doc) { return false; }
-                                        if (selToc != "" && selToc != d.toc) { return false; }
-                                        if (selGeo.length == 68) { return true; }
-                                        return d3.set(selGeo).has(d.id);
-                                      })
-                                    );
+                  // disData = d3.nest()
+                  //             .key(function (d) { return d.year })
+                  //             .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                  //             .entries(dispositions
+                  //                     .filter(function(d) { 
+                  //                       if (selDoc != "" && selDoc != d.doc) { return false; }
+                  //                       if (selToc != "" && selToc != d.toc) { return false; }
+                  //                       if (selGeo.length == 68) { return true; }
+                  //                       return d3.set(selGeo).has(d.id);
+                  //                     })
+                  //                   );
                                     
-                  var firstOne = 0.0;
-                  disData.forEach( function (d) {
-                    if (vizSelected == 1) {
-                      if (firstOne == 0) {
-                        firstOne = d.values.total;
-                        d.total = 100.0;
-                      } else {
-                        d.total = 100.0 * (d.values.total / firstOne);
-                      };
-                    } else {
-                      d.total = d.values.total;
-                    };
-                  });                                   
+                  // var firstOne = 0.0;
+                  // disData.forEach( function (d) {
+                  //   if (vizSelected == 1) {
+                  //     if (firstOne == 0) {
+                  //       firstOne = d.values.total;
+                  //       d.total = 100.0;
+                  //     } else {
+                  //       d.total = 100.0 * (d.values.total / firstOne);
+                  //     };
+                  //   } else {
+                  //     d.total = d.values.total;
+                  //   };
+                  // });                                   
                   
 
                   popData = d3.nest()
@@ -735,7 +840,7 @@ div.tooltip {
 									
                   var margin = {top: 10, right: 75, bottom: 40, left: 70},
                       width = document.getElementById("headline").offsetWidth - 300 - margin.left - margin.right,
-                      height = window.innerHeight*0.4 - margin.top - margin.bottom;
+                      height = window.innerHeight*0.6 - margin.top - margin.bottom;
 
                   var color = d3.scale.category10();
                                     
@@ -755,20 +860,36 @@ div.tooltip {
                       .scale(y)
                       .orient("left");
 
-                  var area = d3.svg.area()
+                  var areaf = d3.svg.area()
                       .interpolate("basis") 
                       .x(function(d) { return x(d.key); })
                       .y0(height)
-                      .y1(function(d) { return y(d.total); });
+                      .y1(function(d) { return y(d.totalf); });
+
+                  var aread = d3.svg.area()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y0(height)
+                      .y1(function(d) { return y(d.totald); });                      
 											
 									var line = d3.svg.line()
                       .interpolate("basis") 
 											.x(function(d) { return x(d.key); })
 											.y(function(d) { return ay(d.total); });
+
+                  var linect = d3.svg.line()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y(function(d) { return ayct(d.clearThis); });
+                  
+                  var linecc = d3.svg.line()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y(function(d) { return aycc(d.clearCum); });                      
 											
-                  var xRange = d3.extent(filData, function(d) { return d.key; });
-                  var fRange = d3.extent(filData, function(d) { return d.total; });
-                  var dRange = d3.extent(disData, function(d) { return d.total; });
+                  var xRange = d3.extent(fildisData, function(d) { return d.key; });
+                  var fRange = d3.extent(fildisData, function(d) { return d.totalf; });
+                  var dRange = d3.extent(fildisData, function(d) { return d.totald; });
                   var yRange = [d3.min([fRange[0],dRange[0]]),d3.max([fRange[1],dRange[1]])];
 
 
@@ -785,7 +906,13 @@ div.tooltip {
 														.range([height, 0])
 														.domain(d3.extent(popData, function(d) { return d.total; }));
 									var ayAxis = d3.svg.axis().scale(ay).orient("right");
-									
+
+                  var ayct = d3.scale.linear()
+                            .range([height, 0])
+                            .domain(d3.extent(fildisData, function(d) { return d.clearThis; }));
+                  var aycc = d3.scale.linear()
+                            .range([height, 0])
+                            .domain(d3.extent(fildisData, function(d) { return d.clearCum; }));									
 
                   // svg.append("path")
                   //     .datum(filData)
@@ -795,10 +922,10 @@ div.tooltip {
                   //     .style("fill", function(d) { return color(1) } )
                   //     .style("fill-opacity", .5);
 
-                  path = svg.selectAll('.farea').datum(filData)
+                  path = svg.selectAll('.farea').datum(fildisData)
                             .transition()
                             .duration(1000)
-                            .attr("d", area);
+                            .attr("d", areaf);
                   // path.attr('d', function(d) {return line(d) + 'Z'})
                   //     .style('stroke-width', 1)
                   //     .style('stroke', 'steelblue');
@@ -825,10 +952,10 @@ div.tooltip {
                   //     .style("fill", function(d) { return color(2) } )
                   //     .style("fill-opacity", .5);
 
-                  path = svg.selectAll('.darea').datum(disData)
+                  path = svg.selectAll('.darea').datum(fildisData)
                             .transition()
                             .duration(1000)
-                            .attr("d", area);
+                            .attr("d", aread);
                   // path.attr('d', function(d) {return line(d) + 'Z'})
                   //     .style('stroke-width', 1)
                   //     .style('stroke', 'steelblue');
@@ -848,7 +975,16 @@ div.tooltip {
                             .transition()
                             .duration(1000)
                             .attr("d", line);
-														
+
+                  path = svg.selectAll('.alinect').datum(fildisData)
+                            .transition()
+                            .duration(1000)
+                            .attr("d", linect);
+
+                  path = svg.selectAll('.alinecc').datum(fildisData)
+                            .transition()
+                            .duration(1000)
+                            .attr("d", linecc);
                   
                   d3.select(".x.axis").remove();
                   svg.append("g")
@@ -926,8 +1062,8 @@ div.tooltip {
 										
 										docData = d3.nest()
                               .key(function (d) { return d.doc })
-                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
-                              .entries(dispositions
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.dcount })}})
+                              .entries(bothFilDis
 																			.filter(function(d) { 
 																				if (selGeo.length == 68) {
 																					return true;
@@ -941,6 +1077,7 @@ div.tooltip {
 																	return d.values.total;} );
 										var cmax = d3.max(docData, function(d) { 
 																	return d.values.total;} );
+
 										var x = d3.scale.linear()
 												.domain([0,cmax])
 												.range([0, cwidth-20]);
@@ -987,8 +1124,8 @@ div.tooltip {
 										
 										docData = d3.nest()
                               .key(function (d) { return d.doc })
-                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
-                              .entries(dispositions
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.dcount })}})
+                              .entries(bothFilDis
 																			.filter(function(d) { 
 																				if (selGeo.length == 68) {
 																					return true;
@@ -1046,8 +1183,8 @@ div.tooltip {
 															
 										var tocData = d3.nest()
 														.key(function (d) { return d.toc })
-														.rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
-														.entries(dispositions
+														.rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.dcount })}})
+														.entries(bothFilDis
 																			.filter(function(d) { 
 																				if (d.doc == selDoc) {
 																					if (selGeo.length == 68) {
@@ -1111,8 +1248,8 @@ div.tooltip {
 												
 										var tocData = d3.nest()
 														.key(function (d) { return d.toc })
-														.rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
-														.entries(dispositions
+														.rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.dcount })}})
+														.entries(bothFilDis
 																			.filter(function(d) { 
 																				if (d.doc == selDoc) {
 																					if (selGeo.length == 68) {
