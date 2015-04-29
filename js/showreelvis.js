@@ -52,10 +52,9 @@ ShowreelVis.prototype.srVis = function () {
 	var growthFlag = this.growthFlag;
 
 	var m = [20, 20, 30, 20];
-	var txtm = 240;
-	var menm = 120;
-	var w = window.innerWidth - m[1] - m[3];
-	var h = window.innerHeight - m[0] - m[2] - menm;
+	var txtm = 140;
+	var w = document.getElementById("headline").offsetWidth - m[1] - m[3];
+	var h = window.innerHeight*0.8 - m[0] - m[2];
 
 	var x = 0;
 	var y = 0;
@@ -263,7 +262,7 @@ ShowreelVis.prototype.srVis = function () {
 			.append("clipPath")
 				.attr("id", "clip")
 			.append("rect")
-				.attr("width", w)
+				.attr("width", w + txtm)
 				.attr("height", h / symbols.length - 10);
 
 		var color2 = d3.scale.ordinal()
