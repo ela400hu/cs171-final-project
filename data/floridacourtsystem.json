@@ -2,7 +2,7 @@
 {"id": 12003, "name": "Baker", "circuit": 8, "district": 1},
 {"id": 12005, "name": "Bay", "circuit": 14, "district": 1},
 {"id": 12007, "name": "Bradford", "circuit": 8, "district": 1},
-{"id": 12009, "name": "Brevard", "circuit": 18, "district": 6},
+{"id": 12009, "name": "Brevard", "circuit": 18, "district": 5},
 {"id": 12011, "name": "Broward", "circuit": 17, "district": 4},
 {"id": 12013, "name": "Calhoun", "circuit": 14, "district": 1},
 {"id": 12015, "name": "Charlotte", "circuit": 20, "district": 2},
