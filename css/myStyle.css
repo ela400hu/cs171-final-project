@@ -1,6 +1,7 @@
 body {
   font-family: 'PT Sans', sans-serif;
 	font-color:#000b95;
+	cursor: default;
 }
 
 svg {
@@ -112,6 +113,10 @@ path.cpath:hover {
 /* 	fill: #e81d5e; pink */
 }
 
+path.cpath.cselected {
+	fill: steelblue;
+}
+
 div.tooltip {
   color: #222; 
   background: #fff; 
@@ -163,6 +168,7 @@ span.tooltip:hover:before{
 	fill:#fff;
 	fill-opacity:0;
 	stroke-opacity:0;
+	cursor: pointer;
 }
 
 .legend {

@@ -58,9 +58,10 @@
 										<input type="radio" class="cd" name="display" value="0" checked></input> Raw 
 										<span title="Indexed data is expressed as a percentage of the 1986 value."><input type="radio" class="cd" name="display" value="1"></input> Indexed</span> 
 										<span style="padding-left:50px"> </span>
-										<label>Selected Dates: </label><span style="padding-left:10px" id="brushInfo"></span>
+										<label>Selected Years: </label><span style="padding-left:10px" id="brushInfo"></span>
 									</form>
 								<div id="divmainbody"></div>
+								<div id="divmainfoot"></div>
             </div>
 				</div>
 
@@ -120,6 +121,7 @@
 							var margin = {top: 10, right: 90, bottom: 60, left: 85};
 							var width = document.getElementById("headline").offsetWidth - mainWidthAdjust - margin.left - margin.right;
 							var height = window.innerHeight*mainHeightPct - margin.top - margin.bottom;
+							var footHeight = 60;
 							var color = d3.scale.category10();
 							var numYears = 28;
 							var yearAxisLabelX = 15;
@@ -131,6 +133,9 @@
 							var barTransitionDur = 500;
 							var cwidth = 250;
 							var cheight = 180;
+							var barStartd = 90;
+							var barStartt = 120;
+							var barStarta = 60;
 							var barHeight = 15;
 							var barWidthTrim = 20;
 							var barHeightTrim = 2;
@@ -142,6 +147,9 @@
 							var numDistricts = 5;
 							var loDate = selYrs[0];
 							var hiDate = selYrs[1];
+							var showStart = 370;
+							var showtextHeight = 15;
+							var expandSymbol = "▹";
 							
               //
               // Division of Court / Type of Case
@@ -154,27 +162,54 @@
 															"Traffic"];
 															
               var doctoc = {
-										"1":["Auto Negligence","Condominium","Contract & Indebtedness",
-												 "Eminent Domain","Other Circuit Civil","Other Negligence",
-												 "Products Liability","Professional Malpractice",
-												 "Real Property/Mortgage Foreclosure"],
-										"2":["Burglary","Capital Murder","Drugs","Non Capital Murder",
-												 "Other Crimes Against Person","Other Crimes Against Property",
-												 "Other Felonies","Robbery","Sexual Offenses",
-												 "Theft, Forgery, Fraud","Worthless Checks (Felony)"],
-										"3":["Civil ($5,001 to $15,000)","Evictions",
-												 "Other Civil (non-monetary)","Replevins",
-												 "Small Claims (up to $5,000)"],
-										"4":["County Ordinances","Misdemeanors","Municipal Ordinances",
-												 "Worthless Checks (Misdemeanors)"],
-										"5":["Child Support","Dissolution","Domestic Violence",
-												 "Juvenile Delinquency","Juvenile Dependency",
-												 "Other Domestic Relations","Repeat Violence",
-												 "Simplified Dissolution","Termination of Parental Rights",
+										"1":["Auto Negligence",
+												 "Condominium",
+												 "Contract & Indebt.",
+												 "Eminent Domain",
+												 "Other Circuit Civil",
+												 "Other Negligence",
+												 "Products Liability",
+												 "Prof. Malpractice",
+												 "Real Prop/Foreclosure"],
+										"2":["Burglary",
+											   "Capital Murder",
+												 "Drugs",
+												 "Non Capital Murder",
+												 "Oth Crimes v Person",
+												 "Oth Crimes v Property",
+												 "Oth Felonies",
+												 "Robbery",
+												 "Sexual Offenses",
+												 "Theft/Forgery/Fraud",
+												 "Worthless Checks Fel."],
+										"3":["Civil ($5K to $15K)",
+												 "Evictions",
+												 "Oth Civil (non-$)",
+												 "Replevins",
+												 "Small Claims (< $5K)"],
+										"4":["County Ordinances",
+												 "Misdemeanors",
+												 "Municipal Ordinances",
+												 "Worthless Checks Mis."],
+										"5":["Child Support",
+												 "Dissolution",
+												 "Domestic Violence",
+												 "Juvenile Delinquency",
+												 "Juvenile Dependency",
+												 "Other Domestic Reln.",
+												 "Repeat Violence",
+												 "Simpl. Dissolution",
+												 "Term of Parental Rts",
 												 "UIFSA"],
-										"6":["Baker Act","Guardianship","Other Social","Probate",
-												 "Substance Abuse Act","Trusts"],
-										"7":["Civil Traffic Infractions","DUI","Non DUI Criminal Traffic"]
+										"6":["Baker Act",
+												 "Guardianship",
+												 "Other Social",
+												 "Probate",
+												 "Substance Abuse Act",
+												 "Trusts"],
+										"7":["Civil Traffic Infr.",
+												 "DUI",
+												 "Non-DUI Crim. Traffic"]
 									};
 							
 							var agegrp = ["Age < 1","Age 1-4","Age 5-9","Age 10-14","Age 15-19","Age 20-24","Age 25-34","Age 35-44","Age 45-54","Age 55-64","Age 65-74","Age 75-84","Age 85+"];
@@ -314,9 +349,10 @@
 
                 };
 								
-								function mainGraph() {
 								
-								  fildisData = d3.nest()
+								function mainGraph() {
+
+									fildisData = d3.nest()
                               .key(function (d) { return d.year })
                               .rollup(function (leaves) { return {"totalf":d3.sum(leaves, function (d) { return d.fcount }),
                                                                   "totald":d3.sum(leaves, function (d) { return d.dcount })}})
@@ -511,7 +547,7 @@
 											
 									d3.select("#divmainbody svg").append("text")
 											.attr("class", "ay label")
-											.attr("visibility","visible")
+											.attr("visibility","hidden")
 											.attr("text-anchor", "end")
 											.attr("x", height/2 + margin.bottom/2)
 											.attr("y", -width - margin.left - margin.right + 7)
@@ -533,10 +569,10 @@
                   svg.append("line")
                     .attr("class", "alineaxc")
 										.attr("visibility","hidden")
-                    .attr("x1",10)
-                    .attr("y1",height/2+1)
-                    .attr("x2",width-10)
-                    .attr("y2",height/2+1)
+                    .attr("x1",0)
+                    .attr("y1",height/2)
+                    .attr("x2",width)
+                    .attr("y2",height/2)
 										.style("stroke","rgb(148,103,189)")
 										.style("stroke-dasharray","10,10");
 									
@@ -593,7 +629,7 @@
                       .attr("class", "aline")
                       .attr("d", line)
                       .attr("data-legend","Population")
-											.attr("visibility","visible")
+											.attr("visibility","hidden")
                       .style("stroke", function(d) { return color(3) } );
 
                   svg.append("path")
@@ -643,7 +679,7 @@
 											
 									svg.append("g")
 											.attr("class", "ay axis")
-											.attr("visibility","visible")
+											.attr("visibility","hidden")
 											.attr("transform", "translate(" + width + " ,0)")
 											.style("fill", "rgb(44, 160, 44)")
 											.call(ayAxis);
@@ -665,27 +701,42 @@
 															.tickSize(-width, 0, 0)
 															.tickFormat("")
 											);
+
+									// Footer
+									var svgfoot = d3.select("#divmainfoot").append("svg")
+											.attr("width", width + margin.left + margin.right)
+											.attr("height", footHeight)
+										.append("g")
+											.attr("transform", "translate(" + margin.left + ",0)");
 											
 									// Legend code borrowed from
 									// http://zeroviscosity.com/d3-js-step-by-step/step-3-adding-a-legend
-									var legend = svg.selectAll('.legend')
+									var legend = svgfoot.selectAll('.legend')
 											.data(color.domain())
 											.enter()
 											.append('g')
 											.attr('class', 'legend')
 											.attr('transform', function(d, i) {
+												var column = Math.floor(i/3);
 												var height = legendRectSize + legendSpacing;
-												var offset =  height * 2 / 2;
-												var horz = 2 * legendRectSize;
-												var vert = i * height + offset;
+												var offset =  legendSpacing;//height * 2 / 2;
+												var horz = column*100; //2 * legendRectSize +
+												var vert = i * height - (column * 3 * height) + offset;
 												return 'translate(' + horz + ',' + vert + ')';
 											});
+											
 									legend.append('rect')
 										.attr('width', legendRectSize)
 										.attr('height', legendRectSize)
 										.style('fill', color)
-										.style("fill-opacity", overlappingPathOpacity)
+										.style("fill-opacity", function(d, i) {
+																	if (i < 2) {
+																		return overlappingPathOpacity;
+																	} else {
+																		return 0;
+																	}})
 										.style('stroke', color);
+										
 									legend.append('text')
 										.attr('x', legendRectSize + legendSpacing)
 										.attr('y', legendRectSize - legendSpacing)
@@ -704,6 +755,27 @@
                                 return "Personal Income"
                               };
 														});
+														
+									svgfoot.selectAll(".showingtext").remove();
+								
+									svgfoot.append("text")
+										.attr("class", "showingtext")
+										.attr("x",showStart)
+										.attr("y",showtextHeight)
+										.text("Selected:")
+										.style("font-weight","bold");
+			
+									svgfoot.append("text")
+										.attr("class", "showingtext")
+										.attr("x",showStart+10)
+										.attr("y",showtextHeight*2)
+										.text("All Divisions of Court");
+										
+									svgfoot.append("text")
+										.attr("class", "showingtext")
+										.attr("x",showStart+10)
+										.attr("y",showtextHeight*3)
+										.text("All Types of Cases");											
 														
 									// Brushing
 									//
@@ -732,22 +804,20 @@
 										d3.select("#brushInfo").text(selYrs[0] + " --> " + selYrs[1]);
 										//$(document).trigger("brushChange", [begDate,endDate]);
 									};
-		
+
 									d3.select(".clickableLegend").remove();
 									
-									svg.append("rect")
+									svgfoot.append("rect")
 											.attr("class","clickableLegend")
-											.attr("width", legendRectSize)
-											.attr("height", (legendRectSize + legendSpacing) * 6)
-											.attr('transform','translate(30,19)')
+											.attr("width", 275)
+											.attr("height", (legendRectSize + legendSpacing) * 3)
 											.on('click', function(d) { legClicked(d3.mouse(this)) });
 
                 };
 
 
-
                 function updateMain() {
-                
+
                   fildisData = d3.nest()
                               .key(function (d) { return d.year })
                               .rollup(function (leaves) { return {"totalf":d3.sum(leaves, function (d) { return d.fcount }),
@@ -1022,15 +1092,60 @@
 											.attr("visibility", popVisible)
 											.attr("transform", "translate(" + width + " ,0)")
 											.style("fill", "rgb(44, 160, 44)")
-											.call(ayAxis);											
+											.call(ayAxis);
+
+									var svgfoot = d3.select("#divmainfoot svg g");
+									
+									svgfoot.selectAll(".showingtext").remove();
+			
+									svgfoot.append("text")
+										.attr("class", "showingtext")
+										.attr("x",showStart)
+										.attr("y",showtextHeight)
+										.text("Selected:")
+										.style("font-weight","bold");
+			
+									if (selDoc == "") {
+										svgfoot.append("text")
+											.attr("class", "showingtext")
+											.attr("x",showStart+10)
+											.attr("y",showtextHeight*2)
+											.text("All Divisions of Court");
+										svgfoot.append("text")
+											.attr("class", "showingtext")
+											.attr("x",showStart+10)
+											.attr("y",showtextHeight*3)
+											.text("All Types of Cases");											
+									} else if (selToc == "") {
+										svgfoot.append("text")
+											.attr("class", "showingtext")
+											.attr("x",showStart+10)
+											.attr("y",showtextHeight*2)
+											.text(doclist[selDoc-1]);
+										svgfoot.append("text")
+											.attr("class", "showingtext")
+											.attr("x",showStart+10)
+											.attr("y",showtextHeight*3)
+											.text("All Types of Cases");											
+									} else {
+										svgfoot.append("text")
+											.attr("class", "showingtext")
+											.attr("x",showStart+10)
+											.attr("y",showtextHeight*2)
+											.text(doclist[selDoc-1]);
+										svgfoot.append("text")
+											.attr("class", "showingtext")
+											.attr("x",showStart+10)
+											.attr("y",showtextHeight*3)
+											.text(doctoc[selDoc][selToc-1]);
+									};											
 
 									d3.select(".clickableLegend").remove();
 									
-									svg.append("rect")
+									d3.select("#divmainfoot svg g").append("rect")
 											.attr("class","clickableLegend")
-											.attr("width", legendRectSize)
-											.attr("height", (legendRectSize + legendSpacing) * 5)
-											.attr('transform','translate(30,19)')
+											.attr("width", 275)
+											.attr("height", (legendRectSize + legendSpacing) * 3)
 											.on('click', function(d) { legClicked(d3.mouse(this)) });
 											
                 };
@@ -1038,9 +1153,12 @@
 									
 								function legClicked(mouse) {
 								
-
-									var whichLeg = Math.floor(mouse[1]/(legendRectSize + legendSpacing));
-
+									var whichColumn = Math.floor(mouse[0]/100);
+									if (whichColumn == 2) {
+										whichColumn = 1;
+									};
+									var whichLeg = Math.floor(mouse[1]/(legendRectSize + legendSpacing)) + 3*whichColumn;
+									
 									if (whichLeg == 0) {
 										d3.select(".farea")
 											.attr("visibility", function() {
@@ -1115,7 +1233,7 @@
 															} else {
 																return "visible";
 															}});
-															
+
 										d3.selectAll(".alineaxc")
 											.attr("visibility", function() {
 															if (d3.select(this).attr("visibility") == "visible") {
@@ -1135,8 +1253,22 @@
 																return "visible";
 															}});
 																											
-									};									
+									};
 									
+									d3.selectAll(".legend rect")
+										.style("fill-opacity", function(d, i) {
+														var existOpacity = d3.select(this).style("fill-opacity");
+														if ((d-1) == whichLeg) {
+															if (existOpacity == 0) {
+																return overlappingPathOpacity;
+															} else {
+																return 0;
+															};
+														} else {
+															return existOpacity;
+														};
+													});
+													
 								};
 
 								
@@ -1168,19 +1300,25 @@
 
 										var x = d3.scale.linear()
 												.domain([0,cmax])
-												.range([0, cwidth-barWidthTrim]);
+												.range([0, cwidth - barStartd - barWidthTrim]);
 
 										var chart = d3.select(".chart")
 												.attr("width", cwidth)
 												.attr("height", cheight);
 
+										var clickHeight = 0;
+										
 										var bar = chart.selectAll("g")
 												.data(docData)
 											.enter().append("g")
 												.attr("class","docbars")
-												.attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
+												.attr("transform", function(d, i) { 
+																		clickHeight += barHeight;
+																		return "translate(0," + i * barHeight + ")"; 
+																	});
 
 										bar.append("rect")
+												.attr("x", barStartd)
 												.attr("class","docrect")
 												.attr("width", function (d) { return x(d.values.total); })
 												.attr("height", barHeight - barHeightTrim);
@@ -1189,7 +1327,7 @@
 												.attr("x", barTextX)
 												.attr("y", barHeight / 2 - 1)
 												.attr("dy", ".35em")
-												.text(function(d) { return doclist[+d.key-1]; })
+												.text(function(d) { return (expandSymbol + doclist[+d.key-1]); })
 													.style("font-weight","normal");		
 
 										d3.select(".clickable").remove();
@@ -1197,7 +1335,7 @@
 										chart.append("rect")
 												.attr("class","clickable")
 												.attr("width", cwidth)
-												.attr("height", cheight)
+												.attr("height", clickHeight)
 												.on('click', function(d) { docClicked(d3.mouse(this)) });
 									};
 									
@@ -1231,20 +1369,25 @@
 										
 										var x = d3.scale.linear()
 												.domain([0,cmax])
-												.range([0, cwidth-barWidthTrim]);
+												.range([0, cwidth - barStartd - barWidthTrim]);
+
+										var clickHeight = 0;
 
 										d3.selectAll(".docrect")
 											.data(docData)
 												.transition()
 												.duration(barTransitionDur)
-												.attr("width", function (d) { return x(d.values.total); });
+												.attr("width", function (d,i) { 
+																					clickHeight += barHeight;
+																					return x(d.values.total);
+																				});
 
 										d3.select(".clickable").remove();
 										
 										d3.select(".chart").append("rect")
 												.attr("class","clickable")
 												.attr("width", cwidth)
-												.attr("height", cheight)
+												.attr("height", clickHeight)
 												.on('click', function(d) { docClicked(d3.mouse(this)) });
 									};
 								
@@ -1259,11 +1402,11 @@
 												.transition()
 												.duration(barTransitionDur)
 												.attr("transform", function(d, i) { 
-																if (i != +whichDoc ) {
+																//if (i != +whichDoc ) {
 																	return "translate(0,-20)";
-																} else {
-																	return "translate(0,0)";
-																}
+																//} else {
+																//	return "translate(0,0)";
+																//}
 															});
 															
 										var tocData = d3.nest()
@@ -1288,17 +1431,31 @@
 																	
 										d3.select("#docInfo").text("Bars show number of cases (0 - " + d3.format(",d")(ctmax) + ")");
 										
+										d3.select(".chart").append("text")
+															.attr("class","sadtext")
+															.attr("x", 2)
+															.attr("y", 6)
+															.attr("dy", ".35em")
+															.text("Select All Divisions")
+																.style("font-weight","normal");
+													
 										var xt = d3.scale.linear()
 																	.domain([0,ctmax])
-																	.range([10, cwidth-barWidthTrim]);
+																	.range([0, cwidth - barStartt - barWidthTrim]);
+																	
+										var clickHeight = barHeight;
 															
 										var bart = d3.select(".chart").selectAll(".tocbars")
 												.data(tocData)
 											.enter().append("g")
 												.attr("class","tocbars")
-												.attr("transform", function(d, i) { return "translate(10,200)"; });
+												.attr("transform", function(d, i) { 
+																						clickHeight += barHeight;
+																						return "translate(0,200)";
+																					});
 
 										bart.append("rect")
+												.attr("x", barStartt)
 												.attr("class","tocrect")
 												.attr("width", function (d) { return xt(d.values.total); })
 												.attr("height", barHeight - 2);
@@ -1312,7 +1469,7 @@
 										d3.select(".chart").selectAll(".tocbars")
 												.transition()
 												.duration(barTransitionDur)
-												.attr("transform", function(d, i) { return "translate(10," + (i+1) * barHeight + ")";
+												.attr("transform", function(d, i) { return "translate(0," + (i+1) * barHeight + ")";
 															});												
 												
 										d3.select(".clickable").remove();
@@ -1320,7 +1477,7 @@
 										d3.select(".chart").append("rect")
 												.attr("class","clickable")
 												.attr("width", cwidth)
-												.attr("height", cheight)
+												.attr("height", clickHeight)
 												.on('click', function(d) { tocClicked(d3.mouse(this)) });
 													
 									};
@@ -1357,24 +1514,28 @@
 										
 										var xt = d3.scale.linear()
 																	.domain([0,ctmax])
-																	.range([10, cwidth-barWidthTrim]);
+																	.range([0, cwidth - barStartt - barWidthTrim]);
+															
+										var clickHeight = barHeight;
 															
 										d3.selectAll(".tocrect")
 											.data(tocData)
 												.transition()
 												.duration(500)
-												.attr("width", function (d) { return xt(d.values.total); });
+												.attr("width", function (d) { 
+																						clickHeight += barHeight;
+																						return xt(d.values.total);
+																					});
 										
 										d3.select(".clickable").remove();
 										
 										d3.select(".chart").append("rect")
 												.attr("class","clickable")
 												.attr("width", cwidth)
-												.attr("height", cheight)
+												.attr("height", clickHeight)
 												.on('click', function(d) { tocClicked(d3.mouse(this)) });
 													
 									};
-									
 									
 								
 									function ageGraph() {
@@ -1405,7 +1566,7 @@
 										
 										var x = d3.scale.linear()
 												.domain([0,cmax])
-												.range([0, cwidth-barWidthTrim]);
+												.range([0, cwidth - barStarta - barWidthTrim]);
 
 										var chart = d3.select(".charta")
 												.attr("width", cwidth)
@@ -1427,6 +1588,7 @@
 																});
 
 										bar.append("rect")
+												.attr("x", barStarta)
 												.attr("class","agerect")
 												.attr("width", function (d) { return x(d.values.total); })
 												.attr("height", barHeight - 2);
@@ -1477,7 +1639,7 @@
 										
 										var x = d3.scale.linear()
 												.domain([0,cmax])
-												.range([0, cwidth-barWidthTrim]);
+												.range([0, cwidth - barStarta - barWidthTrim]);
 
 										d3.selectAll(".agerect")
 											.data(ageData)
@@ -1495,14 +1657,15 @@
 									};
 									
 									
-									
 									function ageClicked(mouse) {
 									
 										var whichAge = Math.floor(mouse[1]/15);
 
 										if (whichAge == 0) {
 											selAge = 0;
-											d3.select(".charta text").style("font-weight","bold")
+											d3.select(".charta text").style("font-weight","bold");
+                      d3.select(".charta").selectAll(".agebars").select("text").style("font-weight","normal");
+											d3.select(".ay.label").text("Population");
 										} else {
 											d3.select(".charta text").style("font-weight","normal")
 											//selAge = (whichAge + 1).toString();
@@ -1514,8 +1677,23 @@
 														} else {
 															return "normal"} 
 												});
+											d3.select(".ay.label").text("Population (" + agegrp[selAge-1] + ")");
 										};
+
+										d3.select(".aline").attr("visibility", "visible");
+										d3.select(".ay.axis").attr("visibility", "visible");
+										d3.select(".ay.label").attr("visibility", "visible");
 										
+										d3.selectAll(".legend rect")
+											.style("fill-opacity", function(d, i) {
+															var existOpacity = d3.select(this).style("fill-opacity");
+															if ((d-1) == 2) {
+																return overlappingPathOpacity;
+															} else {
+																return existOpacity;
+															};
+														});										
+
                     updateMain();
 					
 									};
@@ -1534,12 +1712,15 @@
 							
 									};
 								
+								
 									function tocClicked(mouse) {
 									
 										var whichToc = Math.floor(mouse[1]/15);
 										
 										if (whichToc <= 0) {
-										
+											
+											d3.select(".sadtext").remove();
+											
 											d3.select(".chart").selectAll(".docbars").select("text")
 													.style("font-weight","normal");	
 													
@@ -1552,7 +1733,7 @@
 										
 											selDoc = "";
                       selToc = "";
-											docGraph();
+											docUpdate();//docGraph();
 
 										} else {
 											
@@ -1593,10 +1774,10 @@
   											.attr("class", "cpath county")
   											.attr("id", function (d) { return d.id })
   											.attr("d", path)
-                        .on("click", function (d) { geoClick({
-                          "level":"county", "id":d.id}
-                        )
-                        })
+                        .on("click", function (d) {
+																geoClick({"level":"county", "id":d.id});
+																d3.select(this).classed("cselected",true);
+														})
                         .on("mousemove", function (d,i) {
                           var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
 
@@ -1621,7 +1802,10 @@
                       .attr("id", i)
                       .attr("visibility", "hidden")
                       .attr("d", path)
-                      .on("click", function (d) { geoClick({"level":"Circuit", "id":+d3.select(this).attr("id")}) }
+                      .on("click", function (d) { 
+																	geoClick({"level":"Circuit", "id":+d3.select(this).attr("id")});
+																	d3.select(this).classed("cselected",true);
+																}
                       )
                       .on("mousemove", function (d,i) {
                         var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
@@ -1645,9 +1829,9 @@
                       .attr("id", i)
                       .attr("visibility", "hidden")
                       .attr("d", path)
-                      .on("click", function (d) { geoClick({
-                          "level":"District", "id":+d3.select(this).attr("id")}
-                        )
+                      .on("click", function (d) { 
+																geoClick({"level":"District", "id":+d3.select(this).attr("id")});
+																d3.select(this).classed("cselected",true);
                       })
                       .on("mousemove", function (d,i) {
                         var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
@@ -1670,10 +1854,10 @@
                     .attr("id", "fl")
                     .attr("visibility", "hidden")
                     .attr("d", path)
-                    .on("click", function (d) { geoClick({
-                          "level":"All of", "id":"Florida"}
-                        )
-                    })
+                    .on("click", function (d) { 
+																geoClick({"level":"All of", "id":"Florida"})
+																d3.select(this).classed("cselected",true);
+															})
                     .on("mousemove", function (d,i) {
                       var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
 
@@ -1690,7 +1874,7 @@
 
                 var geoClick = function(d){
 
-                  //
+                  d3.selectAll(".cpath").classed("cselected",false);
                   d3.selectAll(".showtext").remove();
       
                   svg2.append("text")
@@ -1765,6 +1949,7 @@
                   if (flaSelected == "3") {
                     d3.selectAll(".florida").attr("visibility", "visible");
 										geoClick({"level":"All of", "id":"Florida"});
+										d3.selectAll(".florida").classed("cselected",true);
                   };
                 });
               
