@@ -1,3 +1,172 @@
+function initSankey(rData) {
+							
+									var margin = {top: 1, right: 1, bottom: 6, left: 1}
+									var width = 890*0.6
+									var height=320
+//											width = document.getElementById("headline").offsetWidth - mainWidthAdjust - margin.left - margin.right,
+//											height = window.innerHeight*mainHeightPct - margin.top - margin.bottom;
+
+		var formatNumber = d3.format(",.0f"),
+				format = function(d) { return formatNumber(d) + " Cases"; },
+				color = d3.scale.category20();
+
+		var svg = d3.select("#chart").append("svg")
+				.attr("class","sankeysvg")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		var sankey = d3.sankey(width)
+				.nodeWidth(15)
+				.nodePadding(10)
+				.size([width, height]);
+
+		var path = sankey.link();
+
+		// Core sankey logic
+		cases = shapedata(rData,"All","All","All",selYrs[0],selYrs[1]);
+			
+			sankey
+					.nodes(cases.nodes)
+					.links(cases.links)
+					.layout(32);
+
+			var link = svg.append("g").selectAll(".link")
+					.data(cases.links)
+				.enter().append("path")
+					.attr("class", "link")
+					.attr("d", path)
+					.style("stroke-width", function(d) { return Math.max(1, d.dy); })
+					.sort(function(a, b) { return b.dy - a.dy; });
+
+			link.append("title")
+					.text(function(d) { return d.source.name + " → " + d.target.name + "\n" + format(d.value); });
+
+			var node = svg.append("g").selectAll(".node")
+					.data(cases.nodes)
+				.enter().append("g")
+					.attr("class", "node")
+					.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+				.call(d3.behavior.drag()
+					.origin(function(d) { return d; })
+					.on("dragstart", function() { this.parentNode.appendChild(this); })
+					.on("drag", dragmove));
+
+			node.append("rect")
+					.attr("height", function(d) { return d.dy; })
+					.attr("width", sankey.nodeWidth())
+					.style("fill", function(d) { return d.color = color(d.name.replace(/ .*/, "")); })
+					.style("stroke", function(d) { return d3.rgb(d.color).darker(2); })
+				.append("title")
+					.text(function(d) { return d.name + "\n" + format(d.value); });
+
+			node.append("text")
+					.attr("x", -6)
+					.attr("y", function(d) { return d.dy / 2; })
+					.attr("dy", ".35em")
+					.attr("text-anchor", "end")
+					.attr("transform", null)
+					.text(function(d) { return d.name; })
+				.filter(function(d) { return d.x < width / 2; })
+					.attr("x", 6 + sankey.nodeWidth())
+					.attr("text-anchor", "start");
+
+			function dragmove(d) {
+				d3.select(this).attr("transform", "translate(" + d.x + "," + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")");
+				sankey.relayout();
+				link.attr("d", path);
+			};
+
+};
+	
+
+function updateSankey(rData) {
+							
+									var margin = {top: 1, right: 1, bottom: 6, left: 1}
+									var width = 890*0.6
+									var height=320
+//											width = document.getElementById("headline").offsetWidth - mainWidthAdjust - margin.left - margin.right,
+//											height = window.innerHeight*mainHeightPct - margin.top - margin.bottom;
+
+		var formatNumber = d3.format(",.0f"),
+				format = function(d) { return formatNumber(d) + " Cases"; },
+				color = d3.scale.category20();
+
+		var svg = d3.select("#chart").append("svg")
+				.attr("class","sankeysvg")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		var sankey = d3.sankey(width)
+				.nodeWidth(15)
+				.nodePadding(10)
+				.size([width, height]);
+
+		var path = sankey.link();
+
+		// Core sankey logic
+		cases = shapedata(rData,"All","All","All",selYrs[0],selYrs[1]);
+			
+			sankey
+					.nodes(cases.nodes)
+					.links(cases.links)
+					.layout(32);
+
+			var link = svg.append("g").selectAll(".link")
+					.data(cases.links)
+				.enter().append("path")
+					.attr("class", "link")
+					.attr("d", path)
+					.style("stroke-width", function(d) { return Math.max(1, d.dy); })
+					.sort(function(a, b) { return b.dy - a.dy; });
+
+			link.append("title")
+					.text(function(d) { return d.source.name + " → " + d.target.name + "\n" + format(d.value); });
+
+			var node = svg.append("g").selectAll(".node")
+					.data(cases.nodes)
+				.enter().append("g")
+					.attr("class", "node")
+					.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+				.call(d3.behavior.drag()
+					.origin(function(d) { return d; })
+					.on("dragstart", function() { this.parentNode.appendChild(this); })
+					.on("drag", dragmove));
+
+			node.append("rect")
+					.attr("height", function(d) { return d.dy; })
+					.attr("width", sankey.nodeWidth())
+					.style("fill", function(d) { return d.color = color(d.name.replace(/ .*/, "")); })
+					.style("stroke", function(d) { return d3.rgb(d.color).darker(2); })
+				.append("title")
+					.text(function(d) { return d.name + "\n" + format(d.value); });
+
+			node.append("text")
+					.attr("x", -6)
+					.attr("y", function(d) { return d.dy / 2; })
+					.attr("dy", ".35em")
+					.attr("text-anchor", "end")
+					.attr("transform", null)
+					.text(function(d) { return d.name; })
+				.filter(function(d) { return d.x < width / 2; })
+					.attr("x", 6 + sankey.nodeWidth())
+					.attr("text-anchor", "start");
+
+			function dragmove(d) {
+				d3.select(this).attr("transform", "translate(" + d.x + "," + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")");
+				sankey.relayout();
+				link.attr("d", path);
+			};
+
+};
+	
+
+
+
+
   //////////////////////////////////////////////////Function shapedata
 function shapedata(data,division,casetype,counties,year,endyear){
 // returns json array [nodes, links]
@@ -134,7 +303,7 @@ for(i=0;i<data.length;i++){
 	var pathindex = pathindices[dindex];
 	var destindex = destindices[dindex];
 	var size= data[i].size
-	if(size>0 & pathindex !=5) {  //pathindex = 5 for "other" that will map direct from source to dest
+	if(size>0 && pathindex !=5) {  //pathindex = 5 for "other" that will map direct from source to dest
 		srcpaths[sourceindex][pathindex] += size
 		pathdests[pathindex][destindex] += size
 	}
@@ -151,8 +320,11 @@ for(i=0;i<pathdests.length;i++){
 		if(pathdests[i][j] >0) objlinks.push({"source":i+sources.length,"target":j+sources.length+paths.length,"value":pathdests[i][j]})
 	}
 }		
+//console.log(objlinks)
 
 	var cases={"nodes": objnodes,"links": objlinks}
+
 //	document.getElementById("b2").innerHTML= htmlstr
+console.log(JSON.stringify(cases))
 	return cases	
 }   //close function shapedata  /////////////////////////////////////// 	
