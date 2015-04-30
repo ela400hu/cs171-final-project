@@ -58,7 +58,9 @@
 										<input type="radio" class="cd" name="display" value="0" checked></input> Raw 
 										<span title="Indexed data is expressed as a percentage of the 1986 value."><input type="radio" class="cd" name="display" value="1"></input> Indexed</span> 
 										<span style="padding-left:50px"> </span>
-										<label>Selected Years: </label><span style="padding-left:10px" id="brushInfo"></span>
+										<label>Selected Years: </label>
+										<span style="padding-left:10px" id="brushInfo"></span>
+										<span style="padding-left:10px"><i>(Brush to change selection.)</i></span>
 									</form>
 								<div id="divmainbody"></div>
 								<div id="divmainfoot"></div>
@@ -93,16 +95,13 @@
             var initVis = function(){
 
                 //Create an eventHandler
-                var MyEventHandler = new Object();
+                //var MyEventHandler = new Object();
 
                 //Instantiate all Vis Objects here
 								//var det_obj = new DetailsVis(d3.select("#divmain"), vizSelected, MyEventHandler);
 																
                 // Bind the eventHandler to the Vis Objects
-                $(document).on("menuChange",
-                            function (MyEventHandler) { 
-                              det_obj.onSelectionChange()
-                              });
+                //$(document).on("menuChange", function (MyEventHandler) { det_obj.onSelectionChange() });
 
             }
 
@@ -1952,9 +1951,12 @@
 										d3.selectAll(".florida").classed("cselected",true);
                   };
                 });
-              
+
+							geoClick({"level":"All of", "id":"Florida"});
+								
 							});
-                initVis();
+							
+              initVis();
 
             }
 
