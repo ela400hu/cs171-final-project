@@ -1,6 +1,17 @@
 body {
   font-family: 'PT Sans', sans-serif;
 	font-color:#000b95;
+
+	background: #fcd2b5; /* Old browsers */
+	background: #fed57e; /* Old browsers */
+	background: -moz-linear-gradient(top, #fed57e 0%, #fcd2b5 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fed57e), color-stop(100%,#fcd2b5)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #fed57e 0%,#fcd2b5 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #fed57e 0%,#fcd2b5 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, #fed57e 0%,#fcd2b5 100%); /* IE10+ */
+	background: linear-gradient(to bottom, #fed57e 0%,#fcd2b5 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fed57e', endColorstr='#fcd2b5',GradientType=0 ); /* IE6-9 */
+
 }
 
 svg {
@@ -16,7 +27,6 @@ svg {
 }
 
 .aline,
-.iline,
 .alinect,
 .alinecc {
   fill: none;
@@ -40,7 +50,7 @@ svg {
 
 .foreground path {
   fill: none;
-  stroke: #000b95;
+  stroke: #e81d5e;
   stroke-width: 1.5px;
 }
 
@@ -69,10 +79,6 @@ svg {
   font-size: 10px;
 }
 
-.ay.label {
-  fill: rgb(44, 160, 44);
-}
-
 .label {
   -webkit-transition: fill 125ms linear;
   color:#000b95;
@@ -81,17 +87,17 @@ svg {
 .active .label:not(.inactive) {
   font-weight: bold;
   font-size: 11px;
-/*   fill: #e81d5e;  pink */
+  fill: #e81d5e;
 }
 
 .label.inactive {
   /*fill: #e09e11;*/
-/*   fill: #c98e0f; gold */
+  fill: #c98e0f;
 }
 
 .foreground path.inactive {
 /*stroke: #e09e11; */
-/*   fill: #c98e0f; gold */
+stroke: #c98e0f;
 
 
   /*stroke: #cfee35;*/
@@ -100,16 +106,13 @@ svg {
 }
 
 path.cpath {
-	fill: #ccc;
-	stroke: #fff;
-/* 	fill: #faab02; yellow */
-/* 	stroke: #fa2f02; red */
+	fill: #faab02;
+	stroke: #fa2f02;
 	stroke-width: .5px;
 }
 
 path.cpath:hover {
-	fill: steelblue;
-/* 	fill: #e81d5e; pink */
+	fill: #e81d5e;
 }
 
 div.tooltip {
@@ -121,17 +124,6 @@ div.tooltip {
   box-shadow: 0px 0px 2px 0px #a6a6a6; 
   opacity: 0.9; 
   position: absolute;
-}
-
-span.tooltip:hover:before{
-    border: solid;
-    border-color: #333 transparent;
-    border-width: 6px 6px 0 6px;
-    bottom: 20px;
-    content: "";
-    left: 50%;
-    position: absolute;
-    z-index: 99;
 }
 
 .docrect {
@@ -176,13 +168,13 @@ span.tooltip:hover:before{
 .boundingBox{
     cursor: pointer;
     fill: grey;
-    fill-opacity: .5;
+    fill-opacity: .3;
     pointer-events: all;
 }
 
 .brush{
     fill: darkgrey;
-    fill-opacity: .5;
+    fill-opacity: .3;
     pointer-events: none;
 }
 
@@ -190,15 +182,11 @@ span.tooltip:hover:before{
   font: 10px sans-serif;
 }
 
-.grid .tick {
-    stroke: lightgrey;
-    stroke-opacity: 0.2;
-}
 
-.grid path {
-      stroke-width: 0;
-}
-
+/* #chart {
+  height: 500px;
+} */
+ 
 .node rect {
   cursor: move;
   fill-opacity: .9;

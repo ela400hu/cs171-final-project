@@ -214,3 +214,22 @@ dism <- melt(fil2c,id=c("id","doc","toc"))
 dism$variable <- as.numeric(substr(dism$variable,2,5))
 dism$value <- as.numeric(gsub(",","",dism$value))
 write.csv(dism, file = "Dispositions.csv")
+
+
+dfa <- read.csv("percapitapersonalincombycounty1986-2013.csv", stringsAsFactors=FALSE)
+
+sink("Income.csv")
+cat(paste(paste("id", "year","income",sep=","),"\n",sep=""))
+
+for(k in 1:nrow(dfa)) {
+    row <- dfa[k,]
+    for (j in 3:30) {
+        cat(paste(paste(row[1],(j+1983),(row[j]),sep=","),"\n",sep=""))
+    }
+}
+
+sink()
+
+
+
+

@@ -43,11 +43,6 @@
                 <input type="radio" class="cs" name="select" value="2"></input> District 
                 <input type="radio" class="cs" name="select" value="3"></input> All
 								<div id="divmap"></div>
-								<label>Show Data: </label>
-                <input type="radio" class="cd" name="display" value="0" checked></input> Raw 
-                <input type="radio" class="cd" name="display" value="1"></input> Indexed 
-								<br>
-								<label>Selected Dates: </label><span style="padding-left:10px" id="brushInfo"></span>
 							</form>
               <label>Division of Court and Case Type:</label>
 							<div id="docInfo"></div>
@@ -58,6 +53,13 @@
 						</div>
             <div class="col-md-9" id="divmain">
 								<div id="divmainhead"></div>
+									<form>
+										<label>Show Data: </label>
+										<input type="radio" class="cd" name="display" value="0" checked></input> Raw 
+										<span title="Indexed data is expressed as a percentage of the 1986 value."><input type="radio" class="cd" name="display" value="1"></input> Indexed</span> 
+										<span style="padding-left:50px"> </span>
+										<label>Selected Dates: </label><span style="padding-left:10px" id="brushInfo"></span>
+									</form>
 								<div id="divmainbody"></div>
             </div>
 				</div>
@@ -115,7 +117,7 @@
 							var numCounties = 68;
 							var mainWidthAdjust = 250;
 							var mainHeightPct = 0.5;
-							var margin = {top: 10, right: 75, bottom: 40, left: 70};
+							var margin = {top: 10, right: 90, bottom: 60, left: 85};
 							var width = document.getElementById("headline").offsetWidth - mainWidthAdjust - margin.left - margin.right;
 							var height = window.innerHeight*mainHeightPct - margin.top - margin.bottom;
 							var color = d3.scale.category10();
@@ -175,7 +177,7 @@
 										"7":["Civil Traffic Infractions","DUI","Non DUI Criminal Traffic"]
 									};
 							
-							var agegrp = ["Age < 0","Age 1-4","Age 5-9","Age 10-14","Age 15-19","Age 20-24","Age 25-34","Age 35-44","Age 45-54","Age 55-64","Age 65-74","Age 75-84","Age 85+"];
+							var agegrp = ["Age < 1","Age 1-4","Age 5-9","Age 10-14","Age 15-19","Age 20-24","Age 25-34","Age 35-44","Age 45-54","Age 55-64","Age 65-74","Age 75-84","Age 85+"];
 
 							d3.select("#brushInfo").text(selYrs[0] + " --> " + selYrs[1]);
 
@@ -243,9 +245,10 @@
                 queue()
                   .defer(d3.csv, 'data/FDCombined.csv')
                   .defer(d3.csv, 'data/Population.csv')
+                  .defer(d3.csv, 'data/Income.csv')
                   .await(allLoaded);
 
-                function allLoaded(error, fdData, pData) {
+                function allLoaded(error, fdData, pData, iData) {
 
 									bothFilDis = fdData.map(function (d) {
                     var fid = +d.id
@@ -285,6 +288,23 @@
                               .key(function (d) { return d.year })
                               .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
                               .entries(populations);
+
+                  incomes = iData.map(function (d) {
+                    var fid = +d.id;
+                    return {
+                      id: fid,
+                      circ: countyCircuit[fid],
+                      dist: countyDistrict[fid],
+                      year: +d.year,
+                      income: +d.income
+                    };
+
+                  });
+
+                  incData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.income })}})
+                              .entries(incomes);															
 
 									docGraph();
 									
@@ -375,6 +395,30 @@
 									});																		
 
 									
+                  incData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.income })}})
+                              .entries(incomes
+																			.filter(function(d) { 
+                                        if (selGeo.length == numCounties) { return true; }
+                                        return d3.set(selGeo).has(d.id);
+																			})
+																		);
+																		
+									var firstOne = 0.0;
+									incData.forEach( function (d) {
+										if (vizSelected == 1) {
+											if (firstOne == 0) {
+												firstOne = d.values.total;
+												d.total = 100.0;
+											} else {
+												d.total = 100.0 * (d.values.total / firstOne);
+											};
+										} else {
+											d.total = d.values.total;
+										};
+									});																		
+									
 									
 									var x = d3.scale.linear()
 											.range([0, width]);
@@ -389,6 +433,15 @@
 											.orient("bottom");
 
 									var yAxis = d3.svg.axis()
+											.scale(y)
+											.orient("left");
+											
+									var gxAxis = d3.svg.axis()
+											.scale(x)
+											.ticks(numYears)
+											.orient("bottom");
+
+									var gyAxis = d3.svg.axis()
 											.scale(y)
 											.orient("left");
 
@@ -408,6 +461,11 @@
                       .interpolate("basis") 
 											.x(function(d) { return x(d.key); })
 											.y(function(d) { return ay(d.total); });
+											
+									var linei = d3.svg.line()
+                      .interpolate("basis") 
+											.x(function(d) { return x(d.key); })
+											.y(function(d) { return iy(d.total); });											
                   
                   var linect = d3.svg.line()
                       .interpolate("basis") 
@@ -423,17 +481,44 @@
                   var fRange = d3.extent(fildisData, function(d) { return d.totalf; });
                   var dRange = d3.extent(fildisData, function(d) { return d.totald; });
                   var yRange = [d3.min([fRange[0],dRange[0]]),d3.max([fRange[1],dRange[1]])];                      
-
+									
+									x.domain(xRange);
+                  y.domain(yRange);
+									
 									var svg = d3.select("#divmainbody").append("svg")
 											.attr("width", width + margin.left + margin.right)
 											.attr("height", height + margin.top + margin.bottom)
 										.append("g")
 											.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                  d3.select("#divmainbody svg").append("text")
-                    .attr("x",yearAxisLabelX)
-                    .attr("y",height + margin.top + margin.bottom + yearAxisLabelY)
-                    .text("Year:");                      
+									//
+									// Axis Labels
+									d3.select("#divmainbody svg").append("text")
+											.attr("class", "x label")
+											.attr("text-anchor", "end")
+											.attr("x", margin.left + width/2)
+											.attr("y", height + margin.top + margin.bottom - 7)
+											.text("Year");
+
+									d3.select("#divmainbody svg").append("text")
+											.attr("class", "y label")
+											.attr("text-anchor", "end")
+											.attr("x", -height/2 + margin.bottom/2)
+											.attr("y", 7)
+											.attr("dy", ".75em")
+											.attr("transform", "rotate(-90)")
+											.text("Number of Cases");
+											
+									d3.select("#divmainbody svg").append("text")
+											.attr("class", "ay label")
+											.attr("visibility","visible")
+											.attr("text-anchor", "end")
+											.attr("x", height/2 + margin.bottom/2)
+											.attr("y", -width - margin.left - margin.right + 7)
+											.attr("dy", ".75em")
+											.attr("transform", "rotate(90)")
+											.text("Population")
+												.style("font-color","green");
 
                   svg.append("line")
                     .attr("class", "alineaxt")
@@ -470,10 +555,7 @@
                     .attr("y",margin.top+height/2)
                     .text("1")
 										.style("fill","rgb(148,103,189)");
-									
-									x.domain(xRange);
-                  y.domain(yRange);
-									
+								
 									var ay = d3.scale.linear()
 														.range([height, 0])
 														.domain(d3.extent(popData, function(d) { return d.total; }));
@@ -511,7 +593,7 @@
                       .attr("class", "aline")
                       .attr("d", line)
                       .attr("data-legend","Population")
-											.attr("visibility","hidden")
+											.attr("visibility","visible")
                       .style("stroke", function(d) { return color(3) } );
 
                   svg.append("path")
@@ -529,7 +611,20 @@
                       .attr("data-legend","Cumulative Clearance Rate")
 											.attr("visibility","hidden")
                       .style("stroke", function(d) { return color(5) } );
+
+									var iy = d3.scale.linear()
+														.range([height, 0])
+														.domain(d3.extent(incData, function(d) { return d.total; }));
+									//var iyAxis = d3.svg.axis().scale(iy).orient("right");
 									
+                  svg.append("path")
+                      .datum(incData)
+                      .attr("class", "iline")
+                      .attr("d", linei)
+                      .attr("data-legend","Personal Income")
+											.attr("visibility","hidden")
+                      .style("stroke", function(d) { return color(6) } );
+											
 									svg.append("g")
 											.attr("class", "x axis")
 											.attr("transform", "translate(0," + height + ")")
@@ -548,11 +643,29 @@
 											
 									svg.append("g")
 											.attr("class", "ay axis")
-											.attr("visibility","hidden")
+											.attr("visibility","visible")
 											.attr("transform", "translate(" + width + " ,0)")
 											.style("fill", "rgb(44, 160, 44)")
 											.call(ayAxis);
+											
+									//
+									// Light Grid
+									// Idea from http://www.d3noob.org/2013/01/adding-grid-lines-to-d3js-graph.html
+									svg.append("g")         
+											.attr("class", "grid")
+											.attr("transform", "translate(0," + height + ")")
+											.call(gxAxis
+															.tickSize(-height, 0, 0)
+															.tickFormat("")
+											);
 
+									svg.append("g")         
+											.attr("class", "grid")
+											.call(gyAxis
+															.tickSize(-width, 0, 0)
+															.tickFormat("")
+											);
+											
 									// Legend code borrowed from
 									// http://zeroviscosity.com/d3-js-step-by-step/step-3-adding-a-legend
 									var legend = svg.selectAll('.legend')
@@ -587,6 +700,8 @@
                                 return "Clearance Rate"
                               } else if (i == 4) {
                                 return "Cumulative Clearance Rate"
+                              } else if (i == 5) {
+                                return "Personal Income"
                               };
 														});
 														
@@ -623,7 +738,7 @@
 									svg.append("rect")
 											.attr("class","clickableLegend")
 											.attr("width", legendRectSize)
-											.attr("height", (legendRectSize + legendSpacing) * 5)
+											.attr("height", (legendRectSize + legendSpacing) * 6)
 											.attr('transform','translate(30,19)')
 											.on('click', function(d) { legClicked(d3.mouse(this)) });
 
@@ -709,8 +824,32 @@
 										} else {
 											d.total = d.values.total;
 										};
-									});																		
+									});
 									
+                  incData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.income })}})
+                              .entries(incomes
+																			.filter(function(d) { 
+                                        if (selGeo.length == numCounties) { return true; }
+                                        return d3.set(selGeo).has(d.id);
+																			})
+																		);
+																		
+									var firstOne = 0.0;
+									incData.forEach( function (d) {
+										if (vizSelected == 1) {
+											if (firstOne == 0) {
+												firstOne = d.values.total;
+												d.total = 100.0;
+											} else {
+												d.total = 100.0 * (d.values.total / firstOne);
+											};
+										} else {
+											d.total = d.values.total;
+										};
+									});																		
+																		
                   var x = d3.scale.linear()
                       .range([0, width]);
 
@@ -727,6 +866,15 @@
                       .scale(y)
                       .orient("left");
 
+									var gxAxis = d3.svg.axis()
+											.scale(x)
+											.ticks(numYears)
+											.orient("bottom");
+
+									var gyAxis = d3.svg.axis()
+											.scale(y)
+											.orient("left");
+											
                   var areaf = d3.svg.area()
                       .interpolate("basis") 
                       .x(function(d) { return x(d.key); })
@@ -743,6 +891,11 @@
                       .interpolate("basis") 
 											.x(function(d) { return x(d.key); })
 											.y(function(d) { return ay(d.total); });
+											
+									var linei = d3.svg.line()
+                      .interpolate("basis") 
+											.x(function(d) { return x(d.key); })
+											.y(function(d) { return iy(d.total); });														
 
                   var linect = d3.svg.line()
                       .interpolate("basis") 
@@ -765,10 +918,35 @@
                   x.domain(xRange);
                   y.domain(yRange);
 									
+									//
+									// Light Grid
+									// Idea from http://www.d3noob.org/2013/01/adding-grid-lines-to-d3js-graph.html
+                  d3.selectAll(".grid").remove();
+
+									svg.append("g")         
+											.attr("class", "grid")
+											.attr("transform", "translate(0," + height + ")")
+											.call(gxAxis
+															.tickSize(-height, 0, 0)
+															.tickFormat("")
+											);
+
+									svg.append("g")         
+											.attr("class", "grid")
+											.call(gyAxis
+															.tickSize(-width, 0, 0)
+															.tickFormat("")
+											);
+									
 									var ay = d3.scale.linear()
 														.range([height, 0])
 														.domain(d3.extent(popData, function(d) { return d.total; }));
 									var ayAxis = d3.svg.axis().scale(ay).orient("right");
+									
+									var iy = d3.scale.linear()
+														.range([height, 0])
+														.domain(d3.extent(incData, function(d) { return d.total; }));
+									//var iyAxis = d3.svg.axis().scale(iy).orient("right");									
 
                   var ctRange = d3.extent(fildisData, function(d) { return d.clearThis; });
                   var ccRange = d3.extent(fildisData, function(d) { return d.clearCum; });
@@ -803,6 +981,11 @@
                             .transition()
                             .duration(mainTransitionDur)
                             .attr("d", linecc);
+														
+									path = svg.selectAll('.iline').datum(incData)
+                            .transition()
+                            .duration(mainTransitionDur)
+                            .attr("d", linei);														
                   
                   d3.select(".x.axis").remove();
                   svg.append("g")
@@ -894,6 +1077,14 @@
 																return "hidden";
 															} else {
 																return "visible";
+															}});
+															
+										d3.select(".ay.label")
+											.attr("visibility", function() {
+															if (d3.select(this).attr("visibility") == "visible") {
+																return "hidden";
+															} else {
+																return "visible";
 															}});															
 									};
 
@@ -934,6 +1125,17 @@
 															}});	
 																														
 									};
+									
+									if (whichLeg == 5) {
+										d3.select(".iline")
+											.attr("visibility", function() {
+															if (d3.select(this).attr("visibility") == "visible") {
+																return "hidden";
+															} else {
+																return "visible";
+															}});
+																											
+									};									
 									
 								};
 
