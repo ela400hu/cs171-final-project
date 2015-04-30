@@ -55,8 +55,12 @@
 								<div id="divmainhead"></div>
 									<form>
 										<label>Show Data: </label>
-										<input type="radio" class="cd" name="display" value="0" checked></input> Raw 
-										<span title="Indexed data is expressed as a percentage of the 1986 value."><input type="radio" class="cd" name="display" value="1"></input> Indexed</span> 
+                    <span title="Range-based data graphs only the pertinent range of data.">
+                      <input type="radio" class="cd" name="display" value="0" checked></input> Range-based </span>
+                    <span title="Zero-based data graphs the data as raw numbers.">
+                      <input type="radio" class="cd" name="display" value="2"></input> Zero-based </span> 
+										<span title="Indexed data is expressed as a percentage of the 1986 value.">
+                      <input type="radio" class="cd" name="display" value="1"></input> Indexed</span> 
 										<span style="padding-left:50px"> </span>
 										<label>Selected Years: </label>
 										<span style="padding-left:10px" id="brushInfo"></span>
@@ -981,6 +985,10 @@
                   var dRange = d3.extent(fildisData, function(d) { return d.totald; });
                   var yRange = [d3.min([fRange[0],dRange[0]]),d3.max([fRange[1],dRange[1]])];
 
+                  if (vizSelected == 2) {
+                    yRange[0] = 0;
+                  }
+
 
                   var svg = d3.select("#divmainbody svg g")
 
@@ -1006,15 +1014,23 @@
 															.tickSize(-width, 0, 0)
 															.tickFormat("")
 											);
-									
+
+                  var ayRange = d3.extent(popData, function(d) { return d.total; });
+                  if (vizSelected == 2) {
+                    ayRange[0] = 0;
+                  };
 									var ay = d3.scale.linear()
 														.range([height, 0])
-														.domain(d3.extent(popData, function(d) { return d.total; }));
+														.domain(ayRange);
 									var ayAxis = d3.svg.axis().scale(ay).orient("right");
-									
+
+                  var iyRange = d3.extent(incData, function(d) { return d.total; });
+                  if (vizSelected == 2) {
+                    iyRange[0] = 0;
+                  };									
 									var iy = d3.scale.linear()
 														.range([height, 0])
-														.domain(d3.extent(incData, function(d) { return d.total; }));
+														.domain(iyRange);
 									//var iyAxis = d3.svg.axis().scale(iy).orient("right");									
 
                   var ctRange = d3.extent(fildisData, function(d) { return d.clearThis; });
@@ -1906,12 +1922,14 @@
 										selGeo = [d.id];
 									};
 
-									docUpdate();
-									if (selDoc != "") {
-										tocUpdate();
-									};
-									ageUpdate();
-									updateMain();
+                  if (d.id != "Florida ") {
+  									docUpdate();
+  									if (selDoc != "") {
+  										tocUpdate();
+  									};
+  									ageUpdate();
+  									updateMain();
+                  };
 
                 };
 
@@ -1952,7 +1970,7 @@
                   };
                 });
 
-							geoClick({"level":"All of", "id":"Florida"});
+							geoClick({"level":"All of", "id":"Florida "});
 								
 							});
 							
