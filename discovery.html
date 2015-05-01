@@ -38,18 +38,18 @@
         <div class="row">
             <div class="col-md-3" id="divnav" >
 						  <form>
-                <label>Select by: </label><br>
+                <label style="margin-bottom: 0;">Select by: </label><br>
                 <input type="radio" class="cs" name="select" value="0" checked></input> County 
                 <input type="radio" class="cs" name="select" value="1"></input> Circuit 
                 <input type="radio" class="cs" name="select" value="2"></input> District 
                 <input type="radio" class="cs" name="select" value="3"></input> All
 								<div id="divmap"></div>
 							</form>
-              <label>Division of Court and Case Type:</label>
-							<div id="docInfo"></div>
+              <label style="margin-bottom: 0;">Division of Court and Case Type:</label>
+							<br><span id="docInfo"></span><br>
 							<svg class="chart"></svg>
-              <label>Population by Age Group:</label>
-							<div id="ageInfo"></div>
+              <label style="margin-bottom: 0;">Population by Age Group:</label>
+							<br><span id="ageInfo"></span><br>
 							<svg class="charta"></svg>
 						</div>
             <div class="col-md-9" id="divmain">
@@ -62,15 +62,15 @@
                       <input type="radio" class="cd" name="display" value="2"></input> Zero-based </span> 
 										<span title="Indexed data is expressed as a percentage of the 1986 value.">
                       <input type="radio" class="cd" name="display" value="1"></input> Indexed</span> 
-										<span style="padding-left:50px"> </span>
-										<label>Selected Years: </label>
-										<span style="padding-left:10px" id="brushInfo"></span>
-										<span style="padding-left:10px"><i>(Brush to change selection.)</i></span>
+										<span style="padding-left:30px"> </span>
+										<label>Selected Year(s): 
+										<span style="padding-left:8px" id="brushInfo"></span></label>
+										<span style="padding-left:8px; font-size: 9px;"><i>(Brush to change.)</i></span>
 									</form>
                 <div id="divmainfoot"></div>
 								<div id="divmainbody"></div>
                 <div id="divsankey"></div>
-                  <label id="xh1">Case Paths to Resolution: </label>
+                  <label style="margin-bottom: 0;" id="xh1">Case Paths to Resolution: </label>
                   <p id="chart">
                   <aside>Drag to rearrange nodes.</aside>
                   <p>Source: <a href="http://flcourts.org">Florida Office of State Courts Administrator</a>                
@@ -223,8 +223,11 @@
 							
 							var agegrp = ["Age < 1","Age 1-4","Age 5-9","Age 10-14","Age 15-19","Age 20-24","Age 25-34","Age 35-44","Age 45-54","Age 55-64","Age 65-74","Age 75-84","Age 85+"];
 
-							d3.select("#brushInfo").text(selYrs[0] + " --> " + selYrs[1]);
-
+							if (selYrs[0] == selYrs[1]) {
+								d3.select("#brushInfo").text(selYrs[0]);
+							} else {
+								d3.select("#brushInfo").text(selYrs[0] + " --> " + selYrs[1]);
+							};
 							
 							// Set up Florida map
 							//
@@ -785,7 +788,7 @@
 										.style("font-weight","bold");
 			
                   svgfoot.append("text")
-                    .attr("class", "showingtextgeo")
+                    .attr("id", "showingtextgeo")
                     .attr("x",showStart+70)
                     .attr("y",showtextHeight*1)
                     .text("All of Florida");
@@ -816,19 +819,26 @@
 												.attr("height", height);
 
 									function brushed () {
+
 										if (brush.extent()[0] != brush.extent()[1]) {
 											selYrs = [Math.floor(brush.extent()[0]+0.5),Math.floor(brush.extent()[1]+0.5)];
 										} else {
 											selYrs = allYrs;
 										};
+										
+										if (selYrs[0] == selYrs[1]) {
+											d3.select("#brushInfo").text(selYrs[0]);
+										} else {
+											d3.select("#brushInfo").text(selYrs[0] + " --> " + selYrs[1]);
+										};
+										
 										docUpdate();
 										if (selDoc != "") {
 											tocUpdate();
 										};
 										ageUpdate();
-										d3.select("#brushInfo").text(selYrs[0] + " --> " + selYrs[1]);
-
-                    d3.select(".sankeysvg").remove();
+                    
+										d3.select(".sankeysvg").remove();
                     updateSankey(sankeyData,margin.left,width);
 										//$(document).trigger("brushChange", [begDate,endDate]);
 									};
@@ -1336,15 +1346,21 @@
 										var cmax = d3.max(docData, function(d) { 
 																	return d.values.total;} );
 																	
-										d3.select("#docInfo").text("Bars show number of cases (0 - " + d3.format(",d")(cmax) + ")");
-
+										d3.select("#docInfo").text(d3.select("#showingtextmap").text() + " for " + d3.select("#brushInfo").text() + ".");
+										
 										var x = d3.scale.linear()
 												.domain([0,cmax])
 												.range([0, cwidth - barStartd - barWidthTrim]);
+												
+										var xAxis = d3.svg.axis()
+												.scale(x)
+												.ticks(2)
+												.tickFormat(d3.format(",d"))
+												.orient("bottom");												
 
 										var chart = d3.select(".chart")
 												.attr("width", cwidth)
-												.attr("height", cheight);
+												.attr("height", cheight+20);
 
 										var clickHeight = 0;
 										
@@ -1368,7 +1384,16 @@
 												.attr("y", barHeight / 2 - 1)
 												.attr("dy", ".35em")
 												.text(function(d) { return (expandSymbol + doclist[+d.key-1]); })
-													.style("font-weight","normal");		
+													.style("font-weight","normal");
+													
+										chart.append("g")
+											.attr("class", "docx axis")
+											.attr("transform", function(d, i) { 
+																return "translate(" + barStartd + "," + (clickHeight) + ")";
+																})
+											.call(xAxis)
+											.selectAll("text")  
+												.style("text-anchor", "end");													
 
 										d3.select(".clickable").remove();
 										
@@ -1405,12 +1430,18 @@
 										var cmax = d3.max(docData, function(d) { 
 																	return d.values.total;} );
 
-										d3.select("#docInfo").text("Bars show number of cases (0 - " + d3.format(",d")(cmax) + ")");
+										d3.select("#docInfo").text(d3.select("#showingtextmap").text() + " for " + d3.select("#brushInfo").text() + ".");
 										
 										var x = d3.scale.linear()
 												.domain([0,cmax])
 												.range([0, cwidth - barStartd - barWidthTrim]);
 
+										var xAxis = d3.svg.axis()
+												.scale(x)
+												.ticks(2)
+												.tickFormat(d3.format(",d"))
+												.orient("bottom");												
+												
 										var clickHeight = 0;
 
 										d3.selectAll(".docrect")
@@ -1421,6 +1452,16 @@
 																					clickHeight += barHeight;
 																					return x(d.values.total);
 																				});
+																				
+										d3.selectAll(".docx.axis").remove();
+										d3.select(".chart").append("g")
+											.attr("class", "docx axis")
+											.attr("transform", function(d, i) { 
+																return "translate(" + barStartd + "," + clickHeight + ")";
+																})
+											.call(xAxis)
+											.selectAll("text")
+												.style("text-anchor", "end");																					
 
 										d3.select(".clickable").remove();
 										
@@ -1469,7 +1510,7 @@
 										var ctmax = d3.max(tocData, function(d) { 
 																	return d.values.total;} );
 																	
-										d3.select("#docInfo").text("Bars show number of cases (0 - " + d3.format(",d")(ctmax) + ")");
+										d3.select("#docInfo").text(doclist[selDoc-1] + ": " + d3.select("#showingtextmap").text() + " for " + d3.select("#brushInfo").text() + ".");
 										
 										d3.select(".chart").append("text")
 															.attr("class","sadtext")
@@ -1482,6 +1523,12 @@
 										var xt = d3.scale.linear()
 																	.domain([0,ctmax])
 																	.range([0, cwidth - barStartt - barWidthTrim]);
+																	
+										var xtAxis = d3.svg.axis()
+												.scale(xt)
+												.ticks(2)
+												.tickFormat(d3.format(",d"))
+												.orient("bottom");																								
 																	
 										var clickHeight = barHeight;
 															
@@ -1511,6 +1558,16 @@
 												.duration(barTransitionDur)
 												.attr("transform", function(d, i) { return "translate(0," + (i+1) * barHeight + ")";
 															});												
+
+										d3.selectAll(".docx.axis").remove();
+										d3.select(".chart").append("g")
+											.attr("class", "docx axis")
+											.attr("transform", function(d, i) { 
+																return "translate(" + barStartt + "," + clickHeight + ")";
+																})
+											.call(xtAxis)
+											.selectAll("text")
+												.style("text-anchor", "end");																	
 												
 										d3.select(".clickable").remove();
 										
@@ -1550,11 +1607,17 @@
 										var ctmax = d3.max(tocData, function(d) { 
 																	return d.values.total;} );
 
-										d3.select("#docInfo").text("Bars show number of cases (0 - " + d3.format(",d")(ctmax) + ")");
+										d3.select("#docInfo").text(doclist[selDoc-1] + ": " + d3.select("#showingtextmap").text() + " for " + d3.select("#brushInfo").text() + ".");
 										
 										var xt = d3.scale.linear()
 																	.domain([0,ctmax])
 																	.range([0, cwidth - barStartt - barWidthTrim]);
+																	
+										var xtAxis = d3.svg.axis()
+												.scale(xt)
+												.ticks(2)
+												.tickFormat(d3.format(",d"))
+												.orient("bottom");																			
 															
 										var clickHeight = barHeight;
 															
@@ -1566,6 +1629,16 @@
 																						clickHeight += barHeight;
 																						return xt(d.values.total);
 																					});
+																					
+										d3.selectAll(".docx.axis").remove();
+										d3.select(".chart").append("g")
+											.attr("class", "docx axis")
+											.attr("transform", function(d, i) { 
+																return "translate(" + barStartt + "," + clickHeight + ")";
+																})
+											.call(xtAxis)
+											.selectAll("text")
+												.style("text-anchor", "end");																							
 										
 										d3.select(".clickable").remove();
 										
@@ -1602,15 +1675,21 @@
 										var cmax = d3.max(ageData, function(d) { 
 																	return d.values.total;} );
 
-										d3.select("#ageInfo").text("Bars show population (0 - " + d3.format(",d")(cmax) + ")");
+										d3.select("#ageInfo").text(d3.select("#showingtextmap").text() + " for " + d3.select("#brushInfo").text() + ".");
 										
 										var x = d3.scale.linear()
 												.domain([0,cmax])
 												.range([0, cwidth - barStarta - barWidthTrim]);
 
+										var xAxis = d3.svg.axis()
+												.scale(x)
+												.ticks(1)
+												.tickFormat(d3.format(",d"))
+												.orient("bottom");
+
 										var chart = d3.select(".charta")
 												.attr("width", cwidth)
-												.attr("height", aheight);
+												.attr("height", aheight+20);
 
 										chart.append("text")
 												.attr("x", 2)
@@ -1638,7 +1717,16 @@
 												.attr("y", barHeight / 2 - 1)
 												.attr("dy", ".35em")
 												.text(function(d) { return agegrp[+d.key-1]; })
-													.style("font-weight","normal");		
+													.style("font-weight","normal");
+													
+										chart.append("g")
+											.attr("class", "agex axis")
+											.attr("transform", function(d, i) { 
+																return "translate(" + barStarta + "," + aheight + ")";
+																})
+											.call(xAxis)
+											.selectAll("text")  
+												.style("text-anchor", "end");											
 
 										d3.select(".clickabla").remove();
 										
@@ -1675,18 +1763,34 @@
 										var cmax = d3.max(ageData, function(d) { 
 																	return d.values.total;} );
 
-										d3.select("#ageInfo").text("Bars show population (0 - " + d3.format(",d")(cmax) + ")");
+										d3.select("#ageInfo").text(d3.select("#showingtextmap").text() + " for " + d3.select("#brushInfo").text() + ".");
 										
 										var x = d3.scale.linear()
 												.domain([0,cmax])
 												.range([0, cwidth - barStarta - barWidthTrim]);
 
+										var xAxis = d3.svg.axis()
+												.scale(x)
+												.ticks(2)
+												.tickFormat(d3.format(",d"))
+												.orient("bottom");												
+												
 										d3.selectAll(".agerect")
 											.data(ageData)
 												.transition()
 												.duration(barTransitionDur)
 												.attr("width", function (d) { return x(d.values.total); });
 
+										d3.selectAll(".agex.axis").remove();
+										d3.select(".charta").append("g")
+											.attr("class", "agex axis")
+											.attr("transform", function(d, i) { 
+																return "translate(" + barStarta + "," + aheight + ")";
+																})
+											.call(xAxis)
+											.selectAll("text")  
+												.style("text-anchor", "end");											
+																								
 										d3.select(".clickabla").remove();
 										
 										d3.select(".charta").append("rect")
@@ -1927,21 +2031,23 @@
 
                     svg2.append("text")
                       .attr("class", "showtext")
+											.attr("id", "showingtextmap")
                       .attr("x",30)
                       .attr("y",120)
-                      .text(countyName[d.id] + " County");
+                      .text(countyName[d.id]);
 
-                    d3.select(".showingtextgeo").text(countyName[d.id] + " County");
+                    d3.select("#showingtextgeo").text(countyName[d.id] + " County");
                   
                   } else {
 
                     svg2.append("text")
                       .attr("class", "showtext")
+											.attr("id", "showingtextmap")
                       .attr("x",30)
                       .attr("y",120)
                       .text(d.level + " " + d.id);
 
-                    d3.select(".showingtextgeo").text(d.level + " " + d.id);
+                    d3.select("#showingtextgeo").text(d.level + " " + d.id);
 
                   };
 									
