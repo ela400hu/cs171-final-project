@@ -804,7 +804,28 @@
 										.attr("class", "showingtext")
 										.attr("x",showStart+70)
 										.attr("y",showtextHeight*3)
-										.text("All Types of Cases");											
+										.text("All Types of Cases");
+
+                  svgfoot.append("text")
+                    .attr("x",showStart+200)
+                    .attr("y",showtextHeight*1)
+                    .text("(click map to change)")
+											.style("font-size","9px")
+											.style("font-style","italic");
+
+                  svgfoot.append("text")
+                    .attr("x",showStart+200)
+                    .attr("y",showtextHeight*2)
+                    .text("(click bar chart)")
+											.style("font-size","9px")
+											.style("font-style","italic");                    
+										
+									svgfoot.append("text")
+										.attr("x",showStart+200)
+										.attr("y",showtextHeight*3)
+										.text("(click bar chart)")
+											.style("font-size","9px")
+											.style("font-style","italic");											
 														
 									// Brushing
 									//
