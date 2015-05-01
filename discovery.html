@@ -67,10 +67,10 @@
 										<span style="padding-left:10px" id="brushInfo"></span>
 										<span style="padding-left:10px"><i>(Brush to change selection.)</i></span>
 									</form>
+                <div id="divmainfoot"></div>
 								<div id="divmainbody"></div>
-								<div id="divmainfoot"></div>
                 <div id="divsankey"></div>
-                  <h4 id="xh1">Case Paths to Resolution</h4>
+                  <label id="xh1">Case Paths to Resolution: </label>
                   <p id="chart">
                   <aside>Drag to rearrange nodes.</aside>
                   <p>Source: <a href="http://flcourts.org">Florida Office of State Courts Administrator</a>                
@@ -156,7 +156,7 @@
 							var numDistricts = 5;
 							var loDate = selYrs[0];
 							var hiDate = selYrs[1];
-							var showStart = 370;
+							var showStart = 300;
 							var showtextHeight = 15;
 							var expandSymbol = "▹";
 							
@@ -724,6 +724,12 @@
 											
 									// Legend code borrowed from
 									// http://zeroviscosity.com/d3-js-step-by-step/step-3-adding-a-legend
+                  d3.select("#divmainfoot svg").append("text")
+                    .attr("x",10)
+                    .attr("y",10)
+                    .text("Legend:")
+                    .style("font-weight","bold");
+
 									var legend = svgfoot.selectAll('.legend')
 											.data(color.domain())
 											.enter()
@@ -778,15 +784,21 @@
 										.text("Selected:")
 										.style("font-weight","bold");
 			
-									svgfoot.append("text")
-										.attr("class", "showingtext")
-										.attr("x",showStart+10)
-										.attr("y",showtextHeight*2)
-										.text("All Divisions of Court");
+                  svgfoot.append("text")
+                    .attr("class", "showingtextgeo")
+                    .attr("x",showStart+70)
+                    .attr("y",showtextHeight*1)
+                    .text("All of Florida");
+
+                  svgfoot.append("text")
+                    .attr("class", "showingtext")
+                    .attr("x",showStart+70)
+                    .attr("y",showtextHeight*2)
+                    .text("All Divisions of Court");                    
 										
 									svgfoot.append("text")
 										.attr("class", "showingtext")
-										.attr("x",showStart+10)
+										.attr("x",showStart+70)
 										.attr("y",showtextHeight*3)
 										.text("All Types of Cases");											
 														
@@ -1136,34 +1148,34 @@
 									if (selDoc == "") {
 										svgfoot.append("text")
 											.attr("class", "showingtext")
-											.attr("x",showStart+10)
+											.attr("x",showStart+70)
 											.attr("y",showtextHeight*2)
 											.text("All Divisions of Court");
 										svgfoot.append("text")
 											.attr("class", "showingtext")
-											.attr("x",showStart+10)
+											.attr("x",showStart+70)
 											.attr("y",showtextHeight*3)
 											.text("All Types of Cases");											
 									} else if (selToc == "") {
 										svgfoot.append("text")
 											.attr("class", "showingtext")
-											.attr("x",showStart+10)
+											.attr("x",showStart+70)
 											.attr("y",showtextHeight*2)
 											.text(doclist[selDoc-1]);
 										svgfoot.append("text")
 											.attr("class", "showingtext")
-											.attr("x",showStart+10)
+											.attr("x",showStart+70)
 											.attr("y",showtextHeight*3)
 											.text("All Types of Cases");											
 									} else {
 										svgfoot.append("text")
 											.attr("class", "showingtext")
-											.attr("x",showStart+10)
+											.attr("x",showStart+70)
 											.attr("y",showtextHeight*2)
 											.text(doclist[selDoc-1]);
 										svgfoot.append("text")
 											.attr("class", "showingtext")
-											.attr("x",showStart+10)
+											.attr("x",showStart+70)
 											.attr("y",showtextHeight*3)
 											.text(doctoc[selDoc][selToc-1]);
 									};											
@@ -1912,17 +1924,25 @@
                     .text("Selected:");
       
                   if (d.level == "county") {
+
                     svg2.append("text")
                       .attr("class", "showtext")
                       .attr("x",30)
                       .attr("y",120)
-                      .text(countyName[d.id]);
+                      .text(countyName[d.id] + " County");
+
+                    d3.select(".showingtextgeo").text(countyName[d.id] + " County");
+                  
                   } else {
+
                     svg2.append("text")
                       .attr("class", "showtext")
                       .attr("x",30)
                       .attr("y",120)
                       .text(d.level + " " + d.id);
+
+                    d3.select(".showingtextgeo").text(d.level + " " + d.id);
+
                   };
 									
                   if (d.level == "All of") {
