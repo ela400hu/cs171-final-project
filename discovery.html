@@ -8,6 +8,7 @@
 
     <!-- ADD Libraries-->
     <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+    <script src="libs/d3/sankey.js"></script>    
 		<script src="http://d3js.org/topojson.v1.min.js"></script>
 		<script src="http://d3js.org/queue.v1.min.js"></script>
     <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
@@ -20,7 +21,7 @@
     <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
 
     <!-- add own vis classes-->
-    <script src = "js/detailsVis.js"></script>
+    <script src = "js/dd.js"></script>
 
     <!-- add own stylesheet-->
     <link rel="stylesheet" type="text/css" href="css/myStyle.css">
@@ -68,6 +69,11 @@
 									</form>
 								<div id="divmainbody"></div>
 								<div id="divmainfoot"></div>
+                <div id="divsankey"></div>
+                  <h4 id="xh1">Case Paths to Resolution</h4>
+                  <p id="chart">
+                  <aside>Drag to rearrange nodes.</aside>
+                  <p>Source: <a href="http://flcourts.org">Florida Office of State Courts Administrator</a>                
             </div>
 				</div>
 
@@ -284,9 +290,10 @@
                   .defer(d3.csv, 'data/FDCombined.csv')
                   .defer(d3.csv, 'data/Population.csv')
                   .defer(d3.csv, 'data/Income.csv')
+                  .defer(d3.csv, "data/dispodetail.csv")                  
                   .await(allLoaded);
 
-                function allLoaded(error, fdData, pData, iData) {
+                function allLoaded(error, fdData, pData, iData, rData) {
 
 									bothFilDis = fdData.map(function (d) {
                     var fid = +d.id
@@ -349,6 +356,9 @@
 									ageGraph();
 									
 									mainGraph();
+
+                  sankeyData = rData;
+                  initSankey(sankeyData,margin.left,width);                  
 
                 };
 								
@@ -805,6 +815,9 @@
 										};
 										ageUpdate();
 										d3.select("#brushInfo").text(selYrs[0] + " --> " + selYrs[1]);
+
+                    d3.select(".sankeysvg").remove();
+                    updateSankey(sankeyData,margin.left,width);
 										//$(document).trigger("brushChange", [begDate,endDate]);
 									};
 

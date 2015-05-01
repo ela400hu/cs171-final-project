@@ -1,7 +1,7 @@
-function initSankey(rData) {
+function initSankey(rData, marginleft, width) {
 							
 									var margin = {top: 1, right: 1, bottom: 6, left: 1}
-									var width = 890*0.6
+									//var width = 890*0.6
 									var height=320
 //											width = document.getElementById("headline").offsetWidth - mainWidthAdjust - margin.left - margin.right,
 //											height = window.innerHeight*mainHeightPct - margin.top - margin.bottom;
@@ -12,10 +12,10 @@ function initSankey(rData) {
 
 		var svg = d3.select("#chart").append("svg")
 				.attr("class","sankeysvg")
-				.attr("width", width + margin.left + margin.right)
+				.attr("width", width + marginleft + margin.left + margin.right)
 				.attr("height", height + margin.top + margin.bottom)
 			.append("g")
-				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+				.attr("transform", "translate(" + (marginleft + margin.left) + "," + margin.top + ")");
 
 		var sankey = d3.sankey(width)
 				.nodeWidth(15)
@@ -81,10 +81,10 @@ function initSankey(rData) {
 };
 	
 
-function updateSankey(rData) {
+function updateSankey(rData, marginleft, width) {
 							
 									var margin = {top: 1, right: 1, bottom: 6, left: 1}
-									var width = 890*0.6
+									//var width = 890*0.6
 									var height=320
 //											width = document.getElementById("headline").offsetWidth - mainWidthAdjust - margin.left - margin.right,
 //											height = window.innerHeight*mainHeightPct - margin.top - margin.bottom;
@@ -95,10 +95,10 @@ function updateSankey(rData) {
 
 		var svg = d3.select("#chart").append("svg")
 				.attr("class","sankeysvg")
-				.attr("width", width + margin.left + margin.right)
+				.attr("width", width + marginleft + margin.left + margin.right)
 				.attr("height", height + margin.top + margin.bottom)
 			.append("g")
-				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+				.attr("transform", "translate(" + (marginleft + margin.left) + "," + margin.top + ")");
 
 		var sankey = d3.sankey(width)
 				.nodeWidth(15)
