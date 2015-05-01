@@ -83,9 +83,9 @@ function initSankey(rData, marginleft, width) {
 
 function updateSankey(rData, marginleft, width) {
 							
-									var margin = {top: 1, right: 1, bottom: 6, left: 1}
-									//var width = 890*0.6
-									var height=320
+			var margin = {top: 1, right: 1, bottom: 6, left: 1}
+			//var width = 890*0.6
+			var height=320
 //											width = document.getElementById("headline").offsetWidth - mainWidthAdjust - margin.left - margin.right,
 //											height = window.innerHeight*mainHeightPct - margin.top - margin.bottom;
 
