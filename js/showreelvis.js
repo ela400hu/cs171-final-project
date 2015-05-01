@@ -20,16 +20,13 @@ ShowreelVis = function(_parentElement, _whichFile, _growthFlag, _whichSlide, _ev
 
 		this.showFlag = true;
 		
-		numViz = 9;
+		numViz = 6;
 		if (this.whichFile == "0") { this.file = "sr_wl_fd.csv" };
 		if (this.whichFile == "1") { this.file = "sr_ag_pop.csv" };
 		if (this.whichFile == "2") { this.file = "sr_wl_fil.csv" };
 		if (this.whichFile == "3") { this.file = "sr_wl_dis.csv" };
 		if (this.whichFile == "4") { this.file = "sr_fl_bud.csv" };
 		if (this.whichFile == "5") { this.file = "sr_ju_bud.csv" };
-		if (this.whichFile == "6") { this.file = "sr_ag_pop2.csv" };
-		if (this.whichFile == "7") { this.file = "sr_co_dtc.csv" };
-		if (this.whichFile == "8") { this.file = "sr_co_c1y.csv" };
 		
     this.srVis();
 }
@@ -51,10 +48,11 @@ ShowreelVis.prototype.srVis = function () {
 	var whichFile = this.whichFile;
 	var growthFlag = this.growthFlag;
 
-	var m = [20, 20, 30, 20];
-	var txtm = 140;
-	var w = document.getElementById("headline").offsetWidth - m[1] - m[3];
-	var h = window.innerHeight*0.8 - m[0] - m[2];
+	var m = [20, 0, 30, 20]; //CHANGE
+	var w = 960 - m[1] - m[3];
+
+	// var h = 700 - m[0] - m[2];
+	var h = 450 - m[0] - m[2];//CHANGE
 
 	var x = 0;
 	var y = 0;
@@ -64,20 +62,16 @@ ShowreelVis.prototype.srVis = function () {
 	var color = d3.scale.category10();
 	
 	for (i = 0; i < numViz; i++) {
-		d3.select(".srsvg"+i).attr("visibility", "hidden");
-	};
-		
-	for (i = 0; i < numViz; i++) {
 		d3.select(".srsvg"+i).remove();
 	};
 
 	var svg = d3.select("#showreelVis").append("svg")
 			.attr("class", "srsvg"+whichFile)
-			.attr("visibility", "visible")
-			.attr("width", w + m[1] + m[3])
+			.attr("width", w + m[1] + m[3] + 100)
 			.attr("height", h + m[0] + m[2])
 		.append("g")
-			.attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+			// .attr("transform", "translate(" + m[3] + "," + m[0] + ")"); //CHANGE
+			.attr("transform", "translate(" + 0 + "," + m[0] + ")"); 
 
 	var stocks="";
 	var symbols="";
@@ -185,7 +179,12 @@ ShowreelVis.prototype.srVis = function () {
 	};
 
 	function lines(rep, callback) {
-		x = d3.time.scale().range([0, w - txtm]);
+
+				var colorKustom = d3.scale.ordinal() //CHANGE
+		.range(["#D31D8C", "#EE88CD", "#4DC5D6", "#A5F2F3", "#BCDD11", "#007034", "#F1FAC0", "#a79e65", "#982395", "#3f0082", "#f76835", "#FFA200"]); 
+
+
+		x = d3.time.scale().range([0, w - 60]);
 		y = d3.scale.linear().range([h / symbols.length - 20, 0]);
 
 		// Compute the minimum and maximum date across symbols.
@@ -205,9 +204,9 @@ ShowreelVis.prototype.srVis = function () {
 
 			e.append("circle")
 					.attr("r", 5)
-					.style("fill", function(d) { return color(d.key); })
-					.style("stroke", "#000b95")
-					.style("opacity", ".7")
+					// .style("fill", function(d) { return color(d.key); })  // CHANGE
+					.style("fill", function(d, i) { return colorKustom(d.key); })
+					.style("stroke", "#000")
 					.style("stroke-width", "2px");
 
 			e.append("text")
@@ -217,6 +216,12 @@ ShowreelVis.prototype.srVis = function () {
 		});
 
 		function draw(k) {
+
+				var colorKustom = d3.scale.ordinal() //CHANGE
+		.range(["#D31D8C", "#EE88CD", "#4DC5D6", "#A5F2F3", "#BCDD11", "#007034", "#F1FAC0", "#a79e65", "#982395", "#3f0082", "#f76835", "#FFA200"]);
+
+
+
 			g.each(function(d) {
 				var e = d3.select(this);
 				y.domain([0, d.maxPrice]);
@@ -262,26 +267,27 @@ ShowreelVis.prototype.srVis = function () {
 			.append("clipPath")
 				.attr("id", "clip")
 			.append("rect")
-				.attr("width", w + txtm)
-				.attr("height", h / symbols.length - 10);
+				.attr("width", w+100)
+				.attr("height", h / symbols.length - 20);
 
-		var color2 = d3.scale.ordinal()
-				.range(["#c6dbef", "#9ecae1", "#6baed6"]);
+		var color2 = d3.scale.ordinal() //CHANGE
+		.range(["#51a6da", "#005595", "#00355f"]); //fathom blues
+
 
 		var g = svg.selectAll(".symbol")
 				.attr("clip-path", "url(#clip)");
 
 		area
-				.y0(h / symbols.length - 10);
+				.y0(h / symbols.length - 20);
 
 		g.select("circle").transition()
 				.duration(duration)
-				.attr("transform", function(d) { return "translate(" + (w - txtm) + "," + (-h / symbols.length) + ")"; })
+				.attr("transform", function(d) { return "translate(" + (w - 60) + "," + (-h / symbols.length) + ")"; })
 				.remove();
 
 		g.select("text").transition()
 				.duration(duration)
-				.attr("transform", function(d) { return "translate(" + (w - txtm) + "," + (h / symbols.length - 25) + ")"; })
+				.attr("transform", function(d) { return "translate(" + (w - 60) + "," + (h / symbols.length - 30) + ")"; })
 				.attr("dy", "0em");
 
 		g.each(function(d) {
@@ -325,11 +331,14 @@ ShowreelVis.prototype.srVis = function () {
 	}
 
 	function areas(callback) {
+
+				var colorKustom = d3.scale.ordinal() //CHANGE
+		.range(["#D31D8C", "#EE88CD", "#4DC5D6", "#A5F2F3", "#BCDD11", "#007034", "#F1FAC0", "#a79e65", "#982395", "#3f0082", "#f76835", "#FFA200"]); 
 		
 		var g = svg.selectAll(".symbol");
 
 		axis
-				.y(h / symbols.length - 11);
+				.y(h / symbols.length - 21);
 
 		g.select(".line")
 				.attr("d", function(d) { return axis(d.values); });
@@ -354,7 +363,9 @@ ShowreelVis.prototype.srVis = function () {
 					.filter(function(d, i) { return !i; })
 				.transition()
 					.duration(duration)
-					.style("fill", color(d.key))
+
+// .style("fill", color(d.key))  //CHANGE
+					.style("fill", colorKustom(d.key))  
 					.attr("d", area(d.values));
 		});
 
@@ -380,6 +391,9 @@ ShowreelVis.prototype.srVis = function () {
 	}
 
 	function stackedArea(callback) {
+
+				var colorKustom = d3.scale.ordinal() //CHANGE
+		.range(["#D31D8C", "#EE88CD", "#4DC5D6", "#A5F2F3", "#BCDD11", "#007034", "#F1FAC0", "#a79e65", "#982395", "#3f0082", "#f76835", "#FFA200"]); 
 		
 		var stack = d3.layout.stack()
 				.values(function(d) { return d.values; })
@@ -408,7 +422,8 @@ ShowreelVis.prototype.srVis = function () {
 				.each("end", function() { d3.select(this).attr("transform", null); });
 
 		t.select("path.area")
-				.style("fill", function(d) { return color(d.key) } )
+				.style("fill", function(d) { return colorKustom(d.key) } ) 
+// style("fill", function(d) { return color(d.key) } ) //CHANGE
 				.attr("d", function(d) { return area(d.values); });
 
 		t.select("path.line")
@@ -416,7 +431,7 @@ ShowreelVis.prototype.srVis = function () {
 				.attr("d", function(d) { return line(d.values); });
 
 		t.select("text")
-				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - txtm) + "," + y(d.price / 2 + d.price0) + ")"; });
+				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.price / 2 + d.price0) + ")"; });
 
 		if (that.whichSlide == "4") {
 			that.showFlag = false;
@@ -432,6 +447,11 @@ ShowreelVis.prototype.srVis = function () {
 	}
 
 	function streamgraph(callback) {
+
+		var colorKustom = d3.scale.ordinal() //CHANGE
+		.range(["#D31D8C", "#EE88CD", "#4DC5D6", "#A5F2F3", "#BCDD11", "#007034", "#F1FAC0", "#a79e65", "#982395", "#3f0082", "#f76835", "#FFA200"]); 
+
+
 		var stack = d3.layout.stack()
 				.values(function(d) { return d.values; })
 				.x(function(d) { return d.date; })
@@ -451,7 +471,9 @@ ShowreelVis.prototype.srVis = function () {
 				.attr("transform", "translate(0,0)");
 
 		t.select("path.area")
-				.style("fill", function(d) { return color(d.key) } )
+// .style("fill", function(d) { return color(d.key) } ) //CHANGE
+
+				.style("fill", function(d) { return colorKustom(d.key) } )
 				.attr("d", function(d) { return area(d.values); });
 
 		t.select("path.line")
@@ -459,7 +481,7 @@ ShowreelVis.prototype.srVis = function () {
 				.attr("d", function(d) { return line(d.values); });
 
 		t.select("text")
-				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - txtm) + "," + y(d.price / 2 + d.price0) + ")"; });
+				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.price / 2 + d.price0) + ")"; });
 
 		if (that.whichSlide == "5") {
 			that.showFlag = false;
@@ -475,6 +497,11 @@ ShowreelVis.prototype.srVis = function () {
 	}
 
 	function overlappingArea(callback) {
+
+		var colorKustom = d3.scale.ordinal() // change
+		.range(["#D31D8C", "#EE88CD", "#4DC5D6", "#A5F2F3", "#BCDD11", "#007034", "#F1FAC0", "#a79e65", "#982395", "#3f0082", "#f76835", "#FFA200"]); 
+
+
 		var g = svg.selectAll(".symbol");
 
 		line
@@ -504,18 +531,19 @@ ShowreelVis.prototype.srVis = function () {
 				.attr("d", function(d) { return line(d.values); });
 
 		t.select(".area")
-				.style("fill", function(d) { return color(d.key) } )
+		// .style("fill", function(d) { return color(d.key) } )
+				.style("fill", function(d) { return colorKustom(d.key) } )
 				.style("fill-opacity", .5)
 				.attr("d", function(d) { return area(d.values); });
 
 		t.select("text")
 				.attr("dy", ".31em")
-				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - txtm) + "," + y(d.price) + ")"; });
+				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.price) + ")"; });
 
 		svg.append("line")
 				.attr("class", "line")
 				.attr("x1", 0)
-				.attr("x2", w - txtm)
+				.attr("x2", w - 60)
 				.attr("y1", h)
 				.attr("y2", h)
 				.style("stroke-opacity", 1e-6)
@@ -537,9 +565,13 @@ ShowreelVis.prototype.srVis = function () {
 	}
 
 	function groupedBar(callback) {
+
+		var colorKustom = d3.scale.ordinal() //change
+		.range(["#D31D8C", "#EE88CD", "#4DC5D6", "#A5F2F3", "#BCDD11", "#007034", "#F1FAC0", "#a79e65", "#982395", "#3f0082", "#f76835", "#FFA200"]); 
+
 		x = d3.scale.ordinal()
 				.domain(symbols[0].values.map(function(d) { return d.date; }))
-				.rangeBands([0, w - txtm], .1);
+				.rangeBands([0, w - 60], .1);
 
 		var x1 = d3.scale.ordinal()
 				.domain(symbols.map(function(d) { return d.key; }))
@@ -557,7 +589,8 @@ ShowreelVis.prototype.srVis = function () {
 				.remove();
 
 		t.select(".area")
-				.style("fill", function(d) { return color(d.key) } )
+		// .style("fill", function(d) { return color(d.key) } ) //CHANGE
+				.style("fill", function(d) { return colorKustom(d.key) } ) 
 				.style("fill-opacity", 1e-6)
 				.remove();
 
@@ -569,7 +602,8 @@ ShowreelVis.prototype.srVis = function () {
 					.attr("y", function(d) { return y(d.price); })
 					.attr("width", x1.rangeBand())
 					.attr("height", function(d) { return h - y(d.price); })
-					.style("fill", color(p.key))
+// .style("fill", color(p.key)) //CHANGE
+					.style("fill", colorKustom(p.key)) 
 					.style("fill-opacity", 1e-6)
 				.transition()
 					.duration(duration)
@@ -590,7 +624,12 @@ ShowreelVis.prototype.srVis = function () {
 	}
 
 	function stackedBar(callback) {
-		x.rangeRoundBands([0, w - txtm], .1);
+
+		var colorKustom = d3.scale.ordinal() //CHANGE
+		.range(["#D31D8C", "#EE88CD", "#4DC5D6", "#A5F2F3", "#BCDD11", "#007034", "#F1FAC0", "#a79e65", "#982395", "#3f0082", "#f76835", "#FFA200"]); 
+
+
+		x.rangeRoundBands([0, w - 60], .1);
 
 		var stack = d3.layout.stack()
 				.values(function(d) { return d.values; })
@@ -614,7 +653,7 @@ ShowreelVis.prototype.srVis = function () {
 
 		t.select("text")
 				.delay(symbols[0].values.length * 10)
-				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - txtm) + "," + y(d.price / 2 + d.price0) + ")"; });
+				.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.price / 2 + d.price0) + ")"; });
 
 		t.selectAll("rect")
 				.delay(function(d, i) { return i * 10; })
