@@ -53,7 +53,7 @@ ShowreelVis.prototype.srVis = function () {
 
 	var m = [20, 20, 30, 20];
 	var txtm = 240;
-	var menm = 120;
+	var menm = 170;
 	var w = window.innerWidth - m[1] - m[3];
 	var h = window.innerHeight - m[0] - m[2] - menm;
 
@@ -167,7 +167,13 @@ ShowreelVis.prototype.srVis = function () {
 										if (allFlag) {
 											svg.selectAll("*").remove();
 											svg.selectAll("g").data(symbols).enter().append("g").attr("class", "symbol");
-											that.showFlag && showreel();
+											if (that.showFlag) {
+												if (firstTime) {
+													mydef1.resolve();
+												} else {
+													showreel();
+												};
+											};
 										};
 										setTimeout(function(){d3.select(".srsvg"+whichFile).attr("visibility", "visible")},1000);
 										});

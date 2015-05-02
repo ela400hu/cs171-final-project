@@ -62,16 +62,16 @@ outline: none;
 		    <form>
 					<span style="padding-left:10px"> </span>
 					<label> Dataset: 
-					<select class="sf">
+					<select id="sfid" class="sf">
 						<option value="0">Filings & Dispositions</option>
-						<option value="6">Age Demo by 4</option>
-						<option value="7">Days to Close</option>
-						<option value="8">Clearance Rate</option>
 						<option value="1">Age Demographics</option>
 						<option value="2">Filings</option>
 						<option value="3">Dispositions</option>
 						<option value="4">Florida Budget</option>
 						<option value="5">Judicial Budget</option>
+						<option value="6">Age Demo by 4</option>
+						<option value="7">Days to Close</option>
+						<option value="8">Clearance Rate</option>
 					</select>
 					</label>
 					<span style="padding-left:10px"> </span>
@@ -148,6 +148,8 @@ outline: none;
         $(function(){ // this function is called after the HTML document is fully loaded
 
             // variables keeping global knowledge of the data
+            firstTime = true;
+            firstCount = 0;
 			whichFile = "0";
 			whichViz = "0";
 			growthFlag = false;
@@ -155,19 +157,65 @@ outline: none;
             // call this function after Data is loaded, reformatted and bound to the variables
             var initVis = function(){
 
-	            //Create an eventHandler
-	            var MyEventHandler = new Object();
+            	function firstInit() {
 
-	            //Instantiate all Vis Objects here
-				var sr_obj = new ShowreelVis(d3.select("#showreelVis"), whichFile, growthFlag, whichViz, MyEventHandler);
-										
-	            // Bind the eventHandler to the Vis Objects
-	            $(document).on("menuChange",
-					function (MyEventHandler) { 
-						sr_obj.onSelectionChange()
-					});
+            		document.getElementById("sfid").selectedIndex = firstCount;
+
+            		mydef1 = $.Deferred();
+
+		            //Create an eventHandler
+		            var MyEventHandler = new Object();
+
+		            //Instantiate all Vis Objects here
+					var sr_obj = new ShowreelVis(d3.select("#showreelVis"), whichFile, growthFlag, whichViz, MyEventHandler);
+											
+		            // Bind the eventHandler to the Vis Objects
+		            $(document).on("menuChange",
+						function (MyEventHandler) { 
+							sr_obj.onSelectionChange()
+						});
+
+		            return mydef1;
+
+				};
+
+				function firstMoveon() {
+
+					firstCount += 1;
+	    			if (firstCount > 8) {
+	    				firstCount = 0;
+	    			};
+
+	    			$(document).trigger("menuChange");
+					whichFile = firstCount.toString();
+					delete sr_obj;
+
+					setTimeout(initVis, 100);
+
+				};
+
+            	function otherFunction() {
+
+		            //Create an eventHandler
+		            var MyEventHandler = new Object();
+
+		            //Instantiate all Vis Objects here
+					var sr_obj = new ShowreelVis(d3.select("#showreelVis"), whichFile, growthFlag, whichViz, MyEventHandler);
+											
+		            // Bind the eventHandler to the Vis Objects
+		            $(document).on("menuChange",
+						function (MyEventHandler) { 
+							sr_obj.onSelectionChange()
+						});
+	        	};
+
+	        	if (firstTime) {
+		        	firstInit().done(firstMoveon);
+		        } else {
+		        	otherFunction();
+		        }
 															
-            }
+            };
 
             var startHere = function(){
 						
@@ -175,17 +223,19 @@ outline: none;
 				// Event Handlers
 				//
 
-				// Which visualization
-				d3.selectAll('.ra').on('change', function () {
-					$(document).trigger("menuChange");
-					growthFlag = this.value=="true";
-					delete sr_obj;
-					setTimeout(initVis, 1);
-					//initVis();
-				});
+				// Which view of the data
+				// d3.selectAll('.ra').on('change', function () {
+				// 	firstTime = false;
+				// 	$(document).trigger("menuChange");
+				// 	growthFlag = this.value=="true";
+				// 	delete sr_obj;
+				// 	setTimeout(initVis, 1);
+				// 	//initVis();
+				// });
 
 				// Which File
 				d3.select('.sf').on("change", function() {
+					firstTime = false;
 					$(document).trigger("menuChange");
 					whichFile = this.options[this.selectedIndex].value;
 					delete sr_obj;
@@ -194,6 +244,7 @@ outline: none;
 
 				// Which Viz
 				d3.select('.sv').on("change", function() {
+					firstTime = false;
 					$(document).trigger("menuChange");
 					whichViz = this.options[this.selectedIndex].value;
 					delete sr_obj;
