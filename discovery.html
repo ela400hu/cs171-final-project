@@ -99,7 +99,9 @@
 						selDoc = ""; // Selected Division of Court
 						selToc = ""; // Selected Type of Case
 						selAge = 0; // Selected Age Group
-						selGeo = []; // Selected Counties by id
+            selGeo = []; // Selected Counties by id
+            multGeo = []; // Selected Counties by id
+            selectingWhich = 3; // For Multi-Selection reset
 						allGeo = []; // All Counties by id
 						allYrs = [1986,2013]; // All Years (1986-2013)
 						selYrs = allYrs; // Selected Years (default 1986-2013)
@@ -166,6 +168,7 @@
 							var showtextHeight = 15;
 							var expandSymbol = "▹";
 							var contractSymbol = "◃";
+              var firstGeoSelect = true;
 							
               //
               // Division of Court / Type of Case
@@ -1998,8 +2001,27 @@
   											.attr("id", function (d) { return d.id })
   											.attr("d", path)
                         .on("click", function (d) {
-																geoClick({"level":"county", "id":d.id});
-																d3.select(this).classed("cselected",true);
+                                if (selectingWhich != 0) {
+                                  multGeo = [];
+                                  d3.selectAll(".cpath").classed("cselected",false);
+                                  selectingWhich = 0;
+                                };
+                                if (d3.select(this).classed("cselected")) {
+                                  var idx = multGeo.indexOf(d.id);
+                                  if (idx >= 0) {
+                                    multGeo.splice(idx, 1);
+                                  };
+                                  if (multGeo.length == 0) {
+                                    geoClick({"level":"All of", "id":"Florida"});
+                                  } else {
+                                    geoClick({"level":"county", "id":d.id});
+                                  };
+                                  d3.select(this).classed("cselected",false);
+                                } else {
+                                  multGeo.push(d.id);
+																  geoClick({"level":"county", "id":d.id});
+																  d3.select(this).classed("cselected",true);
+                                };
 														})
                         .on("mousemove", function (d,i) {
                           var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
@@ -2025,10 +2047,39 @@
                       .attr("id", i)
                       .attr("visibility", "hidden")
                       .attr("d", path)
-                      .on("click", function (d) { 
-																	geoClick({"level":"Circuit", "id":+d3.select(this).attr("id")});
-																	d3.select(this).classed("cselected",true);
-																}
+                      .on("click", function (d) {
+                                if (selectingWhich != 1) {
+                                  multGeo = [];
+                                  d3.selectAll(".cpath").classed("cselected",false);
+                                  selectingWhich = 1;
+                                };                        
+                                
+                                var useid = +d3.select(this).attr("id");
+                                var countyList = countyCircuitIds[useid];
+                                
+                                if (d3.select(this).classed("cselected")) {
+                                  for (var i = 0; i < countyList.length; i++) {
+                                    var idx = multGeo.indexOf(countyList[i]);
+                                    if (idx >= 0) {
+                                      multGeo.splice(idx, 1);
+                                    };
+                                  };
+                                  if (multGeo.length == 0) {
+                                    geoClick({"level":"All of", "id":"Florida"});
+                                  } else {
+                                    geoClick({"level":"Circuit", "id":useid});
+                                  };
+                                  d3.select(this).classed("cselected",false);
+                                } else {
+                                  multGeo.push.apply(multGeo, countyList);
+                                  geoClick({"level":"Circuit", "id":useid});
+                                  d3.select(this).classed("cselected",true);
+                                };
+
+                            }
+																//	geoClick({"level":"Circuit", "id":+d3.select(this).attr("id")});
+																//	d3.select(this).classed("cselected",true);
+																//}
                       )
                       .on("mousemove", function (d,i) {
                         var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
@@ -2052,10 +2103,40 @@
                       .attr("id", i)
                       .attr("visibility", "hidden")
                       .attr("d", path)
-                      .on("click", function (d) { 
-																geoClick({"level":"District", "id":+d3.select(this).attr("id")});
-																d3.select(this).classed("cselected",true);
-                      })
+                      .on("click", function (d) {
+                                if (selectingWhich != 2) {
+                                  multGeo = [];
+                                  d3.selectAll(".cpath").classed("cselected",false);
+                                  selectingWhich = 2;
+                                };                        
+                                
+                                var useid = +d3.select(this).attr("id");
+                                var countyList = countyDistrictIds[useid];
+                                
+                                if (d3.select(this).classed("cselected")) {
+                                  for (var i = 0; i < countyList.length; i++) {
+                                    var idx = multGeo.indexOf(countyList[i]);
+                                    if (idx >= 0) {
+                                      multGeo.splice(idx, 1);
+                                    };
+                                  };
+                                  if (multGeo.length == 0) {
+                                    geoClick({"level":"All of", "id":"Florida"});
+                                  } else {
+                                    geoClick({"level":"District", "id":useid});
+                                  };
+                                  d3.select(this).classed("cselected",false);
+                                } else {
+                                  multGeo.push.apply(multGeo, countyList);
+                                  geoClick({"level":"District", "id":useid});
+                                  d3.select(this).classed("cselected",true);
+                                };
+
+                            }
+															//	geoClick({"level":"District", "id":+d3.select(this).attr("id")});
+															//	d3.select(this).classed("cselected",true);
+                              //}
+                      )
                       .on("mousemove", function (d,i) {
                         var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
 
@@ -2077,7 +2158,10 @@
                     .attr("id", "fl")
                     .attr("visibility", "hidden")
                     .attr("d", path)
-                    .on("click", function (d) { 
+                    .on("click", function (d) {
+                                multGeo = [];
+                                d3.selectAll(".cpath").classed("cselected",false);
+                                selectingWhich = 3;
 																geoClick({"level":"All of", "id":"Florida"})
 																d3.select(this).classed("cselected",true);
 															})
@@ -2097,7 +2181,7 @@
 
                 var geoClick = function(d){
 
-                  d3.selectAll(".cpath").classed("cselected",false);
+                  //d3.selectAll(".cpath").classed("cselected",false);
                   d3.selectAll(".showtext").remove();
       
                   svg2.append("text")
@@ -2108,15 +2192,86 @@
       
                   if (d.level == "county") {
 
-                    svg2.append("text")
-                      .attr("class", "showtext")
-											.attr("id", "showingtextmap")
-                      .attr("x",30)
-                      .attr("y",120)
-                      .text(countyName[d.id]);
+                    if (multGeo.length == 1) {
+                    
+                      svg2.append("text")
+                        .attr("class", "showtext")
+  											.attr("id", "showingtextmap")
+                        .attr("x",30)
+                        .attr("y",120)
+                        .text(countyName[multGeo[0]]);
 
-                    d3.select("#showingtextgeo").text(countyName[d.id] + " County");
+                      d3.select("#showingtextgeo").text(countyName[multGeo[0]] + " County");
+
+                    } else {
+                      
+                      svg2.append("text")
+                        .attr("class", "showtext")
+                        .attr("id", "showingtextmap")
+                        .attr("x",30)
+                        .attr("y",120)
+                        .text("Multiple Counties");
+
+                      d3.select("#showingtextgeo").text("Multiple Counties");
+                    
+                    };
                   
+                  } else if (d.level == "Circuit") {
+
+                      var useid = countyCircuit[multGeo[0]];
+
+                      if (multGeo.length == countyCircuitIds[useid].length) {
+                      
+                        svg2.append("text")
+                          .attr("class", "showtext")
+                          .attr("id", "showingtextmap")
+                          .attr("x",30)
+                          .attr("y",120)
+                          .text(d.level + " " + useid);
+
+                        d3.select("#showingtextgeo").text(d.level + " " + useid);
+
+                      } else {
+                        
+                        svg2.append("text")
+                          .attr("class", "showtext")
+                          .attr("id", "showingtextmap")
+                          .attr("x",30)
+                          .attr("y",120)
+                          .text("Multiple Circuits");
+
+                        d3.select("#showingtextgeo").text("Multiple Circuits");
+                      
+                      };
+
+                  } else if (d.level == "District") {
+
+                      var useid = countyDistrict[multGeo[0]];
+
+                      if (multGeo.length == countyDistrictIds[useid].length) {
+                      
+                        svg2.append("text")
+                          .attr("class", "showtext")
+                          .attr("id", "showingtextmap")
+                          .attr("x",30)
+                          .attr("y",120)
+                          .text(d.level + " " + useid);
+
+                        d3.select("#showingtextgeo").text(d.level + " " + useid);
+
+                      } else {
+                        
+                        svg2.append("text")
+                          .attr("class", "showtext")
+                          .attr("id", "showingtextmap")
+                          .attr("x",30)
+                          .attr("y",120)
+                          .text("Multiple Districts");
+
+                        d3.select("#showingtextgeo").text("Multiple Districts");
+                      
+                      };
+
                   } else {
 
                     svg2.append("text")
@@ -2133,11 +2288,11 @@
                   if (d.level == "All of") {
 										selGeo = copy(allGeo);
 									} else if (d.level == "District") {
-										selGeo = copy(countyDistrictIds[d.id]);
+										selGeo = copy(multGeo);//countyDistrictIds[d.id]);
 									} else if (d.level == "Circuit") {
-										selGeo = copy(countyCircuitIds[d.id]);
+										selGeo = copy(multGeo);//countyCircuitIds[d.id]);
 									} else {
-										selGeo = [d.id];
+										selGeo = copy(multGeo);
 									};
 
                   if (d.id != "Florida ") {
@@ -2183,6 +2338,9 @@
                   };
                   if (flaSelected == "3") {
                     d3.selectAll(".florida").attr("visibility", "visible");
+                    multGeo = [];
+                    d3.selectAll(".cpath").classed("cselected",false);
+                    selectingWhich = 3;
 										geoClick({"level":"All of", "id":"Florida"});
 										d3.selectAll(".florida").classed("cselected",true);
                   };
