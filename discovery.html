@@ -64,9 +64,10 @@
 										<span title="Indexed data is expressed as a percentage of the 1986 value.">
                       <input type="radio" class="cd" name="display" value="1"></input> Indexed</span> 
 										<span style="padding-left:30px"> </span>
-										<label>Selected Year(s): 
+										<!-- <label>Selected Year(s):  -->
+										<label>Brush Selection:
 										<span style="padding-left:8px" id="brushInfo"></span></label>
-										<span style="padding-left:8px; font-size: 9px;"><i>(Brush to change.)</i></span>
+										<!-- <span style="padding-left:8px; font-size: 9px;"><i>(Brush to change.)</i></span> -->
 									</form>
                 <div id="divmainfoot"></div>
 								<div id="divmainbody"></div>
@@ -807,26 +808,26 @@
 										.attr("y",showtextHeight*3)
 										.text("All Types of Cases");
 
-                  svgfoot.append("text")
-                    .attr("x",showStart+200)
-                    .attr("y",showtextHeight*1)
-                    .text("(click map to change)")
-											.style("font-size","9px")
-											.style("font-style","italic");
+           //        svgfoot.append("text")
+           //          .attr("x",showStart+200)
+           //          .attr("y",showtextHeight*1)
+           //          .text("(click map to change)")
+											// .style("font-size","9px")
+											// .style("font-style","italic");
 
-                  svgfoot.append("text")
-                    .attr("x",showStart+200)
-                    .attr("y",showtextHeight*2)
-                    .text("(click bar chart)")
-											.style("font-size","9px")
-											.style("font-style","italic");                    
+           //        svgfoot.append("text")
+           //          .attr("x",showStart+200)
+           //          .attr("y",showtextHeight*2)
+           //          .text("(click bar chart)")
+											// .style("font-size","9px")
+											// .style("font-style","italic");                    
 										
-									svgfoot.append("text")
-										.attr("x",showStart+200)
-										.attr("y",showtextHeight*3)
-										.text("(click bar chart)")
-											.style("font-size","9px")
-											.style("font-style","italic");											
+									// svgfoot.append("text")
+									// 	.attr("x",showStart+200)
+									// 	.attr("y",showtextHeight*3)
+									// 	.text("(click bar chart)")
+									// 		.style("font-size","9px")
+									// 		.style("font-style","italic");											
 														
 									// Brushing
 									//

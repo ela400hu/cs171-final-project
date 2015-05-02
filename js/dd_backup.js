@@ -99,6 +99,7 @@ function updateSankey(rData, marginleft, width) {
 		var formatNumber = d3.format(",.0f"),
 				format = function(d) { return formatNumber(d) + " Cases"; },
 				color = d3.scale.category20();
+				
 
 		var svg = d3.select("#chart").append("svg")
 				.attr("class","sankeysvg")
