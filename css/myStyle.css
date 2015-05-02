@@ -108,14 +108,31 @@ path.cpath {
 	stroke-width: .5px;
 }
 
-path.cpath:hover {
+/*path.cpath:hover {
 	fill: steelblue;
-/* 	fill: #e81d5e; pink */
+ 	fill: #e81d5e; pink 
 }
 
 path.cpath.cselected {
 	fill: steelblue;
+}*/
+
+
+
+path.cpath {
+  fill: #faab02;
+  stroke: #fa2f02;
+  stroke-width: .5px;
 }
+
+path.cpath:hover {
+  fill: #e81d5e;
+}
+
+path.cpath.cselected {
+  fill: #e81d5e;
+}
+
 
 div.tooltip {
   color: #222; 

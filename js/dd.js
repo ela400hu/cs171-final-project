@@ -8,7 +8,10 @@ function initSankey(rData, marginleft, width) {
 
 		var formatNumber = d3.format(",.0f"),
 				format = function(d) { return formatNumber(d) + " Cases"; },
-				color = d3.scale.category20();
+				// color = d3.scale.category20();
+				color = d3.scale.ordinal() //CHANGE
+		.range(["#293e6a", "#3b5998", "#009d97", "#7ec2aa", "#442d65", "#775ba3", "#999900", "#333300", "#ff9700", "#cc6600", "#57102c", "#aa2159"]); 
+
 
 		var svg = d3.select("#chart").append("svg")
 				.attr("class","sankeysvg")
@@ -98,19 +101,29 @@ function updateSankey(rData, marginleft, width) {
 
 		var formatNumber = d3.format(",.0f"),
 				format = function(d) { return formatNumber(d) + " Cases"; },
-				color = d3.scale.category20();
+				// color = d3.scale.category20();
+				color = d3.scale.ordinal() //CHANGE
+		.range(["#293e6a", "#3b5998", "#009d97", "#7ec2aa", "#442d65", "#775ba3", "#999900", "#333300", "#ff9700", "#cc6600", "#57102c", "#aa2159"]); 
+
 
 		var svg = d3.select("#chart").append("svg")
 				.attr("class","sankeysvg")
 				.attr("width", width + marginleft + margin.left + margin.right)
 				.attr("height", height + margin.top + margin.bottom)
 			.append("g")
-				.attr("transform", "translate(" + (marginleft + margin.left) + "," + margin.top + ")");
+				.attr("transform", "translate(" + 0 + "," + margin.top + ")");
+				// .attr("transform", "translate(" + (marginleft + margin.left) + "," + margin.top + ")");
 
-		var sankey = d3.sankey(width)
+		var sankey = d3.sankey(width + marginleft + margin.left + margin.right)
 				.nodeWidth(15)
 				.nodePadding(10)
-				.size([width, height]);
+				.size([width + marginleft + margin.left + margin.right, height]);
+
+		// var sankey = d3.sankey(width)
+		// 		.nodeWidth(15)
+		// 		.nodePadding(10)
+		// 		.size([width, height]);
+
 
 		var path = sankey.link();
 

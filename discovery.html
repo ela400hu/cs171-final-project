@@ -133,7 +133,10 @@
 							var width = document.getElementById("headline").offsetWidth - mainWidthAdjust - margin.left - margin.right;
 							var height = window.innerHeight*mainHeightPct - margin.top - margin.bottom;
 							var footHeight = 60;
-							var color = d3.scale.category10();
+							// var color = d3.scale.category10();
+							var color = d3.scale.ordinal() //CHANGE
+		.range(["#293e6a", "#3b5998", "#009d97", "#7ec2aa", "#442d65", "#775ba3", "#999900", "#333300", "#ff9700", "#cc6600", "#57102c", "#aa2159"]); 
+
 							var numYears = 28;
 							var yearAxisLabelX = 15;
 							var yearAxisLabelY = -15;
@@ -546,14 +549,14 @@
 										.append("g")
 											.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-									//
+									//                YEARS have an iconic number format - extra Label adds clutter
 									// Axis Labels
-									d3.select("#divmainbody svg").append("text")
-											.attr("class", "x label")
-											.attr("text-anchor", "end")
-											.attr("x", margin.left + width/2)
-											.attr("y", height + margin.top + margin.bottom - 7)
-											.text("Year");
+									// d3.select("#divmainbody svg").append("text")
+									// 		.attr("class", "x label")
+									// 		.attr("text-anchor", "end")
+									// 		.attr("x", margin.left + width/2)
+									// 		.attr("y", height + margin.top + margin.bottom - 7)
+									// 		.text("Year");
 
 									d3.select("#divmainbody svg").append("text")
 											.attr("class", "y label")
