@@ -98,6 +98,7 @@
             vizSelected = 0; // Raw (0) or Indexed (1) selected
 						selDoc = ""; // Selected Division of Court
 						selToc = ""; // Selected Type of Case
+            mulToc = {}; // Multi-Selected Types of Cases
             selAge = 0; // Selected Age Group
             multAge = []; // Multi-Selected Age Groups
             selGeo = []; // Selected Counties by id
@@ -151,18 +152,19 @@
 							var barTransitionDur = 500;
 							var cwidth = 250;
 							var cheight = 180;
-							var barStartd = 90;
-							var barStartt = 120;
+							var barStartd = 90+12;
+							var barStartt = 120+12;
 							var barStarta = 60;
 							var barHeight = 15;
 							var barWidthTrim = 10;
 							var barHeightTrim = 2;
-							var barTextX = 3;
+							var barTextX = 3+12;
 							var aheight = 210;
 							var cidMin = 12000;
 							var cidMax = 13000;
 							var numCircuits = 20;
 							var numDistricts = 5;
+              var numCaseTypes = 48;
 							var loDate = selYrs[0];
 							var hiDate = selYrs[1];
 							var showStart = 300;
@@ -229,7 +231,14 @@
 												 "DUI",
 												 "Non-DUI Crim. Traffic"]
 									};
-							
+
+              for (var i = 1; i <= 7; i++) {
+                mulToc[i] = [];
+                for (var j = 0; j < doctoc[""+i].length; j++) {
+                  mulToc[i].push(1);
+                };
+              };
+
 							var agegrp = ["Age < 1","Age 1-4","Age 5-9","Age 10-14","Age 15-19","Age 20-24","Age 25-34","Age 35-44","Age 45-54","Age 55-64","Age 65-74","Age 75-84","Age 85+"];
 
 							if (selYrs[0] == selYrs[1]) {
@@ -383,9 +392,10 @@
                                                                   "totald":d3.sum(leaves, function (d) { return d.dcount })}})
                               .entries(bothFilDis
 																			.filter(function(d) {
-                                        if (selDoc != "" && selDoc != d.doc) { return false; }
-                                        if (selToc != "" && selToc != d.toc) { return false; }
-																				if (selGeo.length == numCounties) { return true; }
+                                        if (mulToc[d.doc][d.toc-1] == 0) { return false; };
+                                        //if (selDoc != "" && selDoc != d.doc) { return false; }
+                                        //if (selToc != "" && selToc != d.toc) { return false; }
+																				if (selGeo.length == numCounties) { return true; };
 																				return d3.set(selGeo).has(d.id);
 																			})
 																		);
@@ -893,8 +903,9 @@
 																						"totald":d3.sum(leaves, function (d) { return d.dcount })}})
                               .entries(bothFilDis
                                       .filter(function(d) {
-                                        if (selDoc != "" && selDoc != d.doc) { return false; }
-                                        if (selToc != "" && selToc != d.toc) { return false; }
+                                        if (mulToc[d.doc][d.toc-1] == 0) { return false; };
+                                        //if (selDoc != "" && selDoc != d.doc) { return false; }
+                                        //if (selToc != "" && selToc != d.toc) { return false; }
                                         if (selGeo.length == numCounties) { return true; }
                                         return d3.set(selGeo).has(d.id);
                                       })
@@ -1186,8 +1197,20 @@
 										.attr("y",showtextHeight)
 										.text("Selected:")
 										.style("font-weight","bold");
+
+                  var testCases = true;
+                  for (var i = 0; i < doclist.length; i++) {
+                    if (testCases) {
+                      for (var j = 0; j < mulToc[i+1].length; j++) {
+                        if (mulToc[i+1][j] == 0) { 
+                          testCases = false;
+                          break;
+                        };
+                      };
+                    };
+                  };        
 			
-									if (selDoc == "") {
+									if (testCases) {
 										svgfoot.append("text")
 											.attr("class", "showingtext")
 											.attr("x",showStart+70)
@@ -1198,28 +1221,28 @@
 											.attr("x",showStart+70)
 											.attr("y",showtextHeight*3)
 											.text("All Types of Cases");											
-									} else if (selToc == "") {
+									} else {//if (selToc == "") {
 										svgfoot.append("text")
 											.attr("class", "showingtext")
 											.attr("x",showStart+70)
 											.attr("y",showtextHeight*2)
-											.text(doclist[selDoc-1]);
+											.text("Multiple Divisions of Court");//doclist[selDoc-1]);
+									// 	svgfoot.append("text")
+									// 		.attr("class", "showingtext")
+									// 		.attr("x",showStart+70)
+									// 		.attr("y",showtextHeight*3)
+									// 		.text("All Types of Cases");											
+									// } else {
+									// 	svgfoot.append("text")
+									// 		.attr("class", "showingtext")
+									// 		.attr("x",showStart+70)
+									// 		.attr("y",showtextHeight*2)
+									// 		.text("Multiple Divisions of Court");//doclist[selDoc-1]);
 										svgfoot.append("text")
 											.attr("class", "showingtext")
 											.attr("x",showStart+70)
 											.attr("y",showtextHeight*3)
-											.text("All Types of Cases");											
-									} else {
-										svgfoot.append("text")
-											.attr("class", "showingtext")
-											.attr("x",showStart+70)
-											.attr("y",showtextHeight*2)
-											.text(doclist[selDoc-1]);
-										svgfoot.append("text")
-											.attr("class", "showingtext")
-											.attr("x",showStart+70)
-											.attr("y",showtextHeight*3)
-											.text(doctoc[selDoc][selToc-1]);
+											.text("Multiple Case Types");//doctoc[selDoc][selToc-1]);
 									};											
 
 									d3.select(".clickableLegend").remove();
@@ -1405,6 +1428,14 @@
 																		return "translate(0," + i * barHeight + ")"; 
 																	});
 
+                    bar.append("rect")
+                        .attr("x", 0)
+                        .attr("class","doccheck")
+                        .attr("width", 10)
+                        .attr("height", 10)
+                        .attr("stroke","#000")
+                        .attr("fill","#000");
+
 										bar.append("rect")
 												.attr("x", barStartd)
 												.attr("class","docrect")
@@ -1475,6 +1506,19 @@
 												.orient("bottom");												
 												
 										var clickHeight = 0;
+
+                    d3.selectAll(".doccheck")
+                      .attr("fill", function (d) {
+                              var all0 = true;
+                              var all1 = true;
+                              for (var i = 0; i < mulToc[+d.key].length; i++) {
+                                if (mulToc[+d.key][i] == 0) { all1 = false };
+                                if (mulToc[+d.key][i] == 1) { all0 = false };
+                              };
+                              if (all1) { return "#000"; };
+                              if (all0) { return "#fff"; };
+                              return "#789";
+                            });
 
 										d3.selectAll(".docrect")
 											.data(docData)
@@ -1571,7 +1615,21 @@
 												.attr("transform", function(d, i) { 
 																						clickHeight += barHeight;
 																						return "translate(0,200)";
-																					});
+																					});                      
+
+                    bart.append("rect")
+                        .attr("x", 0)
+                        .attr("class","toccheck")
+                        .attr("width", 10)
+                        .attr("height", 10)
+                        .attr("stroke","#000")
+                        .attr("fill", function (d) {
+                              if (mulToc[selDoc][+d.key-1] == 1) {
+                                return "#000";
+                              } else {
+                                return "#fff";
+                              };
+                            });
 
 										bart.append("rect")
 												.attr("x", barStartt)
@@ -1652,6 +1710,16 @@
 												.orient("bottom");																			
 															
 										var clickHeight = barHeight;
+
+
+                    d3.selectAll(".toccheck")
+                      .attr("fill", function (d) {
+                              if (mulToc[selDoc][+d.key] == 1) {
+                                return "#000";
+                              } else {
+                                return "#fff";
+                              };
+                            });                    
 															
 										d3.selectAll(".tocrect")
 											.data(tocData)
@@ -1907,39 +1975,68 @@
 									function docClicked(mouse) {
 									
 										var whichDoc = Math.floor(mouse[1]/15);
+                    var boxClick = (mouse[0] <= 10);
+
+                    if (boxClick) {
+
+                        d3.selectAll(".doccheck")
+                          .attr("fill", function (d) {
+                                  var existFill = d3.select(this).attr("fill");
+                                  if (whichDoc+1 == +d.key) { // selected box
+                                    if (existFill == "#000" || existFill == "#789") { // all or some selected
+                                      for (var j = 0; j < mulToc[+d.key].length; j++) {
+                                        mulToc[+d.key][j] = 0;
+                                      };
+                                      return "#fff";
+                                    } else {
+                                      for (var j = 0; j < mulToc[+d.key].length; j++) {
+                                        mulToc[+d.key][j] = 1;
+                                      };                                      
+                                      return "#000";
+                                    };
+                                  } else {
+                                    return existFill;
+                                  };
+                                });
+
+                        updateMain();
+
+                    } else {
 										
-										if (whichDoc <= 6) {
-											selDoc = (whichDoc + 1).toString();
-											tocGraph(whichDoc);
-											setTimeout(function() {d3.select(".chart").selectAll(".docbars").select("text").style("font-weight","bold")},barTransitionDur);
-											
-											var checkEmpty = true;
-											d3.selectAll(".legend rect")
-												.style("fill-opacity", function(d) {
-																var existOpacity = d3.select(this).style("fill-opacity");
-																if (existOpacity != 0) {
-																	if (d == 1 || d == 2 || d == 4 || d == 5) {
-																		checkEmpty = false;
-																	};
-																};
-																return existOpacity;
-															});
-															
-											if (checkEmpty) {
-												d3.select(".darea").attr("visibility", "visible");
-												d3.selectAll(".legend rect")
-													.style("fill-opacity", function(d) {
-																	var existOpacity = d3.select(this).style("fill-opacity");
-																	if ((d-1) == 1) {
-																		return overlappingPathOpacity;
-																	} else {
-																		return existOpacity;
-																	};
-																});
-											};
-										
-                      updateMain();
-										};
+  										if (whichDoc <= 6) {
+  											selDoc = (whichDoc + 1).toString();
+  											tocGraph(whichDoc);
+  											//setTimeout(function() {d3.select(".chart").selectAll(".docbars").select("text").style("font-weight","bold")},barTransitionDur);
+  											
+  											var checkEmpty = true;
+  											d3.selectAll(".legend rect")
+  												.style("fill-opacity", function(d) {
+  																var existOpacity = d3.select(this).style("fill-opacity");
+  																if (existOpacity != 0) {
+  																	if (d == 1 || d == 2 || d == 4 || d == 5) {
+  																		checkEmpty = false;
+  																	};
+  																};
+  																return existOpacity;
+  															});
+  															
+  											if (checkEmpty) {
+  												d3.select(".darea").attr("visibility", "visible");
+  												d3.selectAll(".legend rect")
+  													.style("fill-opacity", function(d) {
+  																	var existOpacity = d3.select(this).style("fill-opacity");
+  																	if ((d-1) == 1) {
+  																		return overlappingPathOpacity;
+  																	} else {
+  																		return existOpacity;
+  																	};
+  																});
+  											};
+  										
+                        updateMain();
+  										};
+
+                    };
 							
 									};
 								
@@ -1947,64 +2044,89 @@
 									function tocClicked(mouse) {
 									
 										var whichToc = Math.floor(mouse[1]/15);
+                    var boxClick = (mouse[0] <= 10);
+
+                    if (boxClick) {
+
+                        d3.selectAll(".toccheck")
+                          .attr("fill", function (d) {
+                                  var existFill = d3.select(this).attr("fill");
+                                  if (whichToc == +d.key) { // selected box
+                                    if (existFill == "#000") { // all sub selected
+                                      mulToc[+selDoc][+d.key-1] = 0;
+                                      return "#fff";
+                                    } else {
+                                      mulToc[+selDoc][+d.key-1] = 1;
+                                      return "#000";
+                                    };
+                                  } else {
+                                    return existFill;
+                                  };
+                                });
+
+                        updateMain();
+
+                    } else {
 										
-										if (whichToc <= 0) {
-											
-											d3.select(".sadtext").remove();
-											
-											d3.select(".chart").selectAll(".docbars").select("text")
-													.style("font-weight","normal");	
-													
-											var bar = d3.select(".chart").selectAll(".docbars")
-													.transition()
-													.duration(barTransitionDur)
-													.attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
+  										if (whichToc <= 0) {
+  											
+  											d3.select(".sadtext").remove();
+  											
+  											//d3.select(".chart").selectAll(".docbars").select("text")
+  											//		.style("font-weight","normal");
+  													
+  											var bar = d3.select(".chart").selectAll(".docbars")
+  													.transition()
+  													.duration(barTransitionDur)
+  													.attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
 
-											d3.select(".chart").selectAll(".tocbars").remove();
-										
-											selDoc = "";
-                      selToc = "";
-											docUpdate();//docGraph();
+  											d3.select(".chart").selectAll(".tocbars").remove();
+  										
+  											selDoc = "";
+                        selToc = "";
+  											docUpdate();//docGraph();
 
-										} else {
-											
-                      d3.select(".chart").selectAll(".tocbars").select("text").style("font-weight",
-												function (d, i) { 
-														if (whichToc == i+1) {
-															selToc = whichToc;
-															return "bold"
-														} else {
-															return "normal"} 
-												});
+  										} else {
+  											
+                        d3.select(".chart").selectAll(".tocbars").select("text").style("font-weight",
+  												function (d, i) { 
+  														if (whichToc == i+1) {
+  															selToc = whichToc;
+  															return "bold"
+  														} else {
+  															return "normal"} 
+  												});
 
-										};
-															
-										var checkEmpty = true;
-										d3.selectAll(".legend rect")
-											.style("fill-opacity", function(d) {
-															var existOpacity = d3.select(this).style("fill-opacity");
-															if (existOpacity != 0) {
-																if (d == 1 || d == 2 || d == 4 || d == 5) {
-																	checkEmpty = false;
-																};
-															};
-															return existOpacity;
-														});
-														
-										if (checkEmpty) {
-											d3.select(".darea").attr("visibility", "visible");
-											d3.selectAll(".legend rect")
-												.style("fill-opacity", function(d) {
-																var existOpacity = d3.select(this).style("fill-opacity");
-																if ((d-1) == 1) {
-																	return overlappingPathOpacity;
-																} else {
-																	return existOpacity;
-																};
-															});
-										};
+  										};
+  															
+  										var checkEmpty = true;
+  										d3.selectAll(".legend rect")
+  											.style("fill-opacity", function(d) {
+  															var existOpacity = d3.select(this).style("fill-opacity");
+  															if (existOpacity != 0) {
+  																if (d == 1 || d == 2 || d == 4 || d == 5) {
+  																	checkEmpty = false;
+  																};
+  															};
+  															return existOpacity;
+  														});
+  														
+  										if (checkEmpty) {
+  											d3.select(".darea").attr("visibility", "visible");
+  											d3.selectAll(".legend rect")
+  												.style("fill-opacity", function(d) {
+  																var existOpacity = d3.select(this).style("fill-opacity");
+  																if ((d-1) == 1) {
+  																	return overlappingPathOpacity;
+  																} else {
+  																	return existOpacity;
+  																};
+  															});
+  										};
 
-                    updateMain();
+                      updateMain();
+
+                    };
 										
 									};
 									
