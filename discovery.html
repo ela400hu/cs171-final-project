@@ -36,7 +36,8 @@
         </div>
 				
         <div class="row">
-            <div class="col-md-3" id="divnav" >
+<!-- divnav needed more space            <div class="col-md-3" id="divnav" > -->
+            <div class="col-md-4" id="divnav" >
 						  <form>
                 <label style="margin-bottom: 0;">Select by: </label><br>
                 <input type="radio" class="cs" name="select" value="0" checked></input> County 
@@ -52,13 +53,13 @@
 							<br><span id="ageInfo"></span><br>
 							<svg class="charta"></svg>
 						</div>
-            <div class="col-md-1" ></div> <!-- Added spacer -->
+<!-- divnav needed more space -- this space is still there <div class="col-md-1" ></div> <!-- Added spacer -->
             <div class="col-md-8" id="divmain">
 								<div id="divmainhead"></div>
 									<form>
-										<label>Show Data: </label>
-                    <span title="Range-based data graphs only the pertinent range of data.">
-                      <input type="radio" class="cd" name="display" value="0" checked></input> Range-based </span>
+										<label style="margin-bottom: 10px;">Show Data: </label>
+                    <span title="Range-bound data graphs only the pertinent range of data.">
+                      <input type="radio" class="cd" name="display" value="0" checked></input> Range-bound </span>
                     <span title="Zero-based data graphs the data as raw numbers.">
                       <input type="radio" class="cd" name="display" value="2"></input> Zero-based </span> 
 										<span title="Indexed data is expressed as a percentage of the 1986 value.">
@@ -129,8 +130,8 @@
 							var numCounties = 68;
 							var mainWidthAdjust = 250;
 							var mainHeightPct = 0.5;
-							var margin = {top: 10, right: 90, bottom: 60, left: 85};
-							var width = document.getElementById("headline").offsetWidth - mainWidthAdjust - margin.left - margin.right;
+							var margin = {top: 10, right: 90, bottom: 40, left: 85};
+							var width = document.getElementById("divmain").offsetWidth - margin.left - margin.right; // - mainWidthAdjust
 							var height = window.innerHeight*mainHeightPct - margin.top - margin.bottom;
 							var footHeight = 60;
 							// var color = d3.scale.category10();
@@ -151,7 +152,7 @@
 							var barStartt = 120;
 							var barStarta = 60;
 							var barHeight = 15;
-							var barWidthTrim = 20;
+							var barWidthTrim = 10;
 							var barHeightTrim = 2;
 							var barTextX = 3;
 							var aheight = 210;
@@ -367,7 +368,7 @@
 									mainGraph();
 
                   sankeyData = rData;
-                  initSankey(sankeyData,margin.left,width);                  
+                  initSankey(sankeyData,margin.left,width+margin.right/1.5);                  
 
                 };
 								
