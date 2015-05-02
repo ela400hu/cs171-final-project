@@ -98,7 +98,8 @@
             vizSelected = 0; // Raw (0) or Indexed (1) selected
 						selDoc = ""; // Selected Division of Court
 						selToc = ""; // Selected Type of Case
-						selAge = 0; // Selected Age Group
+            selAge = 0; // Selected Age Group
+            multAge = []; // Multi-Selected Age Groups
             selGeo = []; // Selected Counties by id
             multGeo = []; // Selected Counties by id
             selectingWhich = 3; // For Multi-Selection reset
@@ -167,9 +168,7 @@
 							var showStart = 300;
 							var showtextHeight = 15;
 							var expandSymbol = "▹";
-							var contractSymbol = "◃";
-              var firstGeoSelect = true;
-							
+							var contractSymbol = "◃";							
               //
               // Division of Court / Type of Case
               var doclist = ["Circuit Civil",
@@ -435,8 +434,9 @@
                               .key(function (d) { return d.year })
                               .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
                               .entries(populations
-																			.filter(function(d) { 
-                                        if (selAge != 0 && selAge != d.agrp) { return false; }
+																			.filter(function(d) {
+                                        if (multAge.indexOf(d.agrp) < 0) { return false; }
+                                        //if (selAge != 0 && selAge != d.agrp) { return false; }
                                         if (selGeo.length == numCounties) { return true; }
                                         return d3.set(selGeo).has(d.id);
 																			})
@@ -945,7 +945,8 @@
                               .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
                               .entries(populations
 																			.filter(function(d) { 
-                                        if (selAge != 0 && selAge != d.agrp) { return false; }
+                                        if (multAge.indexOf(d.agrp) < 0) { return false; }
+                                        //if (selAge != 0 && selAge != d.agrp) { return false; }
                                         if (selGeo.length == numCounties) { return true; }
                                         return d3.set(selGeo).has(d.id);
 																			})
@@ -1683,8 +1684,6 @@
 									
 								
 									function ageGraph() {
-
-										selAge = 0;
 									
 										// Set up Age Group bar chart
 										//
@@ -1837,22 +1836,53 @@
 										var whichAge = Math.floor(mouse[1]/15);
 
 										if (whichAge == 0) {
+
 											selAge = 0;
+                      for (var i = 1; i <= agegrp.length; i++) { multAge.push(i); };
 											d3.select(".charta text").style("font-weight","bold");
                       d3.select(".charta").selectAll(".agebars").select("text").style("font-weight","normal");
 											d3.select(".ay.label").text("Population");
+
 										} else {
+
 											d3.select(".charta text").style("font-weight","normal")
 											//selAge = (whichAge + 1).toString();
+                      multAge = [];
 											selAge = whichAge;
                       d3.select(".charta").selectAll(".agebars").select("text").style("font-weight",
-												function (d, i) { 
-														if (whichAge == i+1) {
-															return "bold"
-														} else {
-															return "normal"} 
-												});
-											d3.select(".ay.label").text("Population (" + agegrp[selAge-1] + ")");
+												function (d, i) {
+                            var existSel = d3.select(this).style("font-weight");
+														if (whichAge == i+1) { // the clicked one
+                              if (existSel == "bold") { // deselect
+                                return "normal";
+                              } else {
+                                multAge.push(i+1)
+															  return "bold";
+                              };
+														} else { // not the clicked one
+                              if (existSel == "bold") { multAge.push(i+1) };
+															return existSel;
+                            }; 
+												  }
+                        );
+
+                      if (multAge.length == 0) {
+
+                        selAge = 0;
+                        for (var i = 1; i <= agegrp.length; i++) { multAge.push(i); };
+                        d3.select(".charta text").style("font-weight","bold");
+                        d3.select(".ay.label").text("Population");
+
+                      } else if (multAge.length == 1) {
+	
+                        d3.select(".ay.label").text("Population (" + agegrp[selAge-1] + ")");
+                      
+                      } else {
+
+                        d3.select(".ay.label").text("Population (multiple age groups)");
+
+                      };
+
 										};
 
 										d3.select(".aline").attr("visibility", "visible");
