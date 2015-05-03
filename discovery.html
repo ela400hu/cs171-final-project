@@ -1719,7 +1719,7 @@
 
                     d3.selectAll(".toccheck")
                       .attr("fill", function (d) {
-                              if (mulToc[selDoc][+d.key] == 1) {
+                              if (mulToc[selDoc][+d.key-1] == 1) {
                                 return "#000";
                               } else {
                                 return "#fff";
@@ -1775,6 +1775,12 @@
 																				};
 																			})
 															);
+
+                    //
+                    // Change totals to averages
+                    ageData.forEach( function (d) {
+                      d.values.total /= (selYrs[1]-selYrs[0]+1);
+                    });
 
 										var cmin = d3.min(ageData, function(d) { 
 																	return d.values.total;} );
@@ -1877,6 +1883,12 @@
 																				};
 																			})
 															);
+
+                    //
+                    // Change totals to averages
+                    ageData.forEach( function (d) {
+                      d.values.total /= (selYrs[1]-selYrs[0]+1);
+                    });
 
 										var cmin = d3.min(ageData, function(d) { 
 																	return d.values.total;} );
