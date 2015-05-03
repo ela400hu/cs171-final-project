@@ -142,8 +142,8 @@
 							var color = d3.scale.ordinal() //CHANGE
 
 
-				.range(["#3b5998", "#009d97", "#7221aa", "#0066cc", 
-  "#333300", "#cc6600"]); 
+				.range(["#3b5998", "#009d97", "#2ca02c", "#0066cc", 
+  "#7221aa", "#cc6600"]); 
 
 
 
@@ -631,7 +631,7 @@
                     .attr("x",margin.left-8)
                     .attr("y",margin.top+height/2)
                     .text("1")
-										.style("fill","rgb(148,103,189)");
+										.style("fill","rgb(44,160,44)");
 								
 									var ay = d3.scale.linear()
 														.range([height, 0])
@@ -722,7 +722,7 @@
 											.attr("class", "ay axis")
 											.attr("visibility","hidden")
 											.attr("transform", "translate(" + width + " ,0)")
-											.style("fill", "rgb(114, 33, 170)")
+											.style("fill", "rgb(44,160,44)")
 											.call(ayAxis);
 											
 									//
@@ -1189,7 +1189,7 @@
 											.attr("class", "ay axis")
 											.attr("visibility", popVisible)
 											.attr("transform", "translate(" + width + " ,0)")
-											.style("fill", "rgb(114, 33, 170)")
+											.style("fill", "rgb(44,160,44)")
 											.call(ayAxis);
 
 									var svgfoot = d3.select("#divmainfoot svg g");

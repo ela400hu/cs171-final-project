@@ -174,12 +174,12 @@ span.tooltip:hover:before{
 }
 
 .tocrect {
-  fill: #ffd700;
+  fill: #aa2159;
   fill-opacity:1;
 }
 
 .agerect {
-  fill: rgb(114, 33, 170);
+  fill: rgb(44,160,44);
   fill-opacity:1;
 }
 

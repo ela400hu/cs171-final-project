@@ -10,7 +10,7 @@ function initSankey(rData, marginleft, width) {
 				format = function(d) { return formatNumber(d) + " Cases"; },
 				// color = d3.scale.category20();
 				color = d3.scale.ordinal() //CHANGE
-  .range(["#0071c2", "#35459e", "#348899", "#71b1d9", "#005595", "#000b95", "#5162da", "#4e52be", "#0700cc", "#0800ff", "#003b74"]);
+  .range(["#00008b", "#00008b", "#00008b", "#00008b", "#00008b","#0071c2", "#35459e", "#348899", "#71b1d9", "#005595", "#000b95", "#5162da", "#4e52be", "#0700cc", "#0800ff", "#003b74"]);
   	 
 
 		var svg = d3.select("#chart").append("svg")
