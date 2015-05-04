@@ -99,6 +99,8 @@
 						selDoc = ""; // Selected Division of Court
 						selToc = ""; // Selected Type of Case
             mulToc = {}; // Multi-Selected Types of Cases
+            multipleDoc = [];
+            multipleToc = [];
             //selAge = 0; // Selected Age Group
             multAge = []; // Multi-Selected Age Groups
             selGeo = []; // Selected Counties by id
@@ -238,10 +240,36 @@
 												 "Non-DUI Crim. Traffic"]
 									};
 
+              var fulldoctoc = {
+                                  "1":["Auto Negligence","Condominium","Contract & Indebtedness",
+                                       "Eminent Domain","Other Circuit Civil","Other Negligence",
+                                       "Products Liability","Professional Malpractice",
+                                       "Real Property/Mortgage Foreclosure"],
+                                  "2":["Burglary","Capital Murder","Drugs","Non Capital Murder",
+                                       "Other Crimes Against Person","Other Crimes Against Property",
+                                       "Other Felonies","Robbery","Sexual Offenses",
+                                       "Theft, Forgery, Fraud","Worthless Checks (Felony)"],
+                                  "3":["Civil ($5,001 to $15,000)","Evictions",
+                                       "Other Civil (non-monetary)","Replevins",
+                                       "Small Claims (up to $5,000)"],
+                                  "4":["County Ordinances","Misdemeanors","Municipal Ordinances",
+                                       "Worthless Checks (Misdemeanors)"],
+                                  "5":["Child Support","Dissolution","Domestic Violence",
+                                       "Juvenile Delinquency","Juvenile Dependency",
+                                       "Other Domestic Relations","Repeat Violence",
+                                       "Simplified Dissolution","Termination of Parental Rights",
+                                       "UIFSA"],
+                                  "6":["Baker Act","Guardianship","Other Social","Probate",
+                                       "Substance Abuse Act","Trusts"],
+                                  "7":["Civil Traffic Infractions","DUI","Non DUI Criminal Traffic"]
+                                };                  
+
               for (var i = 1; i <= 7; i++) {
                 mulToc[i] = [];
+                multipleDoc.push(doclist[i-1]);
                 for (var j = 0; j < doctoc[""+i].length; j++) {
                   mulToc[i].push(1);
+                  multipleToc.push(fulldoctoc[""+i][j]);
                 };
               };
 
@@ -2187,7 +2215,21 @@
                                   if (all1) { return "bold"; };//"#aa2159"; };
                                   if (all0) { return "normal"; };//"#fff"; };
                                   return "normal";//"#aa2159";
-                                });                           
+                                });
+
+                        multipleDoc = [];
+                        multipleToc = [];
+                        for (var i = 1; i <= 7; i++) {
+                          for (var j = 0; j < doctoc[""+i].length; j++) {
+                            if (mulToc[i][j] == 1) {
+                              var idx = multipleDoc.indexOf(doclist[i-1]);
+                              if (idx < 0) {
+                                multipleDoc.push(doclist[i-1]);
+                              };
+                              multipleToc.push(fulldoctoc[""+i][j]);
+                            };
+                          };
+                        };
 
                         updateMain();
 
@@ -2331,6 +2373,20 @@
   																};
   															});
   										};
+
+                    multipleDoc = [];
+                    multipleToc = [];
+                    for (var i = 1; i <= 7; i++) {
+                      for (var j = 0; j < doctoc[""+i].length; j++) {
+                        if (mulToc[i][j] == 1) {
+                          var idx = multipleDoc.indexOf(doclist[i-1]);
+                          if (idx < 0) {
+                            multipleDoc.push(doclist[i-1]);
+                          };
+                          multipleToc.push(fulldoctoc[""+i][j]);
+                        };
+                      };
+                    };                      
 
                     updateMain();
 										
