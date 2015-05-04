@@ -139,10 +139,12 @@ path.cpath {
 
 path.cpath.cselected {
   fill: #e81d5e;
+	fill-opacity: 1;
 }
 
 path.cpath:hover {
-  fill: steelblue;
+  fill: #e81d5e;
+	fill-opacity: 0.7;
 }
 
 div.tooltip {

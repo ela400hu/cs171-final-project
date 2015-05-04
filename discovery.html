@@ -1928,27 +1928,6 @@
                                 return "translate(0," + (i+1) * barHeight + ")";
                                 });
 
-/*                    bar.append("rect")
-                        .attr("x", 0)
-                        .attr("class","agecheck")
-                        .attr("width", 10)
-                        .attr("height", 10)
-                        .attr("stroke","#000")
-                        .attr("fill", "#D3D3D3");//function (d) {
-                            //   if (multAge.indexOf(d.key) >= 0) {
-                            //     return "#000";
-                            //   } else {
-                            //     return "#fff";
-                            //   };
-                            // });
-
-                    bar.append("path")
-                        .attr("d", "M 1 1 L 9 9 M 1 9 L 9 1")
-                        .attr("class","agecheck2")
-                        .attr("fill","#fff")
-                        .attr("stroke-width","2px")
-                        .attr("stroke", "#000"); 
-*/
                     bar.append("rect")
                         .attr("x", barStarta)
                         .attr("class","agerect")
@@ -2026,28 +2005,11 @@
                         .tickFormat(d3.format(",d"))
                         .orient("bottom");
 
-/*                    d3.selectAll(".agecheck")
-                      .attr("fill", function (d) {
-                              if (multAge.indexOf(+d.key) >= 0) {
-                                return "#D3D3D3";
-                              } else {
-                                return "#fff";
-                              };
-                            });
-
-                    d3.selectAll(".agecheck2")
-                        .attr("stroke", function (d) {
-                              if (multAge.indexOf(+d.key) >= 0) {
-                                return "#000";
-                              } else {
-                                return "#fff";
-                              };
-                            });                      
-*/
                     d3.selectAll(".agebars")
                       .data(ageData);
 											
 										d3.selectAll(".agerect")
+                      .data(ageData)
                         .transition()
                         .duration(barTransitionDur)
                         .attr("width", function (d) { return x(d.values.total); })
@@ -2059,8 +2021,8 @@
                               };
                             });
 														
-                    d3.selectAll(".agetext")
-											.style("font-weight", function (d) {
+                    d3.select(".agetext")
+												.style("font-weight", function (d) {
                              if (multAge.indexOf(+d.key) >= 0) {
                                return "bold";
                              } else {
@@ -2109,26 +2071,6 @@
 
                     } else {
 
-                      // d3.select(".charta text").style("font-weight","normal")
-                      // //selAge = (whichAge + 1).toString();
-           //            multAge = [];
-                      // selAge = whichAge;
-           //            d3.select(".charta").selectAll(".agebars").select("text").style("font-weight",
-                      //  function (d, i) {
-           //                  var existSel = d3.select(this).style("font-weight");
-                      //      if (whichAge == i+1) { // the clicked one
-           //                    if (existSel == "bold") { // deselect
-           //                      return "normal";
-           //                    } else {
-           //                      multAge.push(i+1)
-                      //          return "bold";
-           //                    };
-                      //      } else { // not the clicked one
-           //                    if (existSel == "bold") { multAge.push(i+1) };
-                      //        return existSel;
-           //                  }; 
-                      //    }
-           //              );
                       multAge = [];
 
                       d3.selectAll(".agerect")
@@ -2163,9 +2105,6 @@
 
                       if (multAge.length == 0) {
 
-                        //for (var i = 1; i <= agegrp.length; i++) { multAge.push(i); };
-                        //d3.select(".ay.label").text("Population");
-                        //d3.selectAll(".agecheck").attr("fill", "#000");
                         d3.select(".ay.label").text("(no age groups selected)");
 
                       } else if (multAge.length == 1) {
