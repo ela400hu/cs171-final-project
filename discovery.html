@@ -41,10 +41,10 @@
               <form>
                 <div id="divmap">
                   <label style="margin-bottom: 0;">Select by: </label><br>
-                  <input type="radio" class="cs" name="select" value="0"></input> County 
+                  <input type="radio" class="cs" name="select" value="0" checked></input> County 
                   <input type="radio" class="cs" name="select" value="1"></input> Circuit 
                   <input type="radio" class="cs" name="select" value="2"></input> District 
-                  <input type="radio" class="cs" name="select" value="3" checked></input> All
+                  <input type="radio" class="cs" name="select" value="3"></input> All
                 </div>
               </form><br><br><br>
               <div id="divdoc">
@@ -2389,7 +2389,7 @@
                     .enter().append("path")
                         .attr("class", "cpath county")
                         .attr("id", function (d) { return d.id })
-												.attr("visibility", "hidden")
+												//.attr("visibility", "hidden")
                         .attr("d", path)
                         .on("click", function (d) {
                                 if (selectingWhich != 0) {
@@ -2545,9 +2545,9 @@
                   // All
                   svg2.append("path")
                     .datum(topojson.merge(topology, topology.objects.counties.geometries.filter(function(d) { return true })))
-                    .attr("class", "cpath cselected florida")
+                    .attr("class", "cpath florida")
                     .attr("id", "fl")
-                    .attr("visibility", "visible")//"hidden")
+                    .attr("visibility", "hidden")//"hidden")
                     .attr("d", path)
                     .on("click", function (d) {
                                 multGeo = [];
@@ -2568,9 +2568,9 @@
                         tooltip.classed("hidden", true);
                       });
 
-									multGeo = [];
-									selectingWhich = 3;
-									geoClick({"level":"All of", "id":"Florida"})
+									//multGeo = [];
+									//selectingWhich = 3;
+									//geoClick({"level":"All of", "id":"Florida"})
 
                 });
 
