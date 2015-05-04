@@ -1239,52 +1239,63 @@
 										.text("Selected:")
 										.style("font-weight","bold");
 
-                  var testCases = true;
-                  for (var i = 0; i < doclist.length; i++) {
-                    if (testCases) {
-                      for (var j = 0; j < mulToc[i+1].length; j++) {
-                        if (mulToc[i+1][j] == 0) { 
-                          testCases = false;
-                          break;
-                        };
-                      };
-                    };
-                  };        
-			
-									if (testCases) {
-										svgfoot.append("text")
-											.attr("class", "showingtext")
-											.attr("x",showStart+70)
-											.attr("y",showtextHeight*2)
-											.text("All Divisions of Court");
-										svgfoot.append("text")
-											.attr("class", "showingtext")
-											.attr("x",showStart+70)
-											.attr("y",showtextHeight*3)
-											.text("All Types of Cases");											
-									} else {//if (selToc == "") {
-										svgfoot.append("text")
-											.attr("class", "showingtext")
-											.attr("x",showStart+70)
-											.attr("y",showtextHeight*2)
-											.text("Multiple Divisions of Court");//doclist[selDoc-1]);
-									// 	svgfoot.append("text")
-									// 		.attr("class", "showingtext")
-									// 		.attr("x",showStart+70)
-									// 		.attr("y",showtextHeight*3)
-									// 		.text("All Types of Cases");											
-									// } else {
+                  // var testCases = true;
+                  // for (var i = 0; i < doclist.length; i++) {
+                  //   if (testCases) {
+                  //     for (var j = 0; j < mulToc[i+1].length; j++) {
+                  //       if (mulToc[i+1][j] == 0) { 
+                  //         testCases = false;
+                  //         break;
+                  //       };
+                  //     };
+                  //   };
+                  // };
+
+                  svgfoot.append("text")
+                    .attr("class", "showingtext")
+                    .attr("x",showStart+70)
+                    .attr("y",showtextHeight*2)
+                    .text(function() {
+                      if (multipleDoc.length == doclist.length) { return "All Divisions of Court"; };
+                      if (multipleDoc.length == 0) { return "No Divisions of Court"; };
+                      if (multipleDoc.length == 1) { return multipleDoc[0]; };
+                      return "Multiple Divisions of Court"; 
+                    });
+
+									svgfoot.append("text")
+										.attr("class", "showingtext")
+										.attr("x",showStart+70)
+										.attr("y",showtextHeight*3)
+                    .text(function() {
+                      if (multipleToc.length == 48) { return "All Case Types"; };
+                      if (multipleToc.length == 0) { return "No Case Types"; };
+                      if (multipleToc.length == 1) { return multipleToc[0]; };
+                      return "Multiple Case Types"; 
+                    });
+
+         //            									} else {//if (selToc == "") {
 									// 	svgfoot.append("text")
 									// 		.attr("class", "showingtext")
 									// 		.attr("x",showStart+70)
 									// 		.attr("y",showtextHeight*2)
 									// 		.text("Multiple Divisions of Court");//doclist[selDoc-1]);
-										svgfoot.append("text")
-											.attr("class", "showingtext")
-											.attr("x",showStart+70)
-											.attr("y",showtextHeight*3)
-											.text("Multiple Case Types");//doctoc[selDoc][selToc-1]);
-									};											
+									// // 	svgfoot.append("text")
+									// // 		.attr("class", "showingtext")
+									// // 		.attr("x",showStart+70)
+									// // 		.attr("y",showtextHeight*3)
+									// // 		.text("All Types of Cases");											
+									// // } else {
+									// // 	svgfoot.append("text")
+									// // 		.attr("class", "showingtext")
+									// // 		.attr("x",showStart+70)
+									// // 		.attr("y",showtextHeight*2)
+									// // 		.text("Multiple Divisions of Court");//doclist[selDoc-1]);
+									// 	svgfoot.append("text")
+									// 		.attr("class", "showingtext")
+									// 		.attr("x",showStart+70)
+									// 		.attr("y",showtextHeight*3)
+									// 		.text("Multiple Case Types");//doctoc[selDoc][selToc-1]);
+									// };											
 
 									d3.select(".clickableLegend").remove();
 									
