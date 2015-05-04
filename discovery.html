@@ -102,6 +102,7 @@
             //selAge = 0; // Selected Age Group
             multAge = []; // Multi-Selected Age Groups
             selGeo = []; // Selected Counties by id
+            selGeoByName = []; // Selected Counties by id
             multGeo = []; // Selected Counties by id
             selectingWhich = 3; // For Multi-Selection reset
 						allGeo = []; // All Counties by id
@@ -309,6 +310,10 @@
                 });
 								
 								selGeo = copy(allGeo);
+                selGeoByName = [];
+                for (var i = 0; i < selGeo.length; i++) {
+                  selGeoByName.push(countyName[selGeo[i]]);
+                };
 
                 // Load Filings, Dispositions, and Population
                 //
@@ -901,6 +906,9 @@
 
 
                 function updateMain() {
+
+                  d3.select(".sankeysvg").remove();
+                  updateSankey(sankeyData,margin.left,width);
 
                   fildisData = d3.nest()
                               .key(function (d) { return d.year })
@@ -2514,6 +2522,11 @@
 									} else {
 										selGeo = copy(multGeo);
 									};
+
+                  selGeoByName = [];
+                  for (var i = 0; i < selGeo.length; i++) {
+                    selGeoByName.push(countyName[selGeo[i]]);
+                  };
 
                   if (d.id != "Florida ") {
   									docUpdate();
