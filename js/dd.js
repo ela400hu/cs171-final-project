@@ -145,15 +145,43 @@ function updateSankey(rData, marginleft, width) {
 									};
 								});
 
+				countFirstNodes = 0;
+				sumFirstDy = 0;
 				d3.selectAll(".node")
 					.attr("visibility", function(d) {
+							if (d.x == 0) {
+								countFirstNodes += 1;
+								sumFirstDy += d.dy;
+							};
 							if (d.sourceLinks.length == 0 && d.targetLinks.length == 0) {
 								return "hidden";
 							} else {
 								return "visible";
-							}
+							};
 					});
+					
+				var useGap = (327-sumFirstDy)/(countFirstNodes+2);
+				var useY = useGap;
+				d3.selectAll(".node")
+					.sort(function (a,b) {return d3.ascending(a.name, b.name);})
+					.attr("y", function(d) {
+							if (d.x == 0) {
+								d.y = useY;
+								console.log(d.name,d.y);
+								useY += (useGap + d.dy);
+							};
+							return d.y;
+					});
+					
+				nodes.transition().duration(250*firstTimeSankey) // .delay(500*firstTimeSankey)
+					.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 			
+			sankey.relayout();
+			links.transition().duration(250*firstTimeSankey)
+						.attr("d", path)
+						.style("stroke-width", function(d) { return Math.max(1, d.dy); })
+						.sort(function(a, b) { return b.dy - a.dy; });
+						
 			firstTimeSankey = 1;
 
 			function dragmove(d) {
