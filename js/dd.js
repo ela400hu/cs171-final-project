@@ -315,7 +315,8 @@ function shapedata(data,division,casetype,counties,year,endyear) {
 	var paths = ["Before Trial", 
 		"Default", 	
 		"Nonjury Trial",
-		"Jury Trial"
+		"Jury Trial",
+		"Juvenile Procedures"
 		];
 
 	//when sources > 1, grouping of TypeOFResolution nodes in "destinations" is needed to prevent clutter.  
@@ -329,7 +330,7 @@ function shapedata(data,division,casetype,counties,year,endyear) {
 		"Jury Trial (Result Unspecified)",
 		"Adjudication",
 		"Resolved- Hearing Officer",
-		"Resolved- Unspecified"
+		"Resolved- By Judge"
 		];
 
 	// if case type is specified, there is only one source node, so there is room to map to all of the
@@ -347,17 +348,17 @@ function shapedata(data,division,casetype,counties,year,endyear) {
 
 	// this array will return the right path indx for any disposition type
 	//var pathindices=[0,0,0,0,0,2,2,2,3,3,3,0,2,1,0,2,3,5,5,5,0,0,2,2]  // 5 means no link
-	var pathindices=[0,0,0,0,0,2,2,2,3,3,3,0,2,1,0,2,3,1,1,1,0,0,2,2]  // 5 means no link
+	var pathindices=[0,0,0,0,0,2,2,2,3,3,3,0,2,1,0,2,3,4,4,4,0,0,2,2]  // 5 means no link
 	// this array will return the right destination indx for any disposition type
 	//var destindices=[0,0,0,0,0,5,5,5,3,1,2,0,7,4,7,5,6,10,10,10,7,0,7,8] //10 means direct link
 	var destindices=[0,0,0,0,0,5,5,5,3,1,2,0,7,4,7,5,6,9,9,9,7,0,7,8] //10 means direct link
 
-	// set up a matrix for the source->path links n sources 4 paths
+	// set up a matrix for the source->path links n sources 5 paths
 	srcpaths=[]
 	for(i=0;i<sources.length;i++){
-		srcpaths[i]=[0,0,0,0]	
+		srcpaths[i]=[0,0,0,0,0]	
 	}
-	// 4 paths(now sources), 10 destinations  TODO-right number of dests for dmode==OneCasetype.
+	// 5 paths(now sources), 10 destinations  TODO-right number of dests for dmode==OneCasetype.
 	pathdests = []
 	for(i=0;i<paths.length;i++){
 		pathdests[i]=[0,0,0,0,0,0,0,0,0,0,0]	
