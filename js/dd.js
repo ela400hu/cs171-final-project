@@ -137,7 +137,16 @@ function updateSankey(rData, marginleft, width) {
 									} else {
 										return "end";
 									};
-								});					
+								});
+
+				d3.selectAll(".node")
+					.attr("visibility", function(d) {
+							if (d.sourceLinks.length == 0 && d.targetLinks.length == 0) {
+								return "hidden";
+							} else {
+								return "visible";
+							}
+					});
 			
 			firstTimeSankey = 1;
 
