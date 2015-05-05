@@ -15,8 +15,7 @@ function initSankey(rData, marginleft, width) {
 
 		svg.append("g").attr("id","linklist");
 		svg.append("g").attr("id","nodelist");				
-		
-		firstTimeSankey = 0;
+				
 		updateSankey(rData, marginleft, width);
 		
 };
@@ -24,11 +23,10 @@ function initSankey(rData, marginleft, width) {
 
 function updateSankey(rData, marginleft, width) {
 			
-			var margin = {top: 1, right: 1, bottom: 6, left: 1}
 			var height=320;
 
 			var formatNumber = d3.format(",.0f")
-			var format = function(d) { return formatNumber(d) + " Cases"; }
+			var format = function(d) { return formatNumber(d) + " Cases"; },
 					// var color = d3.scale.category20();
 			var color = d3.scale.ordinal() //CHANGE
   							.range(["#00008b", "#00008b", "#00008b", "#00008b", "#00008b","#0071c2", "#35459e", "#348899", "#71b1d9", "#005595", "#000b95", "#5162da", "#4e52be", "#0700cc", "#0800ff", "#003b74"]);
@@ -47,7 +45,7 @@ function updateSankey(rData, marginleft, width) {
 					.nodes(cases.nodes)
 					.links(cases.links)
 					.layout(32);			
-
+			
 			var svg = d3.select("#chart svg g");
 			
 			
@@ -67,7 +65,7 @@ function updateSankey(rData, marginleft, width) {
 				newLinks.append("title");
 						
 				// Update
-				links//.transition().duration(500*firstTimeSankey)  // .delay(500*firstTimeSankey)
+				links//.transition()
 						.attr("d", path)
 						.style("stroke-width", function(d) { return Math.max(1, d.dy); })
 						.sort(function(a, b) { return b.dy - a.dy; });
@@ -99,7 +97,7 @@ function updateSankey(rData, marginleft, width) {
 				// Add Other new elements with defaults
 				newNodes.append("rect")
 					.attr("width", sankey.nodeWidth())
-					.append("title","");
+					.append(title);
 				newNodes.append("text")
 					.attr("x", -6)
 					.attr("dy", ".35em")
@@ -107,7 +105,7 @@ function updateSankey(rData, marginleft, width) {
 					.attr("transform", null);
 				
 				// Update
-				nodes//.transition().duration(500*firstTimeSankey) // .delay(500*firstTimeSankey)
+				nodes//.transition()
 						.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
 				// Exit
@@ -124,22 +122,10 @@ function updateSankey(rData, marginleft, width) {
 				nodes.select("text")//.transition()
 					.attr("y", function(d) { return d.dy / 2; })
 					.text(function(d) { return d.name; })
-					.attr("x", function(d) {
-									if (d.x < (width/2)) {
-										return 6 + sankey.nodeWidth();
-									} else {
-										return -6;
-									};
-								})
-					.attr("text-anchor", function(d) {
-									if (d.x < (width/2)) {
-										return "start";
-									} else {
-										return "end";
-									};
-								});					
+					.filter(function(d) { return d.x < width / 2; })
+						.attr("x", 6 + sankey.nodeWidth())
+						.attr("text-anchor", "start");
 			
-			firstTimeSankey = 1;
 
 			function dragmove(d) {
 				d3.select(this).attr("transform", "translate(" + d.x + "," + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")");
@@ -153,67 +139,52 @@ function updateSankey(rData, marginleft, width) {
 function shapedata(data,division,casetype,counties,year,endyear) {
 // returns json array [nodes, links]
 
-	// I think these need to be set in stone rather than building them each time.
-	// If a sub-selection doesn't include all of the dtypes, the path and dest indices will be off.
-	dispTypes = [
-		"Before Trial - Speedy Trial Rule Dismissals",
-		"Before Trial - Dismissed",
-		"Before Trial - Transferred",
-		"Before Trial - Plea",
-		"Before Trial - Other",
-		"After Trial - Non Jury Acquitted/Dismissed",
-		"After Trial - Non Jury Plea",
-		"After Trial - Non Jury Convicted",
-		"After Trial - Jury Acquitted/Dismissed",
-		"After Trial - Jury Plea",
-		"After Trial - Jury Convicted",
-		"Dismissed, Settled or Disposed Before Hearing",
-		"Dismissed, Settled or Disposed After Hearing",
-		"By Default",
-		"By Judge",
-		"Non Jury Trial",
-		"Jury Trial",
-		"Other",
-		"Total Disposed",
-		"Total Disposed (1986 to 1995)",
-		"Before Hearing",
-		"Before Trial - No File",
-		"After Hearing by Judge",
-		"After Hearing by Hearing Officer"
-	];
-
-	divArr = ["Circuit Civil",
-	            "Circuit Criminal",
-	            "County Civil",
-	            "County Criminal",
-	            "Family Court",
-	            "Probate",
-	            "Traffic"];
-
 	// get the year or year range, or use a default year
-	var yearspan = endyear - year;
+	if (year == undefined || year < 1986 || year > 2013)  year = "1986"   
+	if (endyear == undefined || year < 1986 || year > 2013)  endyear = "2013"   //default case
+	var yearspan= endyear - year
+	if(yearspan>0)document.getElementById("xh1").innerHTML= "Case Paths to Resolution "+ year+"-"+endyear
+	else document.getElementById("xh1").innerHTML= "Case Paths to Resolution "+ year
 
-	if (yearspan>0) {
-		document.getElementById("xh1").innerHTML= "Case Paths to Resolution "+ year+"-"+endyear;
-	} else {
-		document.getElementById("xh1").innerHTML= "Case Paths to Resolution "+ year;
+	var dmode         // are we showing all divisions, one division, or one case type 
+	// if division = "All" casetype must also be
+	
+	if(division == "All") {
+		casetype= "All"
+		dmode = "AllDivisions"
+		}
+	// otherwise filter by division, and if necessary casetype. set the mode
+	else {
+		data = data.filter(function(d){return d.DivisionOfCourt == division})
+		dmode="OneDivision"
+		if (casetype !="All") {
+			data = data.filter(function(d){return d.TypeOfCase == casetype})
+			dmode = "OneCasetype"
+		}
 	}
 
-	data = data.filter(function(d) {
-					if (multipleToc.indexOf(d.TypeOfCase) < 0) return false;
-					if (counties.indexOf(d.County) < 0) return false;
-					return true; //d.DivisionOfCourt == division;
-				});
+	// filter by counties- could be one or an array [if district or circuit is selectd) or "All"
+		if (counties !="All") {
+			data = data.filter(function(d){return counties.indexOf(d.County) >=0 })
+		}
+
+	// list of keys
+	keys = Object.keys(data[0]);
+	// list of alphabetic keys
+	alfakeys = keys.filter(function(d) {return d > "2015"})
+	// yearkeys needed to sum across year values
+	yearkeys = keys.filter(function(d) {return d <= "2015"})
 
 	// arrays to hold unique values; [0] is always unique	
 	divisions = [data[0].DivisionOfCourt];   
 	ctypes= [data[0].TypeOfCase];
-	dtypes= dispTypes;
+	dtypes=[data[0].TypeOfDisposition];
 
 	//fill the unique values, they will be node names
 	// and aggregate the year values while we're in there
 
 	for(i=0;i<data.length;i++){
+		if (dtypes.indexOf(data[i].TypeOfDisposition) == -1) dtypes.push(data[i].TypeOfDisposition) 
 		if (ctypes.indexOf(data[i].TypeOfCase) == -1) ctypes.push(data[i].TypeOfCase) 
 		if (divisions.indexOf(data[i].DivisionOfCourt) == -1) divisions.push(data[i].DivisionOfCourt)
 		data[i].size= +data[i][year];
@@ -227,23 +198,28 @@ function shapedata(data,division,casetype,counties,year,endyear) {
 
 	var sources
 	// nodelist is are the sources the paths and the destinations concatenated
-	if (divisions.length > 1) {
-			sources = copy(divisions);
-			//will need this momentarily
-			whatdata = "DivisionOfCourt";
-		} 
+	if (dmode == "AllDivisions") {
+		sources=divisions
+		//will need this mementarily
+		whatdata = "DivisionOfCourt"
+		}
 	// data is already filtered; only contains ctypes for selected division
-	else {
-		sources = copy(ctypes);
-		whatdata = "TypeOfCase";
-		};
+	else if (dmode=="OneDivision") {
+		sources = ctypes
+		whatdata = "TypeOfCase"
+		}
+	// it will be all observations for that one case type /county /year 
+	else if (dmode=="OneCasetype"){
+		sources = ctypes
+		whatdata = "TypeOfCase"
+	}
 
 	// groups to show the four main pathways- all bit "other" go through one
 	var paths = ["Before Trial", 
 		"Default", 	
 		"Nonjury Trial",
 		"Jury Trial"
-		];
+		]
 
 	//when sources > 1, grouping of TypeOFResolution nodes in "destinations" is needed to prevent clutter.  
 	var destinations = [
@@ -257,11 +233,10 @@ function shapedata(data,division,casetype,counties,year,endyear) {
 		"Adjudication",
 		"Resolved- Hearing Officer",
 		"Resolved- Unspecified("
-		];
-
+		]
 	// if case type is specified, there is only one source node, so there is room to map to all of the
 	// detailed (ie ungrouped by "destination") disposition type nodes 
-	if (multipleToc.length == 1) destinations = copy(divArr);
+	if (dmode == "OneCasetype") destinations= dtypes
 
 	var	nodelist = sources.concat(paths).concat(destinations)	
 	// objectify
@@ -321,6 +296,5 @@ function shapedata(data,division,casetype,counties,year,endyear) {
 	// document.getElementById("b2").innerHTML= htmlstr
 // console.log(JSON.stringify(cases))
 	return cases;
-
 
 }   //close function shapedata  ///////////////////////////////////////

@@ -931,7 +931,7 @@
                     };
                     ageUpdate();
                     
-                    d3.select(".sankeysvg").remove();
+                    //d3.select(".sankeysvg").remove();
                     updateSankey(sankeyData,margin.left,width+margin.right/1.5);
                     //$(document).trigger("brushChange", [begDate,endDate]);
                   };
@@ -951,7 +951,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 function updateMain() {
 
-                  d3.select(".sankeysvg").remove();
+                  //d3.select(".sankeysvg").remove();
                   updateSankey(sankeyData,margin.left,width+margin.right/1.5);
 
                   fildisData = d3.nest()
