@@ -1,0 +1,2934 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<style type="text/css"></style>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>The Real Business of the Courts</title>
+
+    <!-- ADD Libraries-->
+    <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+    <script src="libs/d3/sankey.js"></script>    
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
+    <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+
+    <!--Stylesheets-->
+    <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+
+    <!-- Get some nice font-->
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+
+    <!-- add own vis classes-->
+    <script src = "js/dd.js"></script>
+
+    <!-- add own stylesheet-->
+    <link rel="stylesheet" type="text/css" href="css/myStyle.css">
+
+</head>
+<body>
+    <div class="container">
+        <h1 id="headline" style="color:#000b95;">The Real Business of the Courts</h1><br><br>
+
+        <div class="row">
+          <div class="col-md-12" id="divtop"></div>
+        </div>
+        
+        <div class="row">
+<!-- divnav needed more space            <div class="col-md-3" id="divnav" > -->
+            <div class="col-md-4" id="divnav" >
+              <form>
+                <div id="divmap">
+                  <label style="margin-bottom: 0;">Select by: </label><br>
+                  <input type="radio" class="cs" name="select" value="0" checked></input> County 
+                  <input type="radio" class="cs" name="select" value="1"></input> Circuit 
+                  <input type="radio" class="cs" name="select" value="2"></input> District 
+                  <input type="radio" class="cs" name="select" value="3"></input> All
+                </div>
+              </form><br><br>
+              <div id="divdoc">
+                <label style="margin-bottom: 0;">Division of Court and Case Type:</label>
+								<br>
+								<span id="docInfo"></span><br>
+                <svg class="chart"></svg><br>
+                <span style="padding-left:20px; font-size:12px;">Include Traffic: <input type="checkbox" class="cb" name="Traffic" checked></input></span>
+                <br><br>
+              </div>
+              <div id="divpop">
+                <label style="margin-bottom: 0;">Population by Age Group:</label>
+                <br><span id="ageInfo"></span><br>
+                <svg class="charta"></svg>
+              </div>
+            </div>
+<!-- divnav needed more space -- this space is still there <div class="col-md-1" ></div> <!-- Added spacer -->
+            <div class="col-md-8" id="divmain">
+                <div id="divmainhead"></div>
+                  <form>
+                    <label style="margin-bottom: 10px;">Show Data: </label>
+                    <span title="Range-bound data graphs only the pertinent range of data.">
+                      <input type="radio" class="cd" name="display" value="0" checked></input> Range-bound </span>
+                    <span title="Zero-based data graphs the data as raw numbers.">
+                      <input type="radio" class="cd" name="display" value="2"></input> Zero-based </span> 
+                    <span title="Indexed data is expressed as a percentage of the 1986 value.">
+                      <input type="radio" class="cd" name="display" value="1"></input> Indexed</span> 
+                    <span style="padding-left:30px"> </span>
+                    <!-- <label>Selected Year(s):  -->
+                    <label>Brush Selection:
+                    <span style="padding-left:8px" id="brushInfo"></span></label>
+                    <!-- <span style="padding-left:8px; font-size: 9px;"><i>(Brush to change.)</i></span> -->
+                  </form>
+                <div id="divmainfoot"></div>
+                <div id="divmainbody"></div>
+                <div id="divsankey"></div><br><br>
+                  <label style="margin-bottom: 0;" id="xh1">Case Paths to Resolution: </label>
+                  <p id="chart">
+                  <aside>Drag to rearrange nodes.</aside>
+                  <p>Source: <a href="http://flcourts.org">Florida Office of State Courts Administrator</a>                
+            </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-3" id="divbotl">
+          </div>
+          <div class="col-md-9" id="divbotr">
+            <span style="padding-left:100px"> </span>Go 
+            <a href="landing.html">Back to Landing Page</a>
+          </div>
+        </div>
+        
+    </div>
+
+    <script>
+        $(function(){ // this function is called after the HTML document is fully loaded
+
+            // variables keeping global knowledge of the data
+            vizSelected = 0; // Raw (0) or Indexed (1) selected
+            trafficSelected = true;
+            selDoc = ""; // Selected Division of Court
+            selToc = ""; // Selected Type of Case
+            mulToc = {}; // Multi-Selected Types of Cases
+            multipleDoc = [];
+            multipleToc = [];
+            //selAge = 0; // Selected Age Group
+            multAge = []; // Multi-Selected Age Groups
+            selGeo = []; // Selected Counties by id
+            selGeoByName = []; // Selected Counties by id
+            multGeo = []; // Selected Counties by id
+            selectingWhich = 3; // For Multi-Selection reset
+            allGeo = []; // All Counties by id
+            allYrs = [1986,2013]; // All Years (1986-2013)
+            selYrs = allYrs; // Selected Years (default 1986-2013)
+
+            // call this function after Data is loaded, reformatted and bound to the variables
+            var initVis = function(){
+
+                //Create an eventHandler
+                //var MyEventHandler = new Object();
+
+                //Instantiate all Vis Objects here
+                //var det_obj = new DetailsVis(d3.select("#divmain"), vizSelected, MyEventHandler);
+                                
+                // Bind the eventHandler to the Vis Objects
+                //$(document).on("menuChange", function (MyEventHandler) { det_obj.onSelectionChange() });
+
+            }
+
+            var startHere = function(){
+
+              var mapWidth = 250;
+              var mapHeight = 190;
+              var mapScale = 1800;
+              var mapOffsetX = -230;
+              var mapOffsetY = -210;
+              var tooltipOffsetL = 10;
+              var tooltipOffsetT = 20;
+              var numCounties = 68;
+              var mainWidthAdjust = 250;
+              var mainHeightPct = 0.4;
+              var margin = {top: 10, right: 90, bottom: 40, left: 85};
+              var width = document.getElementById("divmain").offsetWidth - margin.left - margin.right; // - mainWidthAdjust
+              var height = window.innerHeight*mainHeightPct - margin.top - margin.bottom;
+              var footHeight = 60;
+              // var color = d3.scale.category10();
+              var color = d3.scale.ordinal() //CHANGE
+
+
+        .range(["#3b5998", "#009d97", "#2ca02c", "#0066cc", 
+  "#7221aa", "#cc6600"]); 
+
+
+
+              var numYears = 28;
+              var yearAxisLabelX = 15;
+              var yearAxisLabelY = -15;
+              var overlappingPathOpacity = 0.5;
+              var legendRectSize = 15;
+              var legendSpacing = 4;
+              var mainTransitionDur = 1000;
+              var barTransitionDur = 500;
+              var cwidth = 250;
+              var cheight = 180;
+              var barStartd = 93+12;
+              var barStartt = 120+12;
+              var barStarta = 60;
+              var barHeight = 15;
+              var barWidthTrim = 10;
+              var barHeightTrim = 2;
+              var barTextX = 3+12;
+              var aheight = 210;
+              var cidMin = 12000;
+              var cidMax = 13000;
+              var numCircuits = 20;
+              var numDistricts = 5;
+              var numCaseTypes = 48;
+              var loDate = selYrs[0];
+              var hiDate = selYrs[1];
+              var showStart = 300;
+              var showtextHeight = 15;
+              var expandSymbol = "";//"▹";
+              var contractSymbol = "◃";             
+              //
+              // Division of Court / Type of Case
+              var doclist = ["Circuit Civil",
+                              "Circuit Criminal",
+                              "County Civil",
+                              "County Criminal",
+                              "Family Court",
+                              "Probate",
+                              "Traffic"];
+                              
+              var doctoc = {
+                    "1":["Auto Negligence",
+                         "Condominium",
+                         "Contract & Indebt.",
+                         "Eminent Domain",
+                         "Other Circuit Civil",
+                         "Other Negligence",
+                         "Products Liability",
+                         "Prof. Malpractice",
+                         "Real Prop/Foreclosure"],
+                    "2":["Burglary",
+                         "Capital Murder",
+                         "Drugs",
+                         "Non Capital Murder",
+                         "Oth Crimes v Person",
+                         "Oth Crimes v Property",
+                         "Oth Felonies",
+                         "Robbery",
+                         "Sexual Offenses",
+                         "Theft/Forgery/Fraud",
+                         "Worthless Checks Fel."],
+                    "3":["Civil ($5K to $15K)",
+                         "Evictions",
+                         "Oth Civil (non-$)",
+                         "Replevins",
+                         "Small Claims (< $5K)"],
+                    "4":["County Ordinances",
+                         "Misdemeanors",
+                         "Municipal Ordinances",
+                         "Worthless Checks Mis."],
+                    "5":["Child Support",
+                         "Dissolution",
+                         "Domestic Violence",
+                         "Juvenile Delinquency",
+                         "Juvenile Dependency",
+                         "Other Domestic Reln.",
+                         "Repeat Violence",
+                         "Simpl. Dissolution",
+                         "Term of Parental Rts",
+                         "UIFSA"],
+                    "6":["Baker Act",
+                         "Guardianship",
+                         "Other Social",
+                         "Probate",
+                         "Substance Abuse Act",
+                         "Trusts"],
+                    "7":["Civil Traffic Infr.",
+                         "DUI",
+                         "Non-DUI Crim. Traffic"]
+                  };
+
+              var fulldoctoc = {
+                                  "1":["Auto Negligence","Condominium","Contract & Indebtedness",
+                                       "Eminent Domain","Other Circuit Civil","Other Negligence",
+                                       "Products Liability","Professional Malpractice",
+                                       "Real Property/Mortgage Foreclosure"],
+                                  "2":["Burglary","Capital Murder","Drugs","Non Capital Murder",
+                                       "Other Crimes Against Person","Other Crimes Against Property",
+                                       "Other Felonies","Robbery","Sexual Offenses",
+                                       "Theft, Forgery, Fraud","Worthless Checks (Felony)"],
+                                  "3":["Civil ($5,001 to $15,000)","Evictions",
+                                       "Other Civil (non-monetary)","Replevins",
+                                       "Small Claims (up to $5,000)"],
+                                  "4":["County Ordinances","Misdemeanors","Municipal Ordinances",
+                                       "Worthless Checks (Misdemeanors)"],
+                                  "5":["Child Support","Dissolution","Domestic Violence",
+                                       "Juvenile Delinquency","Juvenile Dependency",
+                                       "Other Domestic Relations","Repeat Violence",
+                                       "Simplified Dissolution","Termination of Parental Rights",
+                                       "UIFSA"],
+                                  "6":["Baker Act","Guardianship","Other Social","Probate",
+                                       "Substance Abuse Act","Trusts"],
+                                  "7":["Civil Traffic Infractions","DUI","Non DUI Criminal Traffic"]
+                                };                  
+
+              for (var i = 1; i <= 7; i++) {
+                mulToc[i] = [];
+                multipleDoc.push(doclist[i-1]);
+                for (var j = 0; j < doctoc[""+i].length; j++) {
+                  mulToc[i].push(1);
+                  multipleToc.push(fulldoctoc[""+i][j]);
+                };
+              };
+
+              var agegrp = ["Age < 1","Age 1-4","Age 5-9","Age 10-14","Age 15-19","Age 20-24","Age 25-34","Age 35-44","Age 45-54","Age 55-64","Age 65-74","Age 75-84","Age 85+"];
+
+              if (selYrs[0] == selYrs[1]) {
+                d3.select("#brushInfo").text(selYrs[0]);
+              } else {
+                d3.select("#brushInfo").text(selYrs[0] + " --> " + selYrs[1]);
+              };
+              
+              // Set up Florida map
+              //
+              var svg2 = d3.select("#divmap").append("svg")
+                  .attr("width", mapWidth)
+                  .attr("height", mapHeight);
+
+              var projection = d3.geo.albersUsa()
+                  .scale(mapScale)
+                  .translate([mapOffsetX,mapOffsetY]);
+
+              var path = d3.geo.path()
+                  .projection(projection);
+
+              // Most of the Tooltip logic came from:
+              // http://techslides.com/demos/d3/worldmap-template.html
+              var tooltip = d3.select("#divmap")
+                              .append("div")
+                              .attr("class", "tooltip hidden");
+
+              //offsets for tooltips
+              var offsetL = document.getElementById('divmap').offsetLeft+tooltipOffsetL;
+              var offsetT = document.getElementById('divmap').offsetTop+tooltipOffsetT;
+
+              var fldata;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+              d3.json("data/floridacourtsystem.json", function(error, json) {
+
+                fldata = json;
+
+                var countyId = {};
+                var countyName = {};
+                var countyCircuit = {};
+                var countyDistrict = {};
+                var countyCircuitIds = {};
+                var countyDistrictIds = {};
+
+                //
+                // Build county lookups
+                fldata.forEach( function (county) {
+                  allGeo.push(county.id);
+                  countyName[county.id] = county.name;
+                  countyId[county.name] = county.id;
+                  countyCircuit[county.id] = county.circuit;
+                  countyDistrict[county.id] = county.district;
+                  if (countyCircuitIds[county.circuit] != null) {
+                    countyCircuitIds[county.circuit].push(county.id);
+                  } else {
+                    countyCircuitIds[county.circuit] = [county.id];
+                  };
+                  if (countyDistrictIds[county.district] != null) {
+                    countyDistrictIds[county.district].push(county.id);
+                  } else {
+                    countyDistrictIds[county.district] = [county.id];
+                  };                  
+                });
+                
+                selGeo = copy(allGeo);
+                selGeoByName = [];
+                for (var i = 0; i < selGeo.length; i++) {
+                  selGeoByName.push(countyName[selGeo[i]]);
+                };
+
+                // Load Filings, Dispositions, and Population
+                //
+                queue()
+                  .defer(d3.csv, 'data/FDCombined.csv')
+                  .defer(d3.csv, 'data/Population.csv')
+                  .defer(d3.csv, 'data/Income.csv')
+                  .defer(d3.csv, "data/dispodetail.csv")                  
+                  .await(allLoaded);
+
+                function allLoaded(error, fdData, pData, iData, rData) {
+
+                  bothFilDis = fdData.map(function (d) {
+                    var fid = +d.id
+                    return {
+                      id: fid,
+                      circ: countyCircuit[fid],
+                      dist: countyDistrict[fid],
+                      doc: +d.doc,
+                      toc: +d.toc,
+                      year: +d.year,
+                      fcount: +d.filcount,
+                      dcount: +d.discount
+                    };
+
+                  });
+
+                  fildisData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"totalf":d3.sum(leaves, function (d) { return d.fcount }),
+                                                                  "totald":d3.sum(leaves, function (d) { return d.dcount })}})
+                              .entries(bothFilDis);
+                              
+                  populations = pData.map(function (d) {
+                    var fid = +d.id;
+                    return {
+                      id: fid,
+                      circ: countyCircuit[fid],
+                      dist: countyDistrict[fid],
+                      agrp: +d.group,
+                      year: +d.year,
+                      count: +d.population
+                    };
+
+                  });
+
+                  popData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(populations);
+
+                  incomes = iData.map(function (d) {
+                    var fid = +d.id;
+                    return {
+                      id: fid,
+                      circ: countyCircuit[fid],
+                      dist: countyDistrict[fid],
+                      year: +d.year,
+                      income: +d.income
+                    };
+
+                  });
+
+                  incData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.income })}})
+                              .entries(incomes);                              
+
+                  docGraph();
+                  
+                  ageGraph();
+                  
+                  mainGraph();
+
+                  sankeyData = rData;
+                  initSankey(sankeyData,margin.left,width+margin.right/1.5);                  
+
+                };
+                
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////                
+                function mainGraph() {
+
+                  fildisData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"totalf":d3.sum(leaves, function (d) { return d.fcount }),
+                                                                  "totald":d3.sum(leaves, function (d) { return d.dcount })}})
+                              .entries(bothFilDis
+                                      .filter(function(d) {
+                                        if (mulToc[d.doc][d.toc-1] == 0) { return false; };
+                                        //if (selDoc != "" && selDoc != d.doc) { return false; }
+                                        //if (selToc != "" && selToc != d.toc) { return false; }
+                                        if (selGeo.length == numCounties) { return true; };
+                                        return d3.set(selGeo).has(d.id);
+                                      })
+                                    );
+                                    
+                  var firstOnef = 0.0;
+                  var firstOned = 0.0;
+                  var cumF = 0;
+                  var cumD = 0;
+
+                  fildisData.forEach( function (d) {
+
+                    if (vizSelected == 1) {
+                      if (firstOnef == 0) {
+                        firstOnef = d.values.totalf;
+                        d.totalf = 100.0;
+                      } else {
+                        d.totalf = 100.0 * (d.values.totalf / firstOnef);
+                      };
+                      if (firstOned == 0) {
+                        firstOned = d.values.totald;
+                        d.totald = 100.0;
+                      } else {
+                        d.totald = 100.0 * (d.values.totald / firstOned);
+                      };
+                    } else {
+                      d.totalf = d.values.totalf;
+                      d.totald = d.values.totald;
+                    };
+
+                    if (d.totalf != 0) {
+                      d.clearThis = d.totald/d.totalf;
+                    } else {
+                      d.clearThis = 1;
+                    };
+                    cumF += d.totalf;
+                    cumD += d.totald;
+                    if (cumF != 0) {
+                      d.clearCum = cumD/cumF;
+                    } else {
+                      d.clearCum = 1;
+                    };
+
+                  });
+                  
+                  popData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(populations
+                                      .filter(function(d) {
+                                        if (multAge.indexOf(d.agrp) < 0) { return false; }
+                                        //if (selAge != 0 && selAge != d.agrp) { return false; }
+                                        if (selGeo.length == numCounties) { return true; }
+                                        return d3.set(selGeo).has(d.id);
+                                      })
+                                    );
+                                    
+                  var firstOne = 0.0;
+                  popData.forEach( function (d) {
+                    if (vizSelected == 1) {
+                      if (firstOne == 0) {
+                        firstOne = d.values.total;
+                        d.total = 100.0;
+                      } else {
+                        d.total = 100.0 * (d.values.total / firstOne);
+                      };
+                    } else {
+                      d.total = d.values.total;
+                    };
+                  });                                   
+
+                  
+                  incData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.income })}})
+                              .entries(incomes
+                                      .filter(function(d) { 
+                                        if (selGeo.length == numCounties) { return true; }
+                                        return d3.set(selGeo).has(d.id);
+                                      })
+                                    );
+                                    
+                  var firstOne = 0.0;
+                  incData.forEach( function (d) {
+                    if (vizSelected == 1) {
+                      if (firstOne == 0) {
+                        firstOne = d.values.total;
+                        d.total = 100.0;
+                      } else {
+                        d.total = 100.0 * (d.values.total / firstOne);
+                      };
+                    } else {
+                      d.total = d.values.total;
+                    };
+                  });                                   
+                  
+                  
+                  var x = d3.scale.linear()
+                      .range([0, width]);
+
+                  var y = d3.scale.linear()
+                      .range([height, 0]);
+
+                  var xAxis = d3.svg.axis()
+                      .scale(x)
+                      .ticks(numYears)
+                      .tickFormat(d3.format("0000"))
+                      .orient("bottom");
+
+                  var yAxis = d3.svg.axis()
+                      .scale(y)
+                      .orient("left");
+                      
+                  var gxAxis = d3.svg.axis()
+                      .scale(x)
+                      .ticks(numYears)
+                      .orient("bottom");
+
+                  var gyAxis = d3.svg.axis()
+                      .scale(y)
+                      .orient("left");
+
+                  var areaf = d3.svg.area()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y0(height)
+                      .y1(function(d) { return y(d.totalf); });
+
+                  var aread = d3.svg.area()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y0(height)
+                      .y1(function(d) { return y(d.totald); });                      
+
+                  var line = d3.svg.line()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y(function(d) { return ay(d.total); });
+                      
+                  var linei = d3.svg.line()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y(function(d) { return iy(d.total); });                      
+                  
+                  var linect = d3.svg.line()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y(function(d) { return aycr(d.clearThis); });
+                  
+                  var linecc = d3.svg.line()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y(function(d) { return aycr(d.clearCum); });
+                      
+                  var xRange = d3.extent(fildisData, function(d) { return d.key; });
+                  var fRange = d3.extent(fildisData, function(d) { return d.totalf; });
+                  var dRange = d3.extent(fildisData, function(d) { return d.totald; });
+                  var yRange = [d3.min([fRange[0],dRange[0]]),d3.max([fRange[1],dRange[1]])];                      
+                  
+                  x.domain(xRange);
+                  y.domain(yRange);
+                  
+                  var svg = d3.select("#divmainbody").append("svg")
+                      .attr("width", width + margin.left + margin.right)
+                      .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                  //                YEARS have an iconic number format - extra Label adds clutter
+                  // Axis Labels
+                  // d3.select("#divmainbody svg").append("text")
+                  //    .attr("class", "x label")
+                  //    .attr("text-anchor", "end")
+                  //    .attr("x", margin.left + width/2)
+                  //    .attr("y", height + margin.top + margin.bottom - 7)
+                  //    .text("Year");
+
+                  d3.select("#divmainbody svg").append("text")
+                      .attr("class", "y label")
+                      .attr("text-anchor", "end")
+                      .attr("x", -height/2 + margin.bottom/2)
+                      .attr("y", 7)
+                      .attr("dy", ".75em")
+                      .attr("transform", "rotate(-90)")
+                      .text("Number of Cases");
+                      
+                  d3.select("#divmainbody svg").append("text")
+                      .attr("class", "ay label")
+                      .attr("visibility","hidden")
+                      .attr("text-anchor", "end")
+                      .attr("x", height/2 + margin.bottom/2)
+                      .attr("y", -width - margin.left - margin.right + 7)
+                      .attr("dy", ".75em")
+                      .attr("transform", "rotate(90)")
+                      .text("Population")
+                        .style("font-color","green");
+
+                  svg.append("line")
+                    .attr("class", "alineaxt")
+                    .attr("visibility","hidden")
+                    .attr("x1",0)
+                    .attr("y1",height/2)
+                    .attr("x2",width)
+                    .attr("y2",height/2)
+                    .style("stroke","rgb(214,39,40)")
+                    .style("stroke-dasharray","10,10");
+                    
+                  svg.append("line")
+                    .attr("class", "alineaxc")
+                    .attr("visibility","hidden")
+                    .attr("x1",0)
+                    .attr("y1",height/2)
+                    .attr("x2",width)
+                    .attr("y2",height/2)
+                    .style("stroke","rgb(148,103,189)")
+                    .style("stroke-dasharray","10,10");
+                  
+                  d3.select("#divmainbody svg").append("text")
+                    .attr("class", "alineaxt")
+                    .attr("visibility","hidden")
+                    .attr("x",margin.left-8)
+                    .attr("y",margin.top+height/2)
+                    .text("1")
+                    .style("fill","rgb(214,39,40)");
+                    
+                  d3.select("#divmainbody svg").append("text")
+                    .attr("class", "alineaxc")
+                    .attr("visibility","hidden")
+                    .attr("x",margin.left-8)
+                    .attr("y",margin.top+height/2)
+                    .text("1")
+                    .style("fill","rgb(44,160,44)");
+                
+                  var ay = d3.scale.linear()
+                            .range([height, 0])
+                            .domain(d3.extent(popData, function(d) { return d.total; }));
+                  var ayAxis = d3.svg.axis().scale(ay).orient("right");
+
+                  var ctRange = d3.extent(fildisData, function(d) { return d.clearThis; });
+                  var ccRange = d3.extent(fildisData, function(d) { return d.clearCum; });
+                  var cDiff = d3.max([Math.abs(ctRange[0]-1), Math.abs(ctRange[1]-1), Math.abs(ccRange[0]-1), Math.abs(ccRange[1]-1)]);
+                  var crRange = [(1-cDiff),(1+cDiff)];
+
+                  var aycr = d3.scale.linear()
+                            .range([height, 0])
+                            .domain(crRange);
+
+                  svg.append("path")
+                      .datum(fildisData)
+                      .attr("class", "farea")
+                      .attr("d", areaf)
+                      .attr("data-legend","Filings")
+                      .attr("visibility","visible")
+                      .style("fill", function(d) { return color(1) } )
+                      .style("fill-opacity", overlappingPathOpacity);     
+
+                  svg.append("path")
+                      .datum(fildisData)
+                      .attr("class", "darea")
+                      .attr("d", aread)
+                      .attr("data-legend","Dispositions")
+                      .attr("visibility","visible")
+                      .style("fill", function(d) { return color(2) } )
+                      .style("fill-opacity", overlappingPathOpacity);                     
+                  
+                  svg.append("path")
+                      .datum(popData)
+                      .attr("class", "aline")
+                      .attr("d", line)
+                      .attr("data-legend","Population")
+                      .attr("visibility","hidden")
+                      .style("stroke", function(d) { return color(3) } );
+
+                  svg.append("path")
+                      .datum(fildisData)
+                      .attr("class", "alinect")
+                      .attr("d", linect)
+                      .attr("data-legend","Clearance Rate")
+                      .attr("visibility","hidden")
+                      .style("stroke", function(d) { return color(4) } );
+
+                  svg.append("path")
+                      .datum(fildisData)
+                      .attr("class", "alinecc")
+                      .attr("d", linecc)
+                      .attr("data-legend","Cumulative Clearance Rate")
+                      .attr("visibility","hidden")
+                      .style("stroke", function(d) { return color(5) } );
+
+                  var iy = d3.scale.linear()
+                            .range([height, 0])
+                            .domain(d3.extent(incData, function(d) { return d.total; }));
+                  //var iyAxis = d3.svg.axis().scale(iy).orient("right");
+                  
+                  svg.append("path")
+                      .datum(incData)
+                      .attr("class", "iline")
+                      .attr("d", linei)
+                      .attr("data-legend","Personal Income")
+                      .attr("visibility","hidden")
+                      .style("stroke", function(d) { return color(6) } );
+                      
+                  svg.append("g")
+                      .attr("class", "x axis")
+                      .attr("transform", "translate(0," + height + ")")
+                      .call(xAxis)
+                      .selectAll("text")  
+                        .style("text-anchor", "end")
+                        .attr("dx", "-.8em")
+                        .attr("dy", ".15em")
+                        .attr("transform", function(d) {
+                            return "rotate(-65)" 
+                            });
+
+                  svg.append("g")
+                      .attr("class", "y axis")
+                      .call(yAxis);
+                      
+                  svg.append("g")
+                      .attr("class", "ay axis")
+                      .attr("visibility","hidden")
+                      .attr("transform", "translate(" + width + " ,0)")
+                      .style("fill", "rgb(44,160,44)")
+                      .call(ayAxis);
+                      
+                  //
+                  // Light Grid
+                  // Idea from http://www.d3noob.org/2013/01/adding-grid-lines-to-d3js-graph.html
+                  svg.append("g")         
+                      .attr("class", "grid")
+                      .attr("transform", "translate(0," + height + ")")
+                      .call(gxAxis
+                              .tickSize(-height, 0, 0)
+                              .tickFormat("")
+                      );
+
+                  svg.append("g")         
+                      .attr("class", "grid")
+                      .call(gyAxis
+                              .tickSize(-width, 0, 0)
+                              .tickFormat("")
+                      );
+
+                  // Footer
+                  var svgfoot = d3.select("#divmainfoot").append("svg")
+                      .attr("width", width + margin.left + margin.right)
+                      .attr("height", footHeight)
+                    .append("g")
+                      .attr("transform", "translate(" + margin.left + ",0)");
+                      
+                  // Legend code borrowed from
+                  // http://zeroviscosity.com/d3-js-step-by-step/step-3-adding-a-legend
+                  d3.select("#divmainfoot svg").append("text")
+                    .attr("x",10)
+                    .attr("y",10)
+                    .text("Legend:")
+                    .style("font-weight","bold");
+
+                  var legend = svgfoot.selectAll('.legend')
+                      .data(color.domain())
+                      .enter()
+                      .append('g')
+                      .attr('class', 'legend')
+                      .attr('transform', function(d, i) {
+                        var column = Math.floor(i/3);
+                        var height = legendRectSize + legendSpacing;
+                        var offset =  legendSpacing;//height * 2 / 2;
+                        var horz = column*100; //2 * legendRectSize +
+                        var vert = i * height - (column * 3 * height) + offset;
+                        return 'translate(' + horz + ',' + vert + ')';
+                      });
+                      
+                  legend.append('rect')
+                    .attr('width', legendRectSize)
+                    .attr('height', legendRectSize)
+                    .style('fill', color)
+                    .style("fill-opacity", function(d, i) {
+                                  if (i < 2) {
+                                    return overlappingPathOpacity;
+                                  } else {
+                                    return 0;
+                                  }})
+                    .style('stroke', color);
+                    
+                  legend.append('text')
+                    .attr('x', legendRectSize + legendSpacing)
+                    .attr('y', legendRectSize - legendSpacing)
+                    .text(function(d,i) { 
+                              if (i == 0) {
+                                return "Filings"
+                              } else if (i == 1) {
+                                return "Dispositions"
+                              } else if (i == 2) {
+                                return "Population"
+                              } else if (i == 3) {
+                                return "Clearance Rate"
+                              } else if (i == 4) {
+                                return "Cumulative Clearance Rate"
+                              } else if (i == 5) {
+                                return "Personal Income"
+                              };
+                            });
+                            
+                  svgfoot.selectAll(".showingtext").remove();
+                
+                  svgfoot.append("text")
+                    .attr("class", "showingtext")
+                    .attr("x",showStart)
+                    .attr("y",showtextHeight)
+                    .text("Selected:")
+                    .style("font-weight","bold");
+      
+                  svgfoot.append("text")
+                    .attr("id", "showingtextgeo")
+                    .attr("x",showStart+70)
+                    .attr("y",showtextHeight*1)
+                    .text("All of Florida");
+
+                  svgfoot.append("text")
+                    .attr("class", "showingtext")
+                    .attr("x",showStart+70)
+                    .attr("y",showtextHeight*2)
+                    .text("All Divisions of Court");                    
+                    
+                  svgfoot.append("text")
+                    .attr("class", "showingtext")
+                    .attr("x",showStart+70)
+                    .attr("y",showtextHeight*3)
+                    .text("All Types of Cases");
+
+           //        svgfoot.append("text")
+           //          .attr("x",showStart+200)
+           //          .attr("y",showtextHeight*1)
+           //          .text("(click map to change)")
+                      // .style("font-size","9px")
+                      // .style("font-style","italic");
+
+           //        svgfoot.append("text")
+           //          .attr("x",showStart+200)
+           //          .attr("y",showtextHeight*2)
+           //          .text("(click bar chart)")
+                      // .style("font-size","9px")
+                      // .style("font-style","italic");                    
+                    
+                  // svgfoot.append("text")
+                  //  .attr("x",showStart+200)
+                  //  .attr("y",showtextHeight*3)
+                  //  .text("(click bar chart)")
+                  //    .style("font-size","9px")
+                  //    .style("font-style","italic");                      
+                            
+                  // Brushing
+                  //
+                  var visScale = d3.scale.linear()
+                                        .domain([loDate, hiDate])
+                                        .range([0, width]);
+
+                  brush = d3.svg.brush().x(visScale).on("brush", brushed);
+
+                  svg.append("g")
+                        .attr("class", "brush").call(brush)
+                        .selectAll("rect")
+                        .attr("height", height);
+
+                  function brushed () {
+
+                    if (brush.extent()[0] != brush.extent()[1]) {
+                      selYrs = [Math.floor(brush.extent()[0]+0.5),Math.floor(brush.extent()[1]+0.5)];
+                    } else {
+                      selYrs = allYrs;
+                    };
+                    
+                    if (selYrs[0] == selYrs[1]) {
+                      d3.select("#brushInfo").text(selYrs[0]);
+                    } else {
+                      d3.select("#brushInfo").text(selYrs[0] + " --> " + selYrs[1]);
+                    };
+                    
+                    docUpdate();
+                    if (selDoc != "") {
+                      tocUpdate();
+                    };
+                    ageUpdate();
+                    
+                    d3.select(".sankeysvg").remove();
+                    updateSankey(sankeyData,margin.left,width+margin.right/1.5);
+                    //$(document).trigger("brushChange", [begDate,endDate]);
+                  };
+
+                  d3.select(".clickableLegend").remove();
+                  
+                  svgfoot.append("rect")
+                      .attr("class","clickableLegend")
+                      .attr("width", 275)
+                      .attr("height", (legendRectSize + legendSpacing) * 3)
+                      .on('click', function(d) { legClicked(d3.mouse(this)) });
+
+                };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                function updateMain() {
+
+                  d3.select(".sankeysvg").remove();
+                  updateSankey(sankeyData,margin.left,width+margin.right/1.5);
+
+                  fildisData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"totalf":d3.sum(leaves, function (d) { return d.fcount }),
+                                            "totald":d3.sum(leaves, function (d) { return d.dcount })}})
+                              .entries(bothFilDis
+                                      .filter(function(d) {
+                                        if (!trafficSelected && d.doc == 7) { return false; };
+                                        if (mulToc[d.doc][d.toc-1] == 0) { return false; };
+                                        //if (selDoc != "" && selDoc != d.doc) { return false; }
+                                        //if (selToc != "" && selToc != d.toc) { return false; }
+                                        if (selGeo.length == numCounties) { return true; }
+                                        return d3.set(selGeo).has(d.id);
+                                      })
+                                    );
+                                    
+                  var firstOnef = 0.0;
+                  var firstOned = 0.0;
+                  var cumF = 0;
+                  var cumD = 0;
+
+                  fildisData.forEach( function (d) {
+                    
+                    if (vizSelected == 1) {
+                      if (firstOnef == 0) {
+                        firstOnef = d.values.totalf;
+                        d.totalf = 100.0;
+                      } else {
+                        d.totalf = 100.0 * (d.values.totalf / firstOnef);
+                      };
+                      if (firstOned == 0) {
+                        firstOned = d.values.totald;
+                        d.totald = 100.0;
+                      } else {
+                        d.totald = 100.0 * (d.values.totald / firstOned);
+                      };
+                    } else {
+                      d.totalf = d.values.totalf;
+                      d.totald = d.values.totald;
+                    };
+
+                    if (d.totalf != 0) {
+                      d.clearThis = d.totald/d.totalf;
+                    } else {
+                      d.clearThis = 1;
+                    };
+                    cumF += d.totalf;
+                    cumD += d.totald;
+                    if (cumF != 0) {
+                      d.clearCum = cumD/cumF;
+                    } else {
+                      d.clearCum = 1;
+                    };
+
+                  });
+
+                  popData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(populations
+                                      .filter(function(d) { 
+                                        if (multAge.indexOf(d.agrp) < 0) { return false; }
+                                        //if (selAge != 0 && selAge != d.agrp) { return false; }
+                                        if (selGeo.length == numCounties) { return true; }
+                                        return d3.set(selGeo).has(d.id);
+                                      })
+                                    );
+                                    
+                  var firstOne = 0.0;
+                  popData.forEach( function (d) {
+                    if (vizSelected == 1) {
+                      if (firstOne == 0) {
+                        firstOne = d.values.total;
+                        d.total = 100.0;
+                      } else {
+                        d.total = 100.0 * (d.values.total / firstOne);
+                      };
+                    } else {
+                      d.total = d.values.total;
+                    };
+                  });
+                  
+                  incData = d3.nest()
+                              .key(function (d) { return d.year })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.income })}})
+                              .entries(incomes
+                                      .filter(function(d) { 
+                                        if (selGeo.length == numCounties) { return true; }
+                                        return d3.set(selGeo).has(d.id);
+                                      })
+                                    );
+                                    
+                  var firstOne = 0.0;
+                  incData.forEach( function (d) {
+                    if (vizSelected == 1) {
+                      if (firstOne == 0) {
+                        firstOne = d.values.total;
+                        d.total = 100.0;
+                      } else {
+                        d.total = 100.0 * (d.values.total / firstOne);
+                      };
+                    } else {
+                      d.total = d.values.total;
+                    };
+                  });                                   
+                                    
+                  var x = d3.scale.linear()
+                      .range([0, width]);
+
+                  var y = d3.scale.linear()
+                      .range([height, 0]);
+
+                  var xAxis = d3.svg.axis()
+                      .scale(x)
+                      .ticks(numYears)
+                      .tickFormat(d3.format("0000"))
+                      .orient("bottom");
+
+                  var yAxis = d3.svg.axis()
+                      .scale(y)
+                      .orient("left");
+
+                  var gxAxis = d3.svg.axis()
+                      .scale(x)
+                      .ticks(numYears)
+                      .orient("bottom");
+
+                  var gyAxis = d3.svg.axis()
+                      .scale(y)
+                      .orient("left");
+                      
+                  var areaf = d3.svg.area()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y0(height)
+                      .y1(function(d) { return y(d.totalf); });
+
+                  var aread = d3.svg.area()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y0(height)
+                      .y1(function(d) { return y(d.totald); });                      
+                      
+                  var line = d3.svg.line()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y(function(d) { return ay(d.total); });
+                      
+                  var linei = d3.svg.line()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y(function(d) { return iy(d.total); });                            
+
+                  var linect = d3.svg.line()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y(function(d) { return aycr(d.clearThis); });
+                  
+                  var linecc = d3.svg.line()
+                      .interpolate("basis") 
+                      .x(function(d) { return x(d.key); })
+                      .y(function(d) { return aycr(d.clearCum); });                      
+                      
+                  var xRange = d3.extent(fildisData, function(d) { return d.key; });
+                  var fRange = d3.extent(fildisData, function(d) { return d.totalf; });
+                  var dRange = d3.extent(fildisData, function(d) { return d.totald; });
+                  var yRange = [d3.min([fRange[0],dRange[0]]),d3.max([fRange[1],dRange[1]])];
+
+                  if (vizSelected == 2) {
+                    yRange[0] = 0;
+                  }
+
+
+                  var svg = d3.select("#divmainbody svg g")
+
+                  x.domain(xRange);
+                  y.domain(yRange);
+                  
+                  //
+                  // Light Grid
+                  // Idea from http://www.d3noob.org/2013/01/adding-grid-lines-to-d3js-graph.html
+                  d3.selectAll(".grid").remove();
+
+                  svg.append("g")         
+                      .attr("class", "grid")
+                      .attr("transform", "translate(0," + height + ")")
+                      .call(gxAxis
+                              .tickSize(-height, 0, 0)
+                              .tickFormat("")
+                      );
+
+                  svg.append("g")         
+                      .attr("class", "grid")
+                      .call(gyAxis
+                              .tickSize(-width, 0, 0)
+                              .tickFormat("")
+                      );
+
+                  var ayRange = d3.extent(popData, function(d) { return d.total; });
+                  if (vizSelected == 2) {
+                    ayRange[0] = 0;
+                  };
+                  var ay = d3.scale.linear()
+                            .range([height, 0])
+                            .domain(ayRange);
+                  var ayAxis = d3.svg.axis().scale(ay).orient("right");
+
+                  var iyRange = d3.extent(incData, function(d) { return d.total; });
+                  if (vizSelected == 2) {
+                    iyRange[0] = 0;
+                  };                  
+                  var iy = d3.scale.linear()
+                            .range([height, 0])
+                            .domain(iyRange);
+                  //var iyAxis = d3.svg.axis().scale(iy).orient("right");                 
+
+                  var ctRange = d3.extent(fildisData, function(d) { return d.clearThis; });
+                  var ccRange = d3.extent(fildisData, function(d) { return d.clearCum; });
+                  var cDiff = d3.max([Math.abs(ctRange[0]-1), Math.abs(ctRange[1]-1), Math.abs(ccRange[0]-1), Math.abs(ccRange[1]-1)]);
+                  var crRange = [(1-cDiff),(1+cDiff)];
+
+                  var aycr = d3.scale.linear()
+                            .range([height, 0])
+                            .domain(crRange);         
+
+                  path = svg.selectAll('.farea').datum(fildisData)
+                            .transition()
+                            .duration(mainTransitionDur)
+                            .attr("d", areaf);
+
+                  path = svg.selectAll('.darea').datum(fildisData)
+                            .transition()
+                            .duration(mainTransitionDur)
+                            .attr("d", aread);
+
+                  path = svg.selectAll('.aline').datum(popData)
+                            .transition()
+                            .duration(mainTransitionDur)
+                            .attr("d", line);
+
+                  path = svg.selectAll('.alinect').datum(fildisData)
+                            .transition()
+                            .duration(mainTransitionDur)
+                            .attr("d", linect);
+
+                  path = svg.selectAll('.alinecc').datum(fildisData)
+                            .transition()
+                            .duration(mainTransitionDur)
+                            .attr("d", linecc);
+                            
+                  path = svg.selectAll('.iline').datum(incData)
+                            .transition()
+                            .duration(mainTransitionDur)
+                            .attr("d", linei);                            
+                  
+                  d3.select(".x.axis").remove();
+                  svg.append("g")
+                      .attr("class", "x axis")
+                      .attr("transform", "translate(0," + height + ")")
+                      .call(xAxis)
+                      .selectAll("text")  
+                        .style("text-anchor", "end")
+                        .attr("dx", "-.8em")
+                        .attr("dy", ".15em")
+                        .attr("transform", function(d) {
+                            return "rotate(-65)" 
+                            });
+
+                  d3.select(".y.axis").remove();
+                  svg.append("g")
+                      .attr("class", "y axis")
+                      .call(yAxis);
+                      
+                  var popVisible = "";
+                  d3.select(".aline")
+                      .attr("visibility", function() {
+                              if (d3.select(this).attr("visibility") == "visible") {
+                                popVisible = "visible";
+                                return "visible";
+                              } else {
+                                popVisible = "hidden";
+                                return "hidden";
+                              }});
+
+                  d3.select(".ay.axis").remove();
+                  svg.append("g")
+                      .attr("class", "ay axis")
+                      .attr("visibility", popVisible)
+                      .attr("transform", "translate(" + width + " ,0)")
+                      .style("fill", "rgb(44,160,44)")
+                      .call(ayAxis);
+
+                  var svgfoot = d3.select("#divmainfoot svg g");
+                  
+                  svgfoot.selectAll(".showingtext").remove();
+      
+                  svgfoot.append("text")
+                    .attr("class", "showingtext")
+                    .attr("x",showStart)
+                    .attr("y",showtextHeight)
+                    .text("Selected:")
+                    .style("font-weight","bold");
+
+                  // var testCases = true;
+                  // for (var i = 0; i < doclist.length; i++) {
+                  //   if (testCases) {
+                  //     for (var j = 0; j < mulToc[i+1].length; j++) {
+                  //       if (mulToc[i+1][j] == 0) { 
+                  //         testCases = false;
+                  //         break;
+                  //       };
+                  //     };
+                  //   };
+                  // };
+
+                  svgfoot.append("text")
+                    .attr("class", "showingtext")
+                    .attr("x",showStart+70)
+                    .attr("y",showtextHeight*2)
+                    .text(function() {
+                      if (multipleDoc.length == doclist.length) { return "All Divisions of Court"; };
+                      if (multipleDoc.length == 0) { return "No Divisions of Court"; };
+                      if (multipleDoc.length == 1) { return multipleDoc[0]; };
+                      return "Multiple Divisions of Court"; 
+                    });
+
+                  svgfoot.append("text")
+                    .attr("class", "showingtext")
+                    .attr("x",showStart+70)
+                    .attr("y",showtextHeight*3)
+                    .text(function() {
+                      if (multipleToc.length == 48) { return "All Case Types"; };
+                      if (multipleToc.length == 0) { return "No Case Types"; };
+                      if (multipleToc.length == 1) { return multipleToc[0]; };
+                      return "Multiple Case Types"; 
+                    });
+
+         //                             } else {//if (selToc == "") {
+                  //  svgfoot.append("text")
+                  //    .attr("class", "showingtext")
+                  //    .attr("x",showStart+70)
+                  //    .attr("y",showtextHeight*2)
+                  //    .text("Multiple Divisions of Court");//doclist[selDoc-1]);
+                  // //   svgfoot.append("text")
+                  // //     .attr("class", "showingtext")
+                  // //     .attr("x",showStart+70)
+                  // //     .attr("y",showtextHeight*3)
+                  // //     .text("All Types of Cases");                      
+                  // // } else {
+                  // //   svgfoot.append("text")
+                  // //     .attr("class", "showingtext")
+                  // //     .attr("x",showStart+70)
+                  // //     .attr("y",showtextHeight*2)
+                  // //     .text("Multiple Divisions of Court");//doclist[selDoc-1]);
+                  //  svgfoot.append("text")
+                  //    .attr("class", "showingtext")
+                  //    .attr("x",showStart+70)
+                  //    .attr("y",showtextHeight*3)
+                  //    .text("Multiple Case Types");//doctoc[selDoc][selToc-1]);
+                  // };                     
+
+                  d3.select(".clickableLegend").remove();
+                  
+                  d3.select("#divmainfoot svg g").append("rect")
+                      .attr("class","clickableLegend")
+                      .attr("width", 275)
+                      .attr("height", (legendRectSize + legendSpacing) * 3)
+                      .on('click', function(d) { legClicked(d3.mouse(this)) });
+                      
+                };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////                  
+                function legClicked(mouse) {
+                
+                  var whichColumn = Math.floor(mouse[0]/100);
+                  if (whichColumn == 2) {
+                    whichColumn = 1;
+                  };
+                  var whichLeg = Math.floor(mouse[1]/(legendRectSize + legendSpacing)) + 3*whichColumn;
+                  
+                  if (whichLeg == 0) {
+                    d3.select(".farea")
+                      .attr("visibility", function() {
+                              if (d3.select(this).attr("visibility") == "visible") {
+                                return "hidden";
+                              } else {
+                                return "visible";
+                              }});
+                  };
+                  
+
+                  if (whichLeg == 1) {
+                    d3.select(".darea")
+                      .attr("visibility", function() {
+                              if (d3.select(this).attr("visibility") == "visible") {
+                                return "hidden";
+                              } else {
+                                return "visible";
+                              }});
+                  };
+                  
+                  if (whichLeg == 2) {
+                    d3.select(".aline")
+                      .attr("visibility", function() {
+                              if (d3.select(this).attr("visibility") == "visible") {
+                                return "hidden";
+                              } else {
+                                return "visible";
+                              }});
+                              
+                    d3.select(".ay.axis")
+                      .attr("visibility", function() {
+                              if (d3.select(this).attr("visibility") == "visible") {
+                                return "hidden";
+                              } else {
+                                return "visible";
+                              }});
+                              
+                    d3.select(".ay.label")
+                      .attr("visibility", function() {
+                              if (d3.select(this).attr("visibility") == "visible") {
+                                return "hidden";
+                              } else {
+                                return "visible";
+                              }});                              
+                  };
+
+                  if (whichLeg == 3) {
+                    d3.select(".alinect")
+                      .attr("visibility", function() {
+                              if (d3.select(this).attr("visibility") == "visible") {
+                                return "hidden";
+                              } else {
+                                return "visible";
+                              }});
+                              
+                    d3.selectAll(".alineaxt")
+                      .attr("visibility", function() {
+                              if (d3.select(this).attr("visibility") == "visible") {
+                                return "hidden";
+                              } else {
+                                return "visible";
+                              }});  
+                              
+                  };
+                  
+                  if (whichLeg == 4) {
+                    d3.select(".alinecc")
+                      .attr("visibility", function() {
+                              if (d3.select(this).attr("visibility") == "visible") {
+                                return "hidden";
+                              } else {
+                                return "visible";
+                              }});
+
+                    d3.selectAll(".alineaxc")
+                      .attr("visibility", function() {
+                              if (d3.select(this).attr("visibility") == "visible") {
+                                return "hidden";
+                              } else {
+                                return "visible";
+                              }});  
+                                                            
+                  };
+                  
+                  if (whichLeg == 5) {
+                    d3.select(".iline")
+                      .attr("visibility", function() {
+                              if (d3.select(this).attr("visibility") == "visible") {
+                                return "hidden";
+                              } else {
+                                return "visible";
+                              }});
+                                                      
+                  };
+                  
+                  d3.selectAll(".legend rect")
+                    .style("fill-opacity", function(d, i) {
+                            var existOpacity = d3.select(this).style("fill-opacity");
+                            if ((d-1) == whichLeg) {
+                              if (existOpacity == 0) {
+                                return overlappingPathOpacity;
+                              } else {
+                                return 0;
+                              };
+                            } else {
+                              return existOpacity;
+                            };
+                          });
+                          
+                };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////                
+                  function docGraph() {
+
+                    selDoc = "";
+                  
+                    // Set up Division of Court bar charts
+                    //
+                    docData = d3.nest()
+                              .key(function (d) { return d.doc })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.dcount })}})
+                              .entries(bothFilDis
+                                      .filter(function(d) { 
+                                        if (selGeo.length == numCounties) {
+                                          return true;
+                                        } else {
+                                          return d3.set(selGeo).has(d.id); 
+                                        }
+                                      })
+                              );
+
+                    var cmin = d3.min(docData, function(d) { 
+                                  return d.values.total;} );
+                    var cmax = d3.max(docData, function(d) { 
+                                  return d.values.total;} );
+                                  
+                    d3.select("#docInfo").text(d3.select("#showingtextmap").text() + " for " + d3.select("#brushInfo").text() + ".");
+                    
+                    var x = d3.scale.linear()
+                        .domain([0,cmax])
+                        .range([0, cwidth - barStartd - barWidthTrim]);
+                        
+                    var xAxis = d3.svg.axis()
+                        .scale(x)
+                        .ticks(2)
+                        .tickFormat(d3.format(",d"))
+                        .orient("bottom");                        
+
+                    var chart = d3.select(".chart")
+                        .attr("width", cwidth)
+                        .attr("height", cheight+20);
+
+                    var clickHeight = 0;
+                    
+                    var bar = chart.selectAll("g")
+                        .data(docData)
+                      .enter().append("g")
+                        .attr("class","docbars")
+                        .attr("transform", function(d, i) { 
+                                    clickHeight += barHeight;
+                                    return "translate(0," + i * barHeight + ")"; 
+                                  });
+
+                    // bar.append("rect")
+                    //     .attr("x", 0)
+                    //     .attr("class","doccheck")
+                    //     .attr("width", 10)
+                    //     .attr("height", 10)
+                    //     .attr("stroke","#000")
+                    //     .attr("fill","#000");
+                    //   fill: #aa2159; fill-opacity:1;
+
+                    bar.append("path")
+                        //.attr("d", "M 0 0 L 0 10 L 10 5 L 0 0")  // Big carat
+                        //.attr("d", "M 1 1 L 1 9 L 9 5 L 1 1")  // Med carat
+                        .attr("d", "M 2 2 L 2 8 L 8 5 L 2 2")  // Small carat
+                        .attr("class","doccheck")
+                        .attr("stroke","#000")
+                        .attr("fill", "#fff");// "#aa2159")
+                        //.attr("fill-opacity","1");
+
+                    bar.append("rect")
+                        .attr("x", barStartd)
+                        .attr("class","docrect")
+                        .attr("width", function (d) { return x(d.values.total); })
+                        .attr("height", barHeight - barHeightTrim);
+
+                    bar.append("text")
+                        .attr("class","doctext")
+                        .attr("x", barTextX)
+                        .attr("y", barHeight / 2 - 1)
+                        .attr("dy", ".35em")
+                        .text(function(d) { return (expandSymbol + doclist[+d.key-1]); })
+                          .style("font-weight", "normal");//"bold");
+                          
+                    chart.append("g")
+                      .attr("class", "docx axis")
+                      .attr("transform", function(d, i) { 
+                                return "translate(" + barStartd + "," + (clickHeight) + ")";
+                                })
+                      .call(xAxis)
+                      .selectAll("text")  
+                        .style("text-anchor", "end");                         
+
+                    d3.select(".clickable").remove();
+                    
+                    chart.append("rect")
+                        .attr("class","clickable")
+                        .attr("width", cwidth)
+                        .attr("height", clickHeight)
+                        .on('click', function(d) { docClicked(d3.mouse(this)) });
+                  };
+                  
+                  
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                  function docUpdate() {
+
+                    // Set up Division of Court bar charts
+                    //
+                    docData = d3.nest()
+                              .key(function (d) { return d.doc })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { 
+                                        if (!trafficSelected && d.doc == 7) {
+                                          return 0;
+                                        } else {
+                                          return d.dcount; 
+                                        }
+                                        } ) } } )
+                              .entries(bothFilDis
+                                      .filter(function(d) {
+                                        if (d.year < selYrs[0] || d.year > selYrs[1]) {
+                                          return false;
+                                        };
+                                        if (selGeo.length == numCounties) {
+                                          return true;
+                                        } else {
+                                          return d3.set(selGeo).has(d.id); 
+                                        };
+                                      })
+                              );
+
+                    var cmin = d3.min(docData, function(d) { 
+                                  return d.values.total;} );
+                    var cmax = d3.max(docData, function(d) { 
+                                  return d.values.total;} );
+
+                    d3.select("#docInfo").text(d3.select("#showingtextmap").text() + " for " + d3.select("#brushInfo").text() + ".");
+                    
+                    var x = d3.scale.linear()
+                        .domain([0,cmax])
+                        .range([0, cwidth - barStartd - barWidthTrim]);
+
+                    var xAxis = d3.svg.axis()
+                        .scale(x)
+                        .ticks(2)
+                        .tickFormat(d3.format(",d"))
+                        .orient("bottom");                        
+                        
+                    var clickHeight = 0;
+
+/*                    d3.selectAll(".doccheck")
+                      .attr("fill", function (d) {
+                              var all0 = true;
+                              var all1 = true;
+                              for (var i = 0; i < mulToc[+d.key].length; i++) {
+                                if (mulToc[+d.key][i] == 0) { all1 = false };
+                                if (mulToc[+d.key][i] == 1) { all0 = false };
+                              };
+                              if (all1) { return "#aa2159"; };
+                              if (all0) { return "#fff"; };
+                              return "#aa2159";
+                            })
+                      .attr("fill-opacity", function (d) {
+                              var all0 = true;
+                              var all1 = true;
+                              for (var i = 0; i < mulToc[+d.key].length; i++) {
+                                if (mulToc[+d.key][i] == 0) { all1 = false };
+                                if (mulToc[+d.key][i] == 1) { all0 = false };
+                              };
+                              if (all1) { return 1; };//"#aa2159"; };
+                              if (all0) { return 0; };//"#fff"; };
+                              return 0.4;//"#aa2159";
+                            });
+*/
+
+                    d3.selectAll(".docrect")
+                      .data(docData)
+                        .transition()
+                        .duration(barTransitionDur)
+                        .attr("width", function (d,i) { 
+                                          clickHeight += barHeight;
+                                          return x(d.values.total);
+                                        });
+
+/*                    d3.selectAll(".doctext")
+                      .style("font-weight", function (d) {
+                              var all0 = true;
+                              var all1 = true;
+                              for (var i = 0; i < mulToc[+d.key].length; i++) {
+                                if (mulToc[+d.key][i] == 0) { all1 = false };
+                                if (mulToc[+d.key][i] == 1) { all0 = false };
+                              };
+                              if (all1) { return "bold"; };//"#aa2159"; };
+                              if (all0) { return "normal"; };//"#fff"; };
+                              return "normal";//"#aa2159";
+                            });
+*/
+                                        
+                    d3.selectAll(".docx.axis").remove();
+                    d3.select(".chart").append("g")
+                      .attr("class", "docx axis")
+                      .attr("transform", function(d, i) { 
+                                return "translate(" + barStartd + "," + clickHeight + ")";
+                                })
+                      .call(xAxis)
+                      .selectAll("text")
+                        .style("text-anchor", "end");                                         
+
+                    d3.select(".clickable").remove();
+                    
+                    d3.select(".chart").append("rect")
+                        .attr("class","clickable")
+                        .attr("width", cwidth)
+                        .attr("height", clickHeight)
+                        .on('click', function(d) { docClicked(d3.mouse(this)) });
+                  };
+                
+                
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                  function tocGraph(whichDoc) {
+
+                    selToc = "";
+                  
+                    // Set up Type of Case bar charts
+                    //
+                    var bar = d3.select(".chart").selectAll(".docbars")
+                        .transition()
+                        .duration(barTransitionDur)
+                        .attr("transform", function(d, i) { 
+                                //if (i != +whichDoc ) {
+                                  return "translate(0,-20)";
+                                //} else {
+                                //  return "translate(0,0)";
+                                //}
+                              });
+                              
+                    var tocData = d3.nest()
+                            .key(function (d) { return d.toc })
+                            .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.dcount })}})
+                            .entries(bothFilDis
+                                      .filter(function(d) { 
+                                        if (d.doc == selDoc) {
+                                          if (selGeo.length == numCounties) {
+                                            return true;
+                                          } else {
+                                            return d3.set(selGeo).has(d.id); 
+                                          }
+                                        }
+                                      })
+                                    );
+                                    
+                    var ctmin = d3.min(tocData, function(d) { 
+                                  return d.values.total;} );
+                    var ctmax = d3.max(tocData, function(d) { 
+                                  return d.values.total;} );
+                                  
+                    d3.select("#docInfo").text(doclist[selDoc-1] + ": " + d3.select("#showingtextmap").text() + " for " + d3.select("#brushInfo").text() + ".");
+                    
+                    d3.select(".chart").append("text")
+                              .attr("class","sadtext")
+                              .attr("x", 2)
+                              .attr("y", 6)
+                              .attr("dy", ".35em")
+                              .text(contractSymbol + "Select All Divisions")
+                                .style("font-weight","bold");
+                          
+                    var xt = d3.scale.linear()
+                                  .domain([0,ctmax])
+                                  .range([0, cwidth - barStartt - barWidthTrim]);
+                                  
+                    var xtAxis = d3.svg.axis()
+                        .scale(xt)
+                        .ticks(2)
+                        .tickFormat(d3.format(",d"))
+                        .orient("bottom");                                                
+                                  
+                    var clickHeight = barHeight;
+                              
+                    var bart = d3.select(".chart").selectAll(".tocbars")
+                        .data(tocData)
+                      .enter().append("g")
+                        .attr("class","tocbars")
+                        .attr("transform", function(d, i) { 
+                                            clickHeight += barHeight;
+                                            return "translate(0,200)";
+                                          });                      
+
+/*                    bart.append("rect")
+                        .attr("x", 0)
+                        .attr("class","toccheck")
+                        .attr("width", 10)
+                        .attr("height", 10)
+                        .attr("stroke","#000")
+                        .attr("fill", function (d) {
+                              if (mulToc[selDoc][+d.key-1] == 1) {
+                                return "#D3D3D3";
+                              } else {
+                                return "#fff";
+                              };
+                            });
+
+                    bart.append("path")
+                        .attr("d", "M 1 1 L 9 9 M 1 9 L 9 1")
+                        .attr("class","toccheck2")
+                        .attr("fill","#fff")
+                        .attr("stroke-width","2px")
+                        .attr("stroke", function (d) {
+                              if (mulToc[selDoc][+d.key-1] == 1) {
+                                return "#000";
+                              } else {
+                                return "#fff";
+                              };
+                            });
+*/
+
+                    bart.append("rect")
+                        .attr("x", barStartt)
+                        .attr("class","tocrect")
+                        .attr("width", function (d) { return xt(d.values.total); })
+                        .attr("height", barHeight - 2)
+													.style("fill-opacity",1);
+
+                    bart.append("text")
+                        .attr("class","toctext")
+                        .attr("x", barTextX)
+                        .attr("y", barHeight / 2 - 1)
+                        .attr("dy", ".35em")
+                        .text(function(d) { return doctoc[selDoc][+d.key-1]; })
+													.style("font-weight","bold");    
+
+                    d3.select(".chart").selectAll(".tocbars")
+                        .transition()
+                        .duration(barTransitionDur)
+                        .attr("transform", function(d, i) { return "translate(0," + (i+1) * barHeight + ")";
+                              });                       
+
+                    d3.selectAll(".docx.axis").remove();
+                    d3.select(".chart").append("g")
+                      .attr("class", "docx axis")
+                      .attr("transform", function(d, i) { 
+                                return "translate(" + barStartt + "," + clickHeight + ")";
+                                })
+                      .call(xtAxis)
+                      .selectAll("text")
+                        .style("text-anchor", "end");                                 
+                        
+                    d3.select(".clickable").remove();
+                    
+                    d3.select(".chart").append("rect")
+                        .attr("class","clickable")
+                        .attr("width", cwidth)
+                        .attr("height", clickHeight)
+                        .on('click', function(d) { tocClicked(d3.mouse(this)) });
+                          
+                  };
+                  
+                  
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                  function tocUpdate() {
+
+                    // Set up Type of Case bar charts
+                    //
+                    var tocData = d3.nest()
+                            .key(function (d) { return d.toc })
+                            .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.dcount })}})
+                            .entries(bothFilDis
+                                      .filter(function(d) {
+                                        if (d.year < selYrs[0] || d.year > selYrs[1]) {
+                                          return false;
+                                        };
+                                        if (d.doc == selDoc) {
+                                          if (selGeo.length == numCounties) {
+                                            return true;
+                                          } else {
+                                            return d3.set(selGeo).has(d.id); 
+                                          };
+                                        };
+                                      })
+                                    );
+                                    
+                    var ctmin = d3.min(tocData, function(d) { 
+                                  return d.values.total;} );
+                    var ctmax = d3.max(tocData, function(d) { 
+                                  return d.values.total;} );
+
+                    d3.select("#docInfo").text(doclist[selDoc-1] + ": " + d3.select("#showingtextmap").text() + " for " + d3.select("#brushInfo").text() + ".");
+                    
+                    var xt = d3.scale.linear()
+                                  .domain([0,ctmax])
+                                  .range([0, cwidth - barStartt - barWidthTrim]);
+                                  
+                    var xtAxis = d3.svg.axis()
+                        .scale(xt)
+                        .ticks(2)
+                        .tickFormat(d3.format(",d"))
+                        .orient("bottom");                                      
+                              
+                    var clickHeight = barHeight;
+
+/*                    d3.selectAll(".toccheck")
+                      .attr("fill", function (d) {
+                              if (mulToc[selDoc][+d.key-1] == 1) {
+                                return "#D3D3D3";
+                              } else {
+                                return "#fff";
+                              };
+                            });
+
+                    d3.selectAll(".toccheck2")
+                        .attr("stroke", function (d) {
+                              if (mulToc[selDoc][+d.key-1] == 1) {
+                                return "#000";
+                              } else {
+                                return "#fff";
+                              };
+                            });                        
+*/
+                              
+                    d3.selectAll(".tocrect")
+                      .data(tocData)
+                        .transition()
+                        .duration(500)
+                        .attr("width", function (d) { 
+                                            clickHeight += barHeight;
+                                            return xt(d.values.total);
+                                          })
+													.style("fill-opacity", function (d) {
+                              if (mulToc[selDoc][+d.key-1] == 1) {
+                                return 1;
+                              } else {
+                                return 0.4;
+                              };
+                            });
+														
+                    d3.select(".toctext")
+												.style("font-weight", function (d) {
+                             if (mulToc[selDoc][+d.key-1] == 1) {
+                               return "bold";
+                             } else {
+                               return "normal";
+                             };
+                           });															
+                                          
+                    d3.selectAll(".docx.axis").remove();
+                    d3.select(".chart").append("g")
+                      .attr("class", "docx axis")
+                      .attr("transform", function(d, i) { 
+                                return "translate(" + barStartt + "," + clickHeight + ")";
+                                })
+                      .call(xtAxis)
+                      .selectAll("text")
+                        .style("text-anchor", "end");                                             
+                    
+                    d3.select(".clickable").remove();
+                    
+                    d3.select(".chart").append("rect")
+                        .attr("class","clickable")
+                        .attr("width", cwidth)
+                        .attr("height", clickHeight)
+                        .on('click', function(d) { tocClicked(d3.mouse(this)) });
+                          
+                  };
+                  
+                
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                  function ageGraph() {
+
+                    for (var i = 1; i <= agegrp.length; i++) { multAge.push(i); };
+
+                  
+                    // Set up Age Group bar chart
+                    //
+                    ageData = d3.nest()
+                              .key(function (d) { return d.agrp })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(populations
+                                      .filter(function(d) {
+                                        if (selGeo.length == numCounties) {
+                                          return true;
+                                        } else {
+                                          return d3.set(selGeo).has(d.id); 
+                                        };
+                                      })
+                              );
+
+                    //
+                    // Change totals to averages
+                    ageData.forEach( function (d) {
+                      d.values.total /= (selYrs[1]-selYrs[0]+1);
+                    });
+
+                    var cmin = d3.min(ageData, function(d) { 
+                                  return d.values.total;} );
+                    var cmax = d3.max(ageData, function(d) { 
+                                  return d.values.total;} );
+
+                    d3.select("#ageInfo").text(d3.select("#showingtextmap").text() + " for " + d3.select("#brushInfo").text() + ".");
+                    
+                    var x = d3.scale.linear()
+                        .domain([0,cmax])
+                        .range([0, cwidth - barStarta - barWidthTrim]);
+
+                    var xAxis = d3.svg.axis()
+                        .scale(x)
+                        .ticks(1)
+                        .tickFormat(d3.format(",d"))
+                        .orient("bottom");
+
+                    var chart = d3.select(".charta")
+                        .attr("width", cwidth)
+                        .attr("height", aheight+20);
+
+                    chart.append("text")
+                        .attr("x", 2)
+                        .attr("y", 6)
+                        .attr("dy", ".35em")
+                        .text("Select/De-Select All Ages")
+                          //.style("font-weight","bold");
+
+                    var bar = chart.selectAll("g")
+                        .data(ageData)
+                      .enter().append("g")
+                        .attr("class","agebars")
+                        .attr("transform", function(d, i) { 
+                                return "translate(0," + (i+1) * barHeight + ")";
+                                });
+
+                    bar.append("rect")
+                        .attr("x", barStarta)
+                        .attr("class","agerect")
+                        .attr("width", function (d) { return x(d.values.total); })
+                        .attr("height", barHeight - 2)
+                        .style("fill-opacity",1);
+
+                    bar.append("text")
+                        .attr("class","agetext")
+                        .attr("x", 3)
+                        .attr("y", barHeight / 2 - 1)
+                        .attr("dy", ".35em")
+                        .text(function(d) { return agegrp[+d.key-1]; })
+                          .style("font-weight","bold");
+                          
+                    chart.append("g")
+                      .attr("class", "agex axis")
+                      .attr("transform", function(d, i) { 
+                                return "translate(" + barStarta + "," + aheight + ")";
+                                })
+                      .call(xAxis)
+                      .selectAll("text")  
+                        .style("text-anchor", "end");                     
+
+                    d3.select(".clickabla").remove();
+                    
+                    chart.append("rect")
+                        .attr("class","clickabla")
+                        .attr("width", cwidth)
+                        .attr("height", aheight)
+                        .on('click', function(d) { ageClicked(d3.mouse(this)) });
+                  };
+                  
+                  
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                  function ageUpdate() {
+
+                    // Set up Age Group bar chart
+                    //
+                    ageData = d3.nest()
+                              .key(function (d) { return d.agrp })
+                              .rollup(function (leaves) { return {"total":d3.sum(leaves, function (d) { return d.count })}})
+                              .entries(populations
+                                      .filter(function(d) {
+                                        if (d.year < selYrs[0] || d.year > selYrs[1]) {
+                                          return false;
+                                        };
+                                        if (selGeo.length == numCounties) {
+                                          return true;
+                                        } else {
+                                          return d3.set(selGeo).has(d.id); 
+                                        };
+                                      })
+                              );
+
+                    //
+                    // Change totals to averages
+                    ageData.forEach( function (d) {
+                      d.values.total /= (selYrs[1]-selYrs[0]+1);
+                    });
+
+                    var cmin = d3.min(ageData, function(d) { 
+                                  return d.values.total;} );
+                    var cmax = d3.max(ageData, function(d) { 
+                                  return d.values.total;} );
+
+                    d3.select("#ageInfo").text(d3.select("#showingtextmap").text() + " for " + d3.select("#brushInfo").text() + ".");
+                    
+                    var x = d3.scale.linear()
+                        .domain([0,cmax])
+                        .range([0, cwidth - barStarta - barWidthTrim]);
+
+                    var xAxis = d3.svg.axis()
+                        .scale(x)
+                        .ticks(2)
+                        .tickFormat(d3.format(",d"))
+                        .orient("bottom");
+
+                    d3.selectAll(".agebars")
+                      .data(ageData);
+											
+										d3.selectAll(".agerect")
+                      .data(ageData)
+                        .transition()
+                        .duration(barTransitionDur)
+                        .attr("width", function (d) { return x(d.values.total); })
+												.style("fill-opacity", function (d) {
+                              if (multAge.indexOf(+d.key) >= 0) {
+                                return 1;
+                              } else {
+                                return 0.4;
+                              };
+                            });
+														
+                    d3.select(".agetext")
+												.style("font-weight", function (d) {
+                             if (multAge.indexOf(+d.key) >= 0) {
+                               return "bold";
+                             } else {
+                               return "normal";
+                             };
+                           });														
+
+                    d3.selectAll(".agex.axis").remove();
+                    d3.select(".charta").append("g")
+                      .attr("class", "agex axis")
+                      .attr("transform", function(d, i) { 
+                                return "translate(" + barStarta + "," + aheight + ")";
+                                })
+                      .call(xAxis)
+                      .selectAll("text")  
+                        .style("text-anchor", "end");                     
+                                                
+                    d3.select(".clickabla").remove();
+                    
+                    d3.select(".charta").append("rect")
+                        .attr("class","clickabla")
+                        .attr("width", cwidth)
+                        .attr("height", aheight)
+                        .on('click', function(d) { ageClicked(d3.mouse(this)) });
+                  };
+                  
+                  
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                  function ageClicked(mouse) {
+                  
+                    var whichAge = Math.floor(mouse[1]/15);
+
+                    if (whichAge == 0) {
+
+                      if (multAge.length != agegrp.length) {
+                        multAge = [];
+                        for (var i = 1; i <= agegrp.length; i++) { multAge.push(i); };
+                        d3.select(".ay.label").text("Population");
+                        d3.selectAll(".agerect").style("fill-opacity", 1);
+                        d3.selectAll(".agetext").style("font-weight", "bold");
+                      } else {
+                        multAge = [];
+                        d3.select(".ay.label").text("(no age groups selected)");
+                        d3.selectAll(".agerect").style("fill-opacity", 0.4);
+                        d3.selectAll(".agetext").style("font-weight", "normal");
+                      };
+
+                    } else {
+
+                      multAge = [];
+
+                      d3.selectAll(".agerect")
+                        .style("fill-opacity", function (d) {
+                                var existFill = d3.select(this).style("fill-opacity");
+                                if (whichAge == +d.key) { // selected box
+                                  if (existFill == 1) { // selected
+                                    return 0.4;
+                                  } else {
+                                    multAge.push(+d.key);
+                                    return 1;
+                                  };
+                                } else {
+                                  if (existFill == 1) { multAge.push(+d.key); };
+                                  return existFill;
+                                };
+                              });
+
+                      d3.selectAll(".agetext")
+                          .style("font-weight", function (d) {
+                                var existStroke = d3.select(this).style("font-weight");
+                                if (whichAge == +d.key) { // selected box
+                                  if (existStroke == "bold") { // selected
+                                    return "normal";
+                                  } else {
+                                    return "bold";
+                                  };
+                                } else {
+                                  return existStroke;
+                                };
+                              });                              
+
+                      if (multAge.length == 0) {
+
+                        d3.select(".ay.label").text("(no age groups selected)");
+
+                      } else if (multAge.length == 1) {
+  
+                        d3.select(".ay.label").text("Population (" + agegrp[multAge[0]-1] + ")");
+                      
+                      } else if (multAge.length == agegrp.length) {
+
+                        d3.select(".ay.label").text("Population");
+
+                      } else {
+
+                        d3.select(".ay.label").text("Population (multiple age groups)");
+
+                      };
+
+                    };
+
+                    d3.select(".aline").attr("visibility", "visible");
+                    d3.select(".ay.axis").attr("visibility", "visible");
+                    d3.select(".ay.label").attr("visibility", "visible");
+                    
+                    d3.selectAll(".legend rect")
+                      .style("fill-opacity", function(d, i) {
+                              var existOpacity = d3.select(this).style("fill-opacity");
+                              if ((d-1) == 2) {
+                                return overlappingPathOpacity;
+                              } else {
+                                return existOpacity;
+                              };
+                            });                   
+
+                    updateMain();
+          
+                  };
+                  
+                
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                  function docClicked(mouse) {
+                  
+                    var whichDoc = Math.floor(mouse[1]/15);
+/*                    //var boxClick = (mouse[0] <= 10);
+
+                    if (boxClick) {
+
+                        d3.selectAll(".doccheck")
+                          .attr("fill", function (d) {
+                                  var existFill = d3.select(this).attr("fill");
+                                  if (whichDoc+1 == +d.key) { // selected box
+                                    if (existFill == "#aa2159") { // all or some selected
+                                      for (var j = 0; j < mulToc[+d.key].length; j++) {
+                                        mulToc[+d.key][j] = 0;
+                                      };
+                                      return "#fff";
+                                    } else {
+                                      for (var j = 0; j < mulToc[+d.key].length; j++) {
+                                        mulToc[+d.key][j] = 1;
+                                      };                                      
+                                      return "#aa2159";
+                                    };
+                                  } else {
+                                    return existFill;
+                                  };
+                                })
+                          .attr("fill-opacity", function (d) {
+                                  var all0 = true;
+                                  var all1 = true;
+                                  for (var i = 0; i < mulToc[+d.key].length; i++) {
+                                    if (mulToc[+d.key][i] == 0) { all1 = false };
+                                    if (mulToc[+d.key][i] == 1) { all0 = false };
+                                  };
+                                  if (all1) { return 1; };//"#aa2159"; };
+                                  if (all0) { return 0; };//"#fff"; };
+                                  return 0.4;//"#aa2159";
+                                });
+
+                        d3.selectAll(".doctext")
+                          .style("font-weight", function (d) {
+                                  var all0 = true;
+                                  var all1 = true;
+                                  for (var i = 0; i < mulToc[+d.key].length; i++) {
+                                    if (mulToc[+d.key][i] == 0) { all1 = false };
+                                    if (mulToc[+d.key][i] == 1) { all0 = false };
+                                  };
+                                  if (all1) { return "bold"; };//"#aa2159"; };
+                                  if (all0) { return "normal"; };//"#fff"; };
+                                  return "normal";//"#aa2159";
+                                });
+
+
+                        multipleDoc = [];
+                        multipleToc = [];
+                        for (var i = 1; i <= 7; i++) {
+                          for (var j = 0; j < doctoc[""+i].length; j++) {
+                            if (mulToc[i][j] == 1) {
+                              var idx = multipleDoc.indexOf(doclist[i-1]);
+                              if (idx < 0) {
+                                multipleDoc.push(doclist[i-1]);
+                              };
+                              multipleToc.push(fulldoctoc[""+i][j]);
+                            };
+                          };
+                        };
+
+                        updateMain();
+
+                    } else {
+*/                    
+                      if ((whichDoc <= 6 && trafficSelected) || (whichDoc <= 5 && !trafficSelected)) {
+                        selDoc = (whichDoc + 1).toString();
+                        tocGraph(whichDoc);
+                        //setTimeout(function() {d3.select(".chart").selectAll(".docbars").select("text").style("font-weight","bold")},barTransitionDur);
+                        
+                        var checkEmpty = true;
+                        d3.selectAll(".legend rect")
+                          .style("fill-opacity", function(d) {
+                                  var existOpacity = d3.select(this).style("fill-opacity");
+                                  if (existOpacity != 0) {
+                                    if (d == 1 || d == 2 || d == 4 || d == 5) {
+                                      checkEmpty = false;
+                                    };
+                                  };
+                                  return existOpacity;
+                                });
+                                
+                        if (checkEmpty) {
+                          d3.select(".darea").attr("visibility", "visible");
+                          d3.selectAll(".legend rect")
+                            .style("fill-opacity", function(d) {
+                                    var existOpacity = d3.select(this).style("fill-opacity");
+                                    if ((d-1) == 1) {
+                                      return overlappingPathOpacity;
+                                    } else {
+                                      return existOpacity;
+                                    };
+                                  });
+                        };
+												
+                        multipleDoc = [doclist[whichDoc]];
+												
+                        multipleToc = [];
+                        for (var i = 1; i <= 7; i++) {
+                          for (var j = 0; j < doctoc[""+i].length; j++) {
+														if (i == whichDoc+1) {
+															mulToc[i][j] = 1;
+                              multipleToc.push(fulldoctoc[""+i][j]);
+														} else {
+															mulToc[i][j] = 0;
+														};
+                          };
+                        };
+
+                        updateMain();
+                      };
+
+//                    };
+              
+                  };
+                
+                
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                  function tocClicked(mouse) {
+                  
+                    var whichToc = Math.floor(mouse[1]/15);
+                    //var boxClick = (mouse[0] <= 10);
+
+                    if (whichToc <= 0) {
+                      
+                      d3.select(".sadtext").remove();
+                      
+                      //d3.select(".chart").selectAll(".docbars").select("text")
+                      //    .style("font-weight","normal");
+                          
+                      var bar = d3.select(".chart").selectAll(".docbars")
+                          .transition()
+                          .duration(barTransitionDur)
+                          .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
+
+                      d3.select(".chart").selectAll(".tocbars").remove();
+											
+											multipleDoc = [];
+											multipleToc = [];
+											for (var i = 1; i <= 7; i++) {
+												multipleDoc.push(doclist[i-1]);
+												for (var j = 0; j < doctoc[""+i].length; j++) {
+                          if (!trafficSelected && i == 7) {
+                            mulToc[i][j] = 0;
+                          } else {
+													  mulToc[i][j] = 1;
+													  multipleToc.push(fulldoctoc[""+i][j]);
+												  };
+                        };
+											};											
+                    
+                      selDoc = "";
+                      selToc = "";
+                      docUpdate();//docGraph();
+
+                    } else {
+                    // if (boxClick) {
+
+/*                        d3.selectAll(".toccheck")
+                          .attr("fill", function (d) {
+                                  var existFill = d3.select(this).attr("fill");
+                                  if (whichToc == +d.key) { // selected box
+                                    if (existFill == "#D3D3D3") { // all sub selected
+                                      mulToc[+selDoc][+d.key-1] = 0;
+                                      return "#fff";
+                                    } else {
+                                      mulToc[+selDoc][+d.key-1] = 1;
+                                      return "#D3D3D3";
+                                    };
+                                  } else {
+                                    return existFill;
+                                  };
+                                });
+
+                        d3.selectAll(".toccheck2")
+                          .attr("stroke", function (d) {
+                                  var existStroke = d3.select(this).attr("stroke");
+                                  if (whichToc == +d.key) { // selected box
+                                    if (existStroke == "#000") { // all sub selected
+                                      //mulToc[+selDoc][+d.key-1] = 0;
+                                      return "#fff";
+                                    } else {
+                                      //mulToc[+selDoc][+d.key-1] = 1;
+                                      return "#000";
+                                    };
+                                  } else {
+                                    return existStroke;
+                                  };
+                                });
+*/
+                    d3.selectAll(".tocrect")
+                          .style("fill-opacity", function (d) {
+                                  var existFill = d3.select(this).style("fill-opacity");
+                                  if (whichToc == +d.key) { // selected box
+                                    if (existFill == 1) { // all sub selected
+                                      mulToc[+selDoc][+d.key-1] = 0;
+                                      return 0.4;
+                                    } else {
+                                      mulToc[+selDoc][+d.key-1] = 1;
+                                      return 1;
+                                    };
+                                  } else {
+                                    return existFill;
+                                  };
+                                });
+														
+                    d3.selectAll(".toctext")
+                          .style("font-weight", function (d) {
+                                  var existFill = d3.select(this).style("font-weight");
+                                  if (whichToc == +d.key) { // selected box
+                                    if (existFill == "bold") { // all sub selected
+                                      return "normal";
+                                    } else {
+                                      return "bold";
+                                    };
+                                  } else {
+                                    return existFill;
+                                  };
+                                });										
+
+                    };
+
+                    //} else {
+                    
+
+            //             else {
+                        
+            //             d3.select(".chart").selectAll(".tocbars").select("text").style("font-weight",
+                      //    function (d, i) { 
+                      //        if (whichToc == i+1) {
+                      //          selToc = whichToc;
+                      //          return "bold"
+                      //        } else {
+                      //          return "normal"} 
+                      //    });
+
+                      // };
+                                
+                      var checkEmpty = true;
+                      d3.selectAll(".legend rect")
+                        .style("fill-opacity", function(d) {
+                                var existOpacity = d3.select(this).style("fill-opacity");
+                                if (existOpacity != 0) {
+                                  if (d == 1 || d == 2 || d == 4 || d == 5) {
+                                    checkEmpty = false;
+                                  };
+                                };
+                                return existOpacity;
+                              });
+                              
+                      if (checkEmpty) {
+                        d3.select(".darea").attr("visibility", "visible");
+                        d3.selectAll(".legend rect")
+                          .style("fill-opacity", function(d) {
+                                  var existOpacity = d3.select(this).style("fill-opacity");
+                                  if ((d-1) == 1) {
+                                    return overlappingPathOpacity;
+                                  } else {
+                                    return existOpacity;
+                                  };
+                                });
+                      };
+
+                    multipleDoc = [];
+                    multipleToc = [];
+                    for (var i = 1; i <= 7; i++) {
+                      for (var j = 0; j < doctoc[""+i].length; j++) {
+                        if (mulToc[i][j] == 1) {
+                          var idx = multipleDoc.indexOf(doclist[i-1]);
+                          if (idx < 0) {
+                            multipleDoc.push(doclist[i-1]);
+                          };
+                          multipleToc.push(fulldoctoc[""+i][j]);
+                        };
+                      };
+                    };                      
+
+                    updateMain();
+                    
+                  };
+                  
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // Create counties
+                //
+                d3.json("maps/us.json", function(error, topology) {
+
+                  // Extract only Florida counties
+                  //
+                  newgeo = [];
+                  topology.objects.counties.geometries.forEach(function (e) {
+                    if (e.id > cidMin && e.id < cidMax) { 
+                      newgeo.push(e) 
+                    }
+                  });
+                  topology.objects.counties.geometries = newgeo;
+                  
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                  // Draw counties
+                  //
+                  svg2.selectAll(".cpath")
+                        .data(topojson.feature(topology, topology.objects.counties).features)
+                    .enter().append("path")
+                        .attr("class", "cpath county")
+                        .attr("id", function (d) { return d.id })
+												//.attr("visibility", "hidden")
+                        .attr("d", path)
+                        .on("click", function (d) {
+                                if (selectingWhich != 0) {
+                                  multGeo = [];
+                                  d3.selectAll(".cpath").classed("cselected",false);
+                                  selectingWhich = 0;
+                                };
+                                if (d3.select(this).classed("cselected")) {
+                                  var idx = multGeo.indexOf(d.id);
+                                  if (idx >= 0) {
+                                    multGeo.splice(idx, 1);
+                                  };
+                                  if (multGeo.length == 0) {
+                                    geoClick({"level":"All of", "id":"Florida"});
+                                  } else {
+                                    geoClick({"level":"county", "id":d.id});
+                                  };
+                                  d3.select(this).classed("cselected",false);
+                                } else {
+                                  multGeo.push(d.id);
+                                  geoClick({"level":"county", "id":d.id});
+                                  d3.select(this).classed("cselected",true);
+                                };
+                            })
+                        .on("mousemove", function (d,i) {
+                          var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
+
+                          tooltip.classed("hidden", false)
+                                 .attr("style", "left:"+(mouse[0]+offsetL)+"px;top:"+(mouse[1]+offsetT)+"px")
+                                 .html(countyName[d.id]);
+
+                          })
+                        .on("mouseout",  function(d,i) {
+                            tooltip.classed("hidden", true);
+                          });
+
+                  //
+                  // Merge counties for circuits, districts, and FL
+                  // Most merge logic came from: http://bl.ocks.org/mbostock/5416405
+                  //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                  // Circuits
+                  for (var i = 1; i <= numCircuits; i++) {
+                    svg2.append("path")
+                      .datum(topojson.merge(topology, topology.objects.counties.geometries.filter(function(d) { return d3.set(countyCircuitIds[i]).has(d.id); })))
+                      .attr("class", "cpath circuit")
+                      .attr("id", i)
+                      .attr("visibility", "hidden")
+                      .attr("d", path)
+                      .on("click", function (d) {
+                                if (selectingWhich != 1) {
+                                  multGeo = [];
+                                  d3.selectAll(".cpath").classed("cselected",false);
+                                  selectingWhich = 1;
+                                };                        
+                                
+                                var useid = +d3.select(this).attr("id");
+                                var countyList = countyCircuitIds[useid];
+                                
+                                if (d3.select(this).classed("cselected")) {
+                                  for (var i = 0; i < countyList.length; i++) {
+                                    var idx = multGeo.indexOf(countyList[i]);
+                                    if (idx >= 0) {
+                                      multGeo.splice(idx, 1);
+                                    };
+                                  };
+                                  if (multGeo.length == 0) {
+                                    geoClick({"level":"All of", "id":"Florida"});
+                                  } else {
+                                    geoClick({"level":"Circuit", "id":useid});
+                                  };
+                                  d3.select(this).classed("cselected",false);
+                                } else {
+                                  multGeo.push.apply(multGeo, countyList);
+                                  geoClick({"level":"Circuit", "id":useid});
+                                  d3.select(this).classed("cselected",true);
+                                };
+
+                            }
+                                //  geoClick({"level":"Circuit", "id":+d3.select(this).attr("id")});
+                                //  d3.select(this).classed("cselected",true);
+                                //}
+                      )
+                      .on("mousemove", function (d,i) {
+                        var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
+
+                        tooltip.classed("hidden", false)
+                               .attr("style", "left:"+(mouse[0]+offsetL)+"px;top:"+(mouse[1]+offsetT)+"px")
+                               .html("Circuit "+d3.select(this).attr("id"));
+
+                        })
+                      .on("mouseout",  function(d,i) {
+                          tooltip.classed("hidden", true);
+                        });                      
+                  };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                  //
+                  // Districts
+                  for (var i = 1; i <= numDistricts; i++) {
+                    svg2.append("path")
+                      .datum(topojson.merge(topology, topology.objects.counties.geometries.filter(function(d) { return d3.set(countyDistrictIds[i]).has(d.id); })))
+                      .attr("class", "cpath district")
+                      .attr("id", i)
+                      .attr("visibility", "hidden")
+                      .attr("d", path)
+                      .on("click", function (d) {
+                                if (selectingWhich != 2) {
+                                  multGeo = [];
+                                  d3.selectAll(".cpath").classed("cselected",false);
+                                  selectingWhich = 2;
+                                };                        
+                                
+                                var useid = +d3.select(this).attr("id");
+                                var countyList = countyDistrictIds[useid];
+                                
+                                if (d3.select(this).classed("cselected")) {
+                                  for (var i = 0; i < countyList.length; i++) {
+                                    var idx = multGeo.indexOf(countyList[i]);
+                                    if (idx >= 0) {
+                                      multGeo.splice(idx, 1);
+                                    };
+                                  };
+                                  if (multGeo.length == 0) {
+                                    geoClick({"level":"All of", "id":"Florida"});
+                                  } else {
+                                    geoClick({"level":"District", "id":useid});
+                                  };
+                                  d3.select(this).classed("cselected",false);
+                                } else {
+                                  multGeo.push.apply(multGeo, countyList);
+                                  geoClick({"level":"District", "id":useid});
+                                  d3.select(this).classed("cselected",true);
+                                };
+
+                            }
+                              //  geoClick({"level":"District", "id":+d3.select(this).attr("id")});
+                              //  d3.select(this).classed("cselected",true);
+                              //}
+                      )
+                      .on("mousemove", function (d,i) {
+                        var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
+
+                        tooltip.classed("hidden", false)
+                               .attr("style", "left:"+(mouse[0]+offsetL)+"px;top:"+(mouse[1]+offsetT)+"px")
+                               .html("District "+d3.select(this).attr("id"));
+
+                        })
+                      .on("mouseout",  function(d,i) {
+                          tooltip.classed("hidden", true);
+                        });                      
+                  };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                  //
+                  // All
+                  svg2.append("path")
+                    .datum(topojson.merge(topology, topology.objects.counties.geometries.filter(function(d) { return true })))
+                    .attr("class", "cpath florida")
+                    .attr("id", "fl")
+                    .attr("visibility", "hidden")//"hidden")
+                    .attr("d", path)
+                    .on("click", function (d) {
+                                multGeo = [];
+                                d3.selectAll(".cpath").classed("cselected",false);
+                                selectingWhich = 3;
+                                geoClick({"level":"All of", "id":"Florida"})
+                                d3.select(this).classed("cselected",true);
+                              })
+                    .on("mousemove", function (d,i) {
+                      var mouse = d3.mouse(svg2.node()).map( function (d) { return parseInt(d); } );
+
+                      tooltip.classed("hidden", false)
+                             .attr("style", "left:"+(mouse[0]+offsetL)+"px;top:"+(mouse[1]+offsetT)+"px")
+                             .html("All of Florida");
+
+                      })
+                    .on("mouseout",  function(d,i) {
+                        tooltip.classed("hidden", true);
+                      });
+
+									//multGeo = [];
+									//selectingWhich = 3;
+									//geoClick({"level":"All of", "id":"Florida"})
+
+                });
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                var geoClick = function(d){
+
+                  //d3.selectAll(".cpath").classed("cselected",false);
+                  d3.selectAll(".showtext").remove();
+      
+                  svg2.append("text")
+                    .attr("class", "showtext")
+                    .attr("x",20)
+                    .attr("y",100)
+                    .text("Selected:");
+      
+                  if (d.level == "county") {
+
+                    if (multGeo.length == 1) {
+                    
+                      svg2.append("text")
+                        .attr("class", "showtext")
+                        .attr("id", "showingtextmap")
+                        .attr("x",30)
+                        .attr("y",120)
+                        .text(countyName[multGeo[0]]);
+
+                      d3.select("#showingtextgeo").text(countyName[multGeo[0]] + " County");
+
+                    } else {
+                      
+                      svg2.append("text")
+                        .attr("class", "showtext")
+                        .attr("id", "showingtextmap")
+                        .attr("x",30)
+                        .attr("y",120)
+                        .text("Multiple Counties");
+
+                      d3.select("#showingtextgeo").text("Multiple Counties");
+                    
+                    };
+                  
+                  } else if (d.level == "Circuit") {
+
+                      var useid = countyCircuit[multGeo[0]];
+
+                      if (multGeo.length == countyCircuitIds[useid].length) {
+                      
+                        svg2.append("text")
+                          .attr("class", "showtext")
+                          .attr("id", "showingtextmap")
+                          .attr("x",30)
+                          .attr("y",120)
+                          .text(d.level + " " + useid);
+
+                        d3.select("#showingtextgeo").text(d.level + " " + useid);
+
+                      } else {
+                        
+                        svg2.append("text")
+                          .attr("class", "showtext")
+                          .attr("id", "showingtextmap")
+                          .attr("x",30)
+                          .attr("y",120)
+                          .text("Multiple Circuits");
+
+                        d3.select("#showingtextgeo").text("Multiple Circuits");
+                      
+                      };
+
+                  } else if (d.level == "District") {
+
+                      var useid = countyDistrict[multGeo[0]];
+
+                      if (multGeo.length == countyDistrictIds[useid].length) {
+                      
+                        svg2.append("text")
+                          .attr("class", "showtext")
+                          .attr("id", "showingtextmap")
+                          .attr("x",30)
+                          .attr("y",120)
+                          .text(d.level + " " + useid);
+
+                        d3.select("#showingtextgeo").text(d.level + " " + useid);
+
+                      } else {
+                        
+                        svg2.append("text")
+                          .attr("class", "showtext")
+                          .attr("id", "showingtextmap")
+                          .attr("x",30)
+                          .attr("y",120)
+                          .text("Multiple Districts");
+
+                        d3.select("#showingtextgeo").text("Multiple Districts");
+                      
+                      };
+
+                  } else {
+
+                    svg2.append("text")
+                      .attr("class", "showtext")
+                      .attr("id", "showingtextmap")
+                      .attr("x",30)
+                      .attr("y",120)
+                      .text(d.level + " " + d.id);
+
+                    d3.select("#showingtextgeo").text(d.level + " " + d.id);
+
+                  };
+                  
+                  if (d.level == "All of") {
+                    selGeo = copy(allGeo);
+                  } else if (d.level == "District") {
+                    selGeo = copy(multGeo);//countyDistrictIds[d.id]);
+                  } else if (d.level == "Circuit") {
+                    selGeo = copy(multGeo);//countyCircuitIds[d.id]);
+                  } else {
+                    selGeo = copy(multGeo);
+                  };
+
+                  selGeoByName = [];
+                  for (var i = 0; i < selGeo.length; i++) {
+                    selGeoByName.push(countyName[selGeo[i]]);
+                  };
+
+                  if (d.id != "Florida ") {
+                    docUpdate();
+                    if (selDoc != "") {
+                      tocUpdate();
+                    };
+                    ageUpdate();
+                    updateMain();
+                  };
+
+                };
+
+          
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //
+                // Event Handlers
+                //
+								
+								// Exclude Traffic
+								d3.selectAll('.cb').on('change', function () {
+                  trafficSelected = this.checked;
+                  multipleDoc = [];
+                  multipleToc = [];
+                  for (var i = 1; i <= 7; i++) {
+                    multipleDoc.push(doclist[i-1]);
+                    for (var j = 0; j < doctoc[""+i].length; j++) {
+                      if (!trafficSelected && i == 7) {
+                        mulToc[i][j] = 0;
+                      } else {
+                        mulToc[i][j] = 1;
+                        multipleToc.push(fulldoctoc[""+i][j]);
+                      };
+                    };
+                  };  
+                  docUpdate();
+                  updateMain();
+								});
+
+                // Which visualization
+                d3.selectAll('.cd').on('change', function () {
+                  //$(document).trigger("menuChange");
+                  vizSelected = +this.value;
+                  //delete det_obj;
+                  //setTimeout(initVis, 500);
+                  updateMain();
+                });
+
+                // Which select
+                d3.selectAll('.cs').on('change', function () {
+                  var flaSelected = this.value;
+                  d3.selectAll(".county").attr("visibility", "hidden");
+                  d3.selectAll(".circuit").attr("visibility", "hidden");
+                  d3.selectAll(".district").attr("visibility", "hidden");
+                  d3.selectAll(".florida").attr("visibility", "hidden");
+                  if (flaSelected == "0") {
+                    d3.selectAll(".county").attr("visibility", "visible");
+                  };
+                  if (flaSelected == "1") {
+                    d3.selectAll(".circuit").attr("visibility", "visible");
+                  };
+                  if (flaSelected == "2") {
+                    d3.selectAll(".district").attr("visibility", "visible");
+                  };
+                  if (flaSelected == "3") {
+                    d3.selectAll(".florida").attr("visibility", "visible");
+                    multGeo = [];
+                    d3.selectAll(".cpath").classed("cselected",false);
+                    selectingWhich = 3;
+                    geoClick({"level":"All of", "id":"Florida"});
+                    d3.selectAll(".florida").classed("cselected",true);
+                  };
+                });
+
+              geoClick({"level":"All of", "id":"Florida "});
+                
+              });
+              
+              initVis();
+
+            }
+
+            startHere();
+            
+        })
+        
+        // Copy array logic from:
+        // http://stackoverflow.com/questions/7486085/copying-array-by-value-in-javascript
+        function copy(o) {
+           var out, v, key;
+           out = Array.isArray(o) ? [] : {};
+           for (key in o) {
+               v = o[key];
+               out[key] = (typeof v === "object") ? copy(v) : v;
+           };
+           return out;
+        };
+        
+    </script>
+</body>
+</html>

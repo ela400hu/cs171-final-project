@@ -160,7 +160,7 @@ ShowreelVis.prototype.srVis = function () {
 			d3.select(".srsvg"+whichFile).attr("visibility", "hidden");
 		};
 
-		that.showFlag && lines(allFlag ? 1 : 2, function(){
+		that.showFlag && lines(allFlag ? 1 : 2, function(){ 
 			that.showFlag && horizons(function() {
 				that.showFlag && areas(function() {
 					that.showFlag && stackedArea(function () {
@@ -171,9 +171,10 @@ ShowreelVis.prototype.srVis = function () {
 										if (allFlag) {
 											svg.selectAll("*").remove();
 											svg.selectAll("g").data(symbols).enter().append("g").attr("class", "symbol");
-											that.showFlag && showreel();
+											that.showFlag && showreel(); console.log("here?");
 										};
 										setTimeout(function(){d3.select(".srsvg"+whichFile).attr("visibility", "visible")},1000);
+										console.log("or here?");
 										});
 									setTimeout(function(){d3.select(".srsvg"+whichFile).attr("visibility", "visible")},1000);
 									});
