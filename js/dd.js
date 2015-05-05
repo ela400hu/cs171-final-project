@@ -67,7 +67,7 @@ function updateSankey(rData, marginleft, width) {
 				newLinks.append("title");
 						
 				// Update
-				links//.transition().duration(500*firstTimeSankey)  // .delay(500*firstTimeSankey)
+				links.transition().duration(500*firstTimeSankey)  // .delay(500*firstTimeSankey)
 						.attr("d", path)
 						.style("stroke-width", function(d) { return Math.max(1, d.dy); })
 						.sort(function(a, b) { return b.dy - a.dy; });
@@ -91,6 +91,7 @@ function updateSankey(rData, marginleft, width) {
 				// Enter
 				var newNodes = nodes.enter().append("g")
 						.attr("class", "node")
+						.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
 					.call(d3.behavior.drag()
 						.origin(function(d) { return d; })
 						.on("dragstart", function() { this.parentNode.appendChild(this); })
@@ -107,7 +108,7 @@ function updateSankey(rData, marginleft, width) {
 					.attr("transform", null);
 				
 				// Update
-				nodes//.transition().duration(500*firstTimeSankey) // .delay(500*firstTimeSankey)
+				nodes.transition().duration(500*firstTimeSankey) // .delay(500*firstTimeSankey)
 						.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
 				// Exit
@@ -115,7 +116,12 @@ function updateSankey(rData, marginleft, width) {
 				
 				// Update sub-elements
 				nodes.select("rect")
-					.attr("height", function(d) { return d.dy; })
+					.attr("height", function(d) { 
+									if (d.dy < 5) {
+										return 5;
+									} else {
+										return d.dy;
+									}})
 					.style("fill", function(d) { return d.color = color(d.name.replace(/ .*/, "")); })
 					.style("stroke", function(d) { return d3.rgb(d.color).darker(2); });
 				nodes.select("rect title")
@@ -153,7 +159,7 @@ function updateSankey(rData, marginleft, width) {
 			function dragmove(d) {
 				d3.select(this).attr("transform", "translate(" + d.x + "," + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")");
 				sankey.relayout();
-				links.attr("d", path);
+				d3.selectAll(".link").attr("d", path);
 			};
 
 };
