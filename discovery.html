@@ -1772,7 +1772,7 @@
                         .attr("class","tocrect")
                         .attr("width", function (d) { return xt(d.values.total); })
                         .attr("height", barHeight - 2)
-													.style("fill-opacity",1);
+													.style("fill-opacity",0.7);
 
                     bart.append("text")
                         .attr("class","toctext")
@@ -1780,7 +1780,7 @@
                         .attr("y", barHeight / 2 - 1)
                         .attr("dy", ".35em")
                         .text(function(d) { return doctoc[selDoc][+d.key-1]; })
-													.style("font-weight","bold");    
+													.style("font-weight","normal");
 
                     d3.select(".chart").selectAll(".tocbars")
                         .transition()
@@ -2403,35 +2403,40 @@
                                   };
                                 });
 */
-                    d3.selectAll(".tocrect")
-                          .style("fill-opacity", function (d) {
-                                  var existFill = d3.select(this).style("fill-opacity");
-                                  if (whichToc == +d.key) { // selected box
-                                    if (existFill == 1) { // all sub selected
-                                      mulToc[+selDoc][+d.key-1] = 0;
-                                      return 0.4;
+                      d3.selectAll(".tocrect")
+                            .style("fill-opacity", function (d) { 
+                                    var existFill = d3.select(this).style("fill-opacity");
+                                    if (whichToc == +d.key) { // selected box
+                                      if (existFill == 1) { // all sub selected
+                                        mulToc[+selDoc][+d.key-1] = 0;
+                                        return 0.4;
+                                      } else {
+                                        mulToc[+selDoc][+d.key-1] = 1;
+                                        return 1;
+                                      };
                                     } else {
-                                      mulToc[+selDoc][+d.key-1] = 1;
-                                      return 1;
+                                      if (existFill > 0.6 && existFill < 0.8) {
+                                        mulToc[+selDoc][+d.key-1] = 0;
+                                        return 0.4;
+                                      } else {
+                                        return existFill;
+                                      };
                                     };
-                                  } else {
-                                    return existFill;
-                                  };
-                                });
-														
-                    d3.selectAll(".toctext")
-                          .style("font-weight", function (d) {
-                                  var existFill = d3.select(this).style("font-weight");
-                                  if (whichToc == +d.key) { // selected box
-                                    if (existFill == "bold") { // all sub selected
-                                      return "normal";
+                                  });
+  														
+                      d3.selectAll(".toctext")
+                            .style("font-weight", function (d) {
+                                    var existFill = d3.select(this).style("font-weight");
+                                    if (whichToc == +d.key) { // selected box
+                                      if (existFill == "bold") { // all sub selected
+                                        return "normal";
+                                      } else {
+                                        return "bold";
+                                      };
                                     } else {
-                                      return "bold";
+                                      return existFill;
                                     };
-                                  } else {
-                                    return existFill;
-                                  };
-                                });										
+                                  });										
 
                     };
 
@@ -2489,7 +2494,7 @@
                         };
                       };
                     };                      
-
+debugger;
                     updateMain();
                     
                   };
