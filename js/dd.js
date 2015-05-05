@@ -261,7 +261,7 @@ function shapedata(data,division,casetype,counties,year,endyear) {
 
 	// if case type is specified, there is only one source node, so there is room to map to all of the
 	// detailed (ie ungrouped by "destination") disposition type nodes 
-	if (multipleToc.length == 1) destinations = copy(divArr);
+	//if (multipleToc.length == 1) destinations = copy(divArr);
 
 	var	nodelist = sources.concat(paths).concat(destinations)	
 	// objectify
@@ -320,7 +320,7 @@ function shapedata(data,division,casetype,counties,year,endyear) {
 
 	// document.getElementById("b2").innerHTML= htmlstr
 // console.log(JSON.stringify(cases))
+//debugger;
 	return cases;
-
 
 }   //close function shapedata  ///////////////////////////////////////
