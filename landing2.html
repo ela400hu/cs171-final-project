@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<style type="text/css">
+
+svg {
+  font-family: "Helvetica Neue", Helvetica;
+}
+
+.line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 2px;
+}
+a {
+    outline: none;
+}
+:link:focus, :visited:focus { 
+outline: none; 
+}
+
+body {
+background: #e2dcd0; /* Old browsers */
+background: #f7f8f3; /* Old browsers */
+background: -moz-linear-gradient(top, #f7f8f3 0%, #e2dcd0 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f7f8f3), color-stop(100%,#e2dcd0)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top, #f7f8f3 0%,#e2dcd0 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top, #f7f8f3 0%,#e2dcd0 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top, #f7f8f3 0%,#e2dcd0 100%); /* IE10+ */
+background: linear-gradient(to bottom, #f7f8f3 0%,#e2dcd0 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f7f8f3', endColorstr='#e2dcd0',GradientType=0 ); /* IE6-9 */
+}
+
+.thumbButton {
+	width:106px;
+	height:80px;
+display:block;
+
+
+}
+
+</style>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Florida Court Performance</title>
+
+    <!-- ADD Libraries-->
+    <script src="libs/d3/d3.min.js" charset="utf-8"></script>
+		<script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
+    <script src="libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+
+    <!--Stylesheets-->
+    <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+
+    <!-- Get some nice font-->
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+
+    <!-- add own vis classes-->
+    <script src = "js/showreelvisx.js"></script>
+
+    <!-- add own stylesheet-->
+    <link rel="stylesheet" type="text/css" href="css/myStyle.css">
+
+</head>
+<body>
+    <div class="container">
+        
+
+ 
+				
+        <div class="row" style="height:100px; margin-bottom:30px;">  
+        	<div class="col-md-2" ><a id="Stephens" href="#" data-toggle="modal" data-target="#myModal">
+            <img style="height: 100px;" src="images/StephensPlaybutton.png" alt="BigStephens" /></a></div>
+
+            <div class="col-md-4" ><h1 id="headline">The Real Business of the Courts</h1></div>
+
+        	
+
+            <div class="col-md-6" id="blankVis">
+            	<br>
+		    <form>
+					<span style="padding-left:10px"> </span>
+					<label> Dataset: 
+					<select id="sfid" class="sf">
+						<option value="0">Filings & Dispositions</option>
+						<option value="1">Age Demographics</option>
+						<option value="2">Filings</option>
+						<option value="3">Dispositions</option>
+						<option value="4">Florida Budget</option>
+						<option value="5">Judicial Budget</option>
+						<option value="6">Age Demo by 4</option>
+						<option value="7">Days to Close</option>
+						<option value="8">Clearance Rate</option>
+					</select>
+					</label>
+					<span style="padding-left:10px"> </span>
+					<label> Slide: 
+					<select class="sv">
+						<option value="0">All</option>
+						<option value="1">Lines</option>
+						<option value="2">Horizons</option>
+						<option value="3">Areas</option>
+						<option value="4">Stacked Area</option>
+						<option value="5">Streamgraph</option>
+						<option value="6">Overlapping Area</option>
+						<option value="7">Grouped Bar</option>
+						<option value="8">Stacked Bar</option>
+					</select>
+					</label>
+				</form>
+            </div> <!-- blankvis close -->
+</div><!-- row close -->
+
+<div class="row">
+
+	<div class="col-md-2 " id="showreelVis">
+
+<span id="AllButton" class="thumbButton" ><img src="images/Butt1a.png" alt="AllButton" /><br>All</span>
+<span id="LinesButton" class="thumbButton"><img src="images/Butt1b.png" alt="LinesButton" /><br>Lines</span>
+<span id="HorizonsButton" class="thumbButton"><img src="images/Butt2.png" alt="HorizonsButton" /><br>Horizons</span>
+<span id="AreasButton" class="thumbButton"><img src="images/Butt3.png" alt="AreasButton" /><br>Areas</span>
+<span id="StackedAreaButton" class="thumbButton"><img src="images/Butt4.png" alt="StackedAreaButton" /><br>Stacked Area</span>
+<span id="StreamgraphButton" class="thumbButton"><img src="images/Butt5.png" alt="StreamgraphButton" /><br>Streamgraph</span>
+<span id="OverlappingAreaButton" class="thumbButton"><img src="images/Butt6.png" alt="OverlappingAreaButton" /><br>Overlapping Area</span>
+<span id="GroupedBarButton" class="thumbButton"><img src="images/Butt7.png" alt="GroupedBarButton" /><br>Grouped Bar</span>
+<span id="StackedBarButton" class="thumbButton"><img src="images/Butt8.png" alt="StackedBarButton" /><br>Stacked Bar</span>
+</div>
+        <!--     <div class="col-md-6" id="menuVis">
+				Actual Menu Elements...
+				<span style="padding-left:50px"> </span>Go 
+            	<a href="discovery.html">Forward to Discovery Page</a>
+            </div> -->
+				<!-- </div> -->
+       
+					<div class="col-md-10" id="showreelVis">
+					</div>
+					
+				
+
+        </div> <!-- row -->
+<span  style="text-align:right; float: right;padding-right:20px;">
+<a href="discovery.html" >Forward to Discovery Page</a></span>
+
+    </div> <!-- container -->
+
+
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Video Placeholder</h4>
+                </div>
+                <div class="modal-body">
+                    <p>The court cases we hear about most often involve something extreme, but what is the usual, day-to-day business of the courts? We have put together a series of interactive views designed to give you a look under the hood of a large state judicial system you may have heard about, the Florida courts. </p>
+                    <p>We hope to shed light on questions about the structure of the court system, the volume and type of cases it handles, and how the cases are resolved. For all of these questions, the answers can vary over time, over geography and over the types of events and resolutions being examined.
+                    </p>
+                    </p>
+                    <p>The opening view is anchored on the domain expert of the data, Judge Stephens. His opening video orients and anchors the viewer to the data landscape and directs the users attention to the interesting questions presented by the data. Eye-catching force node buttons present data views that illustrate key narratives, such as the hypothesis that case filings are driven by population growth and economic conditions. </p>
+
+                    <p>Once the video is complete the user can appreciate an unobstructed view of the opening animation. This kinetic presentation functions as a teaser and gives an overview of the changes in <a href="#FilingsandDispositions">case filings and dispositions</a> over time, classified by the type of case. Since population growth and economic activity are believed to influence court caseloads, the display also shows economic and demographic data for the same timeframe. </p>
+                    <p>This display initially features an animated tour of the different forms of vizualization available for the various data elements; you can select a single form and focus on the time path of a specific data item, or in some cases two items displayed together. </p>
+
+                    <p>The second view is descriptive. It shows how case filings and resolutions can vary over time in different geographic areas. The map of Florida visualizes the structure of the state courts system and permits the user to compare filng data and detailed resolution data. You can choose to make comparisons at the county level, or to aggregate by circuit (a grouping of counties) or district (a grouping of circuits). Making one selection compares the selected region to statewide averages, and a second selection compares that region to the first one. The comparisons of disposition are further broken down into the type of disposition- whether the case was resolved by jury trial, by pretrial rulings, or by settlement. This does not try to include who won or lost, since that is only meaningful relative to the parties' negotiations which take place privately.</p>
+
+                    <p>References and Sources</p>
+                    <p>
+                        <a id="FilingsandDispositions"></a> Case filings and dispositions. Data provided upon request by State of Florida Office of State Courts Administrator from OSCA's <a href="http://flcourts.org/publications-reports-stats/statistics/">Summary Reporting System</a>. </p>
+                    <p><a href="http://www.courtstatistics.org/Appellate/20123Appellate.aspx">Population Size and Caseload are Often Related</a> National Center for State Courts.</p>
+                    <p><a href="http://www.courtstatistics.org/~/media/Microsites/Files/CSP/DATA%20PDF/CSP_DEC.ashx">National Trend declining case filings</a>. Examining the Work of State Courts, National Center for State Courts (2012) (using 2010 data)</p>
+                    <p>&nbsp;</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        $(function(){ // this function is called after the HTML document is fully loaded
+
+            // variables keeping global knowledge of the data
+            firstTime = true;
+            firstCount = 0;
+			whichFile = "0";
+			whichViz = "0";
+			growthFlag = false;
+
+            // call this function after Data is loaded, reformatted and bound to the variables
+            var initVis = function(){
+
+            	function firstInit() {
+
+            		document.getElementById("sfid").selectedIndex = firstCount;
+
+            		mydef1 = $.Deferred();
+
+		            //Create an eventHandler
+		            var MyEventHandler = new Object();
+
+		            //Instantiate all Vis Objects here
+					var sr_obj = new ShowreelVis(d3.select("#showreelVis"), whichFile, growthFlag, whichViz, MyEventHandler);
+											
+		            // Bind the eventHandler to the Vis Objects
+		            $(document).on("menuChange",
+						function (MyEventHandler) { 
+							sr_obj.onSelectionChange()
+						});
+
+		            return mydef1;
+
+				};
+
+				function firstMoveon() {
+
+					firstCount += 1;
+	    			if (firstCount > 8) {
+	    				firstCount = 0;
+	    			};
+
+	    			$(document).trigger("menuChange");
+					whichFile = firstCount.toString();
+					delete sr_obj;
+
+					setTimeout(initVis, 100);
+
+				};
+
+            	function otherFunction() {
+
+		            //Create an eventHandler
+		            var MyEventHandler = new Object();
+
+		            //Instantiate all Vis Objects here
+					var sr_obj = new ShowreelVis(d3.select("#showreelVis"), whichFile, growthFlag, whichViz, MyEventHandler);
+											
+		            // Bind the eventHandler to the Vis Objects
+		            $(document).on("menuChange",
+						function (MyEventHandler) { 
+							sr_obj.onSelectionChange()
+						});
+	        	};
+
+	        	if (firstTime) {
+		        	firstInit().done(firstMoveon);
+		        } else {
+		        	otherFunction();
+		        }
+															
+            };
+
+            var startHere = function(){
+						
+				//
+				// Event Handlers
+				//
+
+				// Which view of the data
+				// d3.selectAll('.ra').on('change', function () {
+				// 	firstTime = false;
+				// 	$(document).trigger("menuChange");
+				// 	growthFlag = this.value=="true";
+				// 	delete sr_obj;
+				// 	setTimeout(initVis, 1);
+				// 	//initVis();
+				// });
+
+				// Which File
+				d3.select('.sf').on("change", function() {
+					firstTime = false;
+					$(document).trigger("menuChange");
+					whichFile = this.options[this.selectedIndex].value;
+					delete sr_obj;
+					setTimeout(initVis, 1);
+				});
+
+				// Which Viz
+				d3.select('.sv').on("change", function() {
+					firstTime = false;
+					$(document).trigger("menuChange");
+					whichViz = this.options[this.selectedIndex].value;
+					console.log(this.options[this.selectedIndex].value);
+					delete sr_obj;
+					setTimeout(initVis, 1);
+					$(".thumbButton").css( "border", "none" );
+					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
+				});
+				
+
+
+
+				d3.select('#AllButton').on("click", function() {
+					firstTime = false;
+					$(document).trigger("menuChange");
+					whichViz = 0;
+					$(".sv").prop('selectedIndex', 0);
+					delete sr_obj;
+					setTimeout(initVis, 1);
+					$(".thumbButton").css( "border", "none" );
+					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
+				});
+
+				d3.select('#LinesButton').on("click", function() {
+					firstTime = false;
+					$(document).trigger("menuChange");
+					whichViz = 1;
+					$(".sv").prop('selectedIndex', 1);
+					delete sr_obj;
+					setTimeout(initVis, 1);
+					$(".thumbButton").css( "border", "none" );
+					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
+				});
+
+				d3.select('#HorizonsButton').on("click", function() {
+					firstTime = false;
+					$(document).trigger("menuChange");
+					whichViz = 2;
+					$(".sv").prop('selectedIndex', 2);
+					delete sr_obj;
+					setTimeout(initVis, 1);
+					$(".thumbButton").css( "border", "none" );
+					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
+				});
+
+				d3.select('#AreasButton').on("click", function() {
+					firstTime = false;
+					$(document).trigger("menuChange");
+					whichViz = 3;
+					$(".sv").prop('selectedIndex', 3);
+					delete sr_obj;
+					setTimeout(initVis, 1);
+					$(".thumbButton").css( "border", "none" );
+					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
+				});
+
+				d3.select('#StackedAreaButton').on("click", function() {
+					firstTime = false;
+					$(document).trigger("menuChange");
+					whichViz = 4;
+					$(".sv").prop('selectedIndex', 4);
+					delete sr_obj;
+					setTimeout(initVis, 1);
+					$(".thumbButton").css( "border", "none" );
+					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
+				});
+
+				d3.select('#StreamgraphButton').on("click", function() {
+					firstTime = false;
+					$(document).trigger("menuChange");
+					whichViz = 5;
+					$(".sv").prop('selectedIndex', 5);
+					delete sr_obj;
+					setTimeout(initVis, 1);
+					$(".thumbButton").css( "border", "none" );
+					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
+				});
+
+				d3.select('#OverlappingAreaButton').on("click", function() {
+					firstTime = false;
+					$(document).trigger("menuChange");
+					whichViz = 6;
+					$(".sv").prop('selectedIndex', 6);
+					delete sr_obj;
+					setTimeout(initVis, 1);
+					$(".thumbButton").css( "border", "none" );
+					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
+				});
+
+				d3.select('#GroupedBarButton').on("click", function() {
+					firstTime = false;
+					$(document).trigger("menuChange");
+					whichViz = 7;
+					$(".sv").prop('selectedIndex', 7);
+					delete sr_obj;
+					setTimeout(initVis, 1);
+					$(".thumbButton").css( "border", "none" );
+					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
+				});
+
+				d3.select('#StackedBarButton').on("click", function() {
+					firstTime = false;
+					$(document).trigger("menuChange");
+					whichViz = 8;
+					$(".sv").prop('selectedIndex', 8);
+					delete sr_obj;
+					setTimeout(initVis, 1);
+					$(".thumbButton").css( "border", "none" );
+					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
+				});
+
+
+
+
+                initVis();
+
+            }
+
+            startHere();
+        })
+    </script>
+</body>
+</html>
