@@ -1,6 +1,6 @@
 function initSankey(rData, marginleft, width) {
 							
-		var margin = {top: 1, right: 1, bottom: 6, left: 1}
+		var margin = {top: 1, right: 2, bottom: 6, left: 2}
 //	var width = 890*0.6
 		var height=320
 //	width = document.getElementById("headline").offsetWidth - mainWidthAdjust - margin.left - margin.right,
@@ -24,16 +24,18 @@ function initSankey(rData, marginleft, width) {
 
 function updateSankey(rData, marginleft, width) {
 			
-			var margin = {top: 1, right: 1, bottom: 6, left: 1}
+			var margin = {top: 1, right: 2, bottom: 6, left: 2}
 			var height=320;
 
 			var formatNumber = d3.format(",.0f")
 			var format = function(d) { return formatNumber(d) + " Cases"; }
-					// var color = d3.scale.category20();
-			var color = d3.scale.ordinal() //CHANGE
-  							.range(["#00008b", "#00008b", "#00008b", "#00008b", "#00008b","#0071c2", "#35459e", "#348899", "#71b1d9", "#005595", "#000b95", "#5162da", "#4e52be", "#0700cc", "#0800ff", "#003b74"]);
-
-			var sankey = d3.sankey(width + marginleft + margin.left + margin.right)
+			var color = d3.scale.category20();
+			// var color = d3.scale.ordinal() //CHANGE
+  							// .range(["#00008b", "#00008b", "#00008b", "#00008b", "#00008b","#0071c2", "#35459e", "#348899", "#71b1d9", "#005595", "#000b95", "#5162da", "#4e52be", "#0700cc", "#0800ff", "#003b74"]);
+			var dcolor = "#00008b";
+			var ccolor = "#aa2159";
+	
+			var sankey = d3.sankey(width + marginleft)// + margin.left + margin.right)
 					.nodeWidth(15)
 					.nodePadding(10)
 					.size([width + marginleft + margin.left + margin.right, height]);
@@ -91,7 +93,12 @@ function updateSankey(rData, marginleft, width) {
 				// Enter
 				var newNodes = nodes.enter().append("g")
 						.attr("class", "node")
-						.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+						.attr("transform", function(d) { 
+										if (isNaN(d.x)) {
+											return "translate(0," + d.y + ")";
+										} else {
+											return "translate(" + d.x + "," + d.y + ")";
+										}})
 					.call(d3.behavior.drag()
 						.origin(function(d) { return d; })
 						.on("dragstart", function() { this.parentNode.appendChild(this); })
@@ -109,26 +116,45 @@ function updateSankey(rData, marginleft, width) {
 				
 				// Update
 				nodes.transition().duration(500*firstTimeSankey) // .delay(500*firstTimeSankey)
-						.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-
+					.attr("transform", function(d) { 
+										if (isNaN(d.x)) {
+											return "translate(0," + d.y + ")";
+										} else {
+											return "translate(" + d.x + "," + d.y + ")";
+										}});
 				// Exit
 				nodes.exit().remove();
 				
 				// Update sub-elements
 				nodes.select("rect")
 					.attr("height", function(d) { 
-									if (d.dy < 5) {
+									if (isNaN(d.dy) || d.dy < 5) {
 										return 5;
 									} else {
 										return d.dy;
 									}})
-					.style("fill", function(d) { return d.color = color(d.name.replace(/ .*/, "")); })
+					.style("fill", function(d) { 
+								if (d.x == 0) {
+									if (divisions.length > 1) {
+										return dcolor;
+									} else {
+										return ccolor;
+									}
+								} else {
+									return d.color = color(d.name);//.replace(/ .*/, ""));
+								}})
 					.style("stroke", function(d) { return d3.rgb(d.color).darker(2); });
+					
 				nodes.select("rect title")
 					.text(function(d) { return d.name + "\n" + format(d.value); });
 				
 				nodes.select("text")//.transition()
-					.attr("y", function(d) { return d.dy / 2; })
+					.attr("y", function(d) { 
+											if (isNaN(d.dy)) {
+												return 0;
+											} else {
+												return d.dy / 2;
+											}})
 					.text(function(d) { return d.name; })
 					.attr("x", function(d) {
 									if (d.x < (width/2)) {
@@ -165,7 +191,7 @@ function updateSankey(rData, marginleft, width) {
 				d3.selectAll(".node")
 					.sort(function (a,b) {return d3.ascending(a.name, b.name);})
 					.attr("y", function(d) {
-							if (d.x == 0) {
+							if (d.x == 0 && !(d.sourceLinks.length == 0 && d.targetLinks.length == 0)) {
 								d.y = useY;
 								useY += (useGap + d.dy);
 							};
@@ -173,7 +199,12 @@ function updateSankey(rData, marginleft, width) {
 					});
 					
 				nodes.transition().duration(250*firstTimeSankey) // .delay(500*firstTimeSankey)
-					.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+					.attr("transform", function(d) { 
+										if (isNaN(d.x)) {
+											return "translate(0," + d.y + ")";
+										} else {
+											return "translate(" + d.x + "," + d.y + ")";
+										}});
 			
 			sankey.relayout();
 			links.transition().duration(250*firstTimeSankey)
