@@ -217,9 +217,23 @@ ShowreelVis.prototype.srVis = function () {
 			d3.max(symbols, function(d) { return d.values[d.values.length - 1].date; })
 		]);
 
+		var xAxis = d3.svg.axis()
+				.scale(x)
+				.ticks(7)
+				.orient("bottom");
+
 		var g = svg.selectAll(".symbol")
 				.attr("transform", function(d, i) { return "translate(0," + (i * h / symbols.length + 10) + ")"; });
 
+		svg.append("g")
+			.attr("class", "x axis")
+			.attr("transform", function(d, i) { 
+								return "translate(" + 0 + "," + h + ")";
+								})
+			.call(xAxis)
+			.selectAll("text");
+				//.style("text-anchor", "end"); 				
+				
 		g.each(function(d) {
 			var e = d3.select(this);
 
