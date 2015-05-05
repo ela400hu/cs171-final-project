@@ -2867,9 +2867,28 @@
 								// Exclude Traffic
 								d3.selectAll('.cb').on('change', function () {
                   trafficSelected = this.checked;
+									debugger;
                   multipleDoc = [];
                   multipleToc = [];
-                  for (var i = 1; i <= 7; i++) {
+									for (var j = 0; j < doctoc["7"].length; j++) {
+										if (!trafficSelected) {
+											mulToc["7"][j] = 0;
+										} else {
+											mulToc["7"][j] = 1;
+										};
+									};
+									for (var i = 1; i <= 7; i++) {
+										var testDoc = false;
+										for (var j = 0; j < doctoc[""+i].length; j++) {
+											if (mulToc[i][j] == 1) {
+												testDoc = true;
+												multipleToc.push(fulldoctoc[""+i][j]);
+											};
+										};
+										if (testDoc) multipleDoc.push(doclist[i-1]);
+									};
+									debugger;
+/*                  for (var i = 1; i <= 7; i++) {
                     if (selDoc == "") {
                       if (trafficSelected || i<7) {
                         multipleDoc.push(doclist[i-1]);
@@ -2892,6 +2911,7 @@
                       };
                     };
                   };
+*/
                   if (selDoc == "") {
                     docUpdate();
                   };
