@@ -52,9 +52,9 @@ ShowreelVis.prototype.srVis = function () {
 	var growthFlag = this.growthFlag;
 
 	var m = [20, 20, 30, 20];
-	var txtm = 240;
+	var txtm = 170;
 	var menm = 170;
-	var w = window.innerWidth - m[1] - m[3];
+	var w = document.getElementById("showreelVis").offsetWidth - m[1] - m[3];
 	var h = window.innerHeight - m[0] - m[2] - menm;
 
 	var x = 0;
@@ -156,13 +156,21 @@ ShowreelVis.prototype.srVis = function () {
 			d3.select(".srsvg"+whichFile).attr("visibility", "hidden");
 		};
 
+		that.showFlag && updateSlideSelect(0);
 		that.showFlag && lines(allFlag ? 1 : 2, function(){
+			that.showFlag && updateSlideSelect(1);
 			that.showFlag && horizons(function() {
+				that.showFlag && updateSlideSelect(2);
 				that.showFlag && areas(function() {
+					that.showFlag && updateSlideSelect(3);
 					that.showFlag && stackedArea(function () {
+						that.showFlag && updateSlideSelect(4);
 						that.showFlag && streamgraph(function () {
+							that.showFlag && updateSlideSelect(5);
 							that.showFlag && overlappingArea(function() {
+								that.showFlag && updateSlideSelect(6);
 								that.showFlag && groupedBar(function() {
+									that.showFlag && updateSlideSelect(7);
 									that.showFlag && stackedBar(function() {
 										if (allFlag) {
 											svg.selectAll("*").remove();
@@ -192,6 +200,11 @@ ShowreelVis.prototype.srVis = function () {
 			setTimeout(function(){d3.select(".srsvg"+whichFile).attr("visibility", "visible")},1000);
 			});
 
+	};
+	
+	function updateSlideSelect(whichSlide) {
+		$(".thumbButton").css( "border", "none" );
+		$(".thumbButton").eq(whichSlide+1).css( "border", "3px solid green" );
 	};
 
 	function lines(rep, callback) {
@@ -304,14 +317,14 @@ ShowreelVis.prototype.srVis = function () {
 					.attr("transform", function(d) { return "translate(0," + (d * (h / symbols.length - 20)) + ")"; })
 					.attr("d", area(d.values))
 					.style("fill", function(d, i) { return color2(i); })
-					.style("fill-opacity", 1e-6);
+					.style("fill-opacity", 1);//.style("fill-opacity", 1e-6);
 
 			y.domain([0, d.maxPrice / 3]);
 
 			d3.select(this).selectAll(".line").transition()
 					.duration(duration)
 					.attr("d", line(d.values))
-					.style("stroke-opacity", 1e-6);
+					.style("stroke-opacity", 1);//.style("stroke-opacity", 1e-6);
 
 			d3.select(this).selectAll(".area").transition()
 					.duration(duration)

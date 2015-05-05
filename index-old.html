@@ -31,18 +31,10 @@ background: linear-gradient(to bottom, #f7f8f3 0%,#e2dcd0 100%); /* W3C */
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f7f8f3', endColorstr='#e2dcd0',GradientType=0 ); /* IE6-9 */
 }
 
-.thumbButton {
-	width:106px;
-	height:80px;
-display:block;
-
-
-}
-
 </style>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>The Real Business of the Courts</title>
+    <title>Florida Court Performance</title>
 
     <!-- ADD Libraries-->
     <script src="libs/d3/d3.min.js" charset="utf-8"></script>
@@ -69,11 +61,13 @@ display:block;
 
  
 				
-        <div class="row" style="height:100px; margin-bottom:30px;">  
+        <!-- <div class="row"> -->
         	<div class="col-md-2" ><a id="Stephens" href="#" data-toggle="modal" data-target="#myModal">
             <img style="height: 100px;" src="images/StephensPlaybutton.png" alt="BigStephens" /></a></div>
 
-            <div class="col-md-4" ><h1 id="headline" style="color:#000b95;">The Real Business of the Courts</h1></div>
+            <div class="col-md-4" ><h1 id="headline">The Real Business of the Courts</h1></div>
+
+        	
 
             <div class="col-md-6" id="blankVis">
             	<br>
@@ -107,40 +101,22 @@ display:block;
 					</select>
 					</label>
 				</form>
-            </div> <!-- blankvis close -->
-</div><!-- row close -->
+            </div>
 
-<div class="row">
-
-	<div class="col-md-2 " id="showreelVis2">
-
-<span id="AllButton" class="thumbButton" ><img src="images/Butt1a.png" alt="AllButton" /><br>All</span>
-<span id="LinesButton" class="thumbButton"><img src="images/Butt1b.png" alt="LinesButton" /><br>Lines</span>
-<span id="HorizonsButton" class="thumbButton"><img src="images/Butt2.png" alt="HorizonsButton" /><br>Horizons</span>
-<span id="AreasButton" class="thumbButton"><img src="images/Butt3.png" alt="AreasButton" /><br>Areas</span>
-<span id="StackedAreaButton" class="thumbButton"><img src="images/Butt4.png" alt="StackedAreaButton" /><br>Stacked Area</span>
-<span id="StreamgraphButton" class="thumbButton"><img src="images/Butt5.png" alt="StreamgraphButton" /><br>Streamgraph</span>
-<span id="OverlappingAreaButton" class="thumbButton"><img src="images/Butt6.png" alt="OverlappingAreaButton" /><br>Overlapping Area</span>
-<span id="GroupedBarButton" class="thumbButton"><img src="images/Butt7.png" alt="GroupedBarButton" /><br>Grouped Bar</span>
-<span id="StackedBarButton" class="thumbButton"><img src="images/Butt8.png" alt="StackedBarButton" /><br>Stacked Bar</span>
-</div>
         <!--     <div class="col-md-6" id="menuVis">
 				Actual Menu Elements...
 				<span style="padding-left:50px"> </span>Go 
             	<a href="discovery.html">Forward to Discovery Page</a>
             </div> -->
 				<!-- </div> -->
-       
-					<div class="col-md-10" id="showreelVis">
+       <div class="row">
+					<div class="col-md-12" id="showreelVis">
 					</div>
 					
-				
-
-        </div> <!-- row -->
-<span  style="text-align:right; float: right;padding-right:20px;">
-<a href="discovery.html" >Forward to Discovery Page</a></span>
-
-    </div> <!-- container -->
+				<span  style="text-align:right; float: right;padding-right:20px;">
+            	<a href="discovery.html" >Forward to Discovery Page</a></span>
+        </div>
+    </div>
 
 
 
@@ -283,117 +259,9 @@ display:block;
 					firstTime = false;
 					$(document).trigger("menuChange");
 					whichViz = this.options[this.selectedIndex].value;
-					console.log(this.options[this.selectedIndex].value);
 					delete sr_obj;
 					setTimeout(initVis, 1);
-					$(".thumbButton").css( "border", "none" );
-					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
 				});
-				
-
-
-
-				d3.select('#AllButton').on("click", function() {
-					firstTime = false;
-					$(document).trigger("menuChange");
-					whichViz = 0;
-					$(".sv").prop('selectedIndex', 0);
-					delete sr_obj;
-					setTimeout(initVis, 1);
-					$(".thumbButton").css( "border", "none" );
-					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
-				});
-
-				d3.select('#LinesButton').on("click", function() {
-					firstTime = false;
-					$(document).trigger("menuChange");
-					whichViz = 1;
-					$(".sv").prop('selectedIndex', 1);
-					delete sr_obj;
-					setTimeout(initVis, 1);
-					$(".thumbButton").css( "border", "none" );
-					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
-				});
-
-				d3.select('#HorizonsButton').on("click", function() {
-					firstTime = false;
-					$(document).trigger("menuChange");
-					whichViz = 2;
-					$(".sv").prop('selectedIndex', 2);
-					delete sr_obj;
-					setTimeout(initVis, 1);
-					$(".thumbButton").css( "border", "none" );
-					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
-				});
-
-				d3.select('#AreasButton').on("click", function() {
-					firstTime = false;
-					$(document).trigger("menuChange");
-					whichViz = 3;
-					$(".sv").prop('selectedIndex', 3);
-					delete sr_obj;
-					setTimeout(initVis, 1);
-					$(".thumbButton").css( "border", "none" );
-					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
-				});
-
-				d3.select('#StackedAreaButton').on("click", function() {
-					firstTime = false;
-					$(document).trigger("menuChange");
-					whichViz = 4;
-					$(".sv").prop('selectedIndex', 4);
-					delete sr_obj;
-					setTimeout(initVis, 1);
-					$(".thumbButton").css( "border", "none" );
-					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
-				});
-
-				d3.select('#StreamgraphButton').on("click", function() {
-					firstTime = false;
-					$(document).trigger("menuChange");
-					whichViz = 5;
-					$(".sv").prop('selectedIndex', 5);
-					delete sr_obj;
-					setTimeout(initVis, 1);
-					$(".thumbButton").css( "border", "none" );
-					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
-				});
-
-				d3.select('#OverlappingAreaButton').on("click", function() {
-					firstTime = false;
-					$(document).trigger("menuChange");
-					whichViz = 6;
-					$(".sv").prop('selectedIndex', 6);
-					delete sr_obj;
-					setTimeout(initVis, 1);
-					$(".thumbButton").css( "border", "none" );
-					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
-				});
-
-				d3.select('#GroupedBarButton').on("click", function() {
-					firstTime = false;
-					$(document).trigger("menuChange");
-					whichViz = 7;
-					$(".sv").prop('selectedIndex', 7);
-					delete sr_obj;
-					setTimeout(initVis, 1);
-					$(".thumbButton").css( "border", "none" );
-					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
-				});
-
-				d3.select('#StackedBarButton').on("click", function() {
-					firstTime = false;
-					$(document).trigger("menuChange");
-					whichViz = 8;
-					$(".sv").prop('selectedIndex', 8);
-					delete sr_obj;
-					setTimeout(initVis, 1);
-					$(".thumbButton").css( "border", "none" );
-					$(".thumbButton").eq(whichViz).css( "border", "3px solid green" );
-				});
-
-
-
 
                 initVis();
 
