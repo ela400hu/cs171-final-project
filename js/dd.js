@@ -167,7 +167,6 @@ function updateSankey(rData, marginleft, width) {
 					.attr("y", function(d) {
 							if (d.x == 0) {
 								d.y = useY;
-								console.log(d.name,d.y);
 								useY += (useGap + d.dy);
 							};
 							return d.y;
