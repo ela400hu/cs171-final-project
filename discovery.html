@@ -2861,17 +2861,31 @@
                   multipleDoc = [];
                   multipleToc = [];
                   for (var i = 1; i <= 7; i++) {
-                    multipleDoc.push(doclist[i-1]);
+                    if (selDoc == "") {
+                      if (trafficSelected || i<7) {
+                        multipleDoc.push(doclist[i-1]);
+                      }
+                    } else {
+                      if (+selDoc == i) {
+                        multipleDoc.push(doclist[i-1]);
+                      }
+                    };
                     for (var j = 0; j < doctoc[""+i].length; j++) {
                       if (!trafficSelected && i == 7) {
                         mulToc[i][j] = 0;
                       } else {
-                        mulToc[i][j] = 1;
-                        multipleToc.push(fulldoctoc[""+i][j]);
+                        if (selDoc == "" || +selDoc == i) {
+                          mulToc[i][j] = 1;
+                          multipleToc.push(fulldoctoc[""+i][j]);
+                        } else {
+                          mulToc[i][j] = 0;
+                        }
                       };
                     };
-                  };  
-                  docUpdate();
+                  };
+                  if (selDoc == "") {
+                    docUpdate();
+                  };
                   updateMain();
 								});
 
