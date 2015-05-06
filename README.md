@@ -8,7 +8,7 @@ Final project for Harvard's [CS171](http://www.cs171.org/2015/index.html) 2015.
 
 ###
 Project uses two html files, 
-Landing.html and Discovery.html
+index.html and discovery.html
 
 ##Discovery 
 
@@ -16,7 +16,7 @@ Landing.html and Discovery.html
 
 ####Timeline.
 
-Displays, by year,  filings, resolutions, population (as selected),clearance rates, cumulative clearance rates, personal income per capita. All can be toggled by control at the top of the element.
+Displays, by year, filings, resolutions, population (as selected), clearance rates, cumulative clearance rates, personal income per capita. All can be toggled by control at the top of the element.
 Selects year or year span, which updates DOC graph, POP graph, and sankey diagram.
 Responsive to: map, DOC and POP.
 
@@ -24,14 +24,14 @@ Responsive to: map, DOC and POP.
 
 Displays whole state or selected part of state. Updates timeline, DOC, POP and sankey. Responsive to itself only.
 
-####Division of Court (DOC) barchart. 
+####Division of Court (DOC) histogram. 
 
-Displays number of cases filed, by division  (or at second level by casetype) honoring selections made by timeline, map, and itself.  Optionally click to eliminate traffic data which is so predominant it obscures comparison among others. Updates timeline, sankey. Responsive to map, timeline.
-
-
+Displays number of cases filed, by division (or at second level by casetype) honoring selections made by timeline, map, and itself.  Optionally click to eliminate traffic data which is so predominant it obscures comparison among others. Updates timeline, sankey. Responsive to map, timeline.
 
 
-####Population (POP) barchart. 
+
+
+####Population (POP) histogram. 
 
 Displays number of inhabitants in each age bracket, following selections on map,and timeline.   
 
@@ -49,7 +49,7 @@ libs/d3/sankey.js
 
 http://d3js.org/topojson.v1.min.js
 
-http://d3js.org/queue.v1.min.js"
+http://d3js.org/queue.v1.min.js
 
 libs/jquery/jquery-2.1.1.min.js
 
@@ -57,17 +57,19 @@ libs/bootstrap/js/bootstrap.min.js
 
 ###Stylesheets
 
- <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+libs/bootstrap/css/bootstrap.min.css
 
- <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+http://fonts.googleapis.com/css
  
- <link rel="stylesheet" type="text/css" href="css/myStyle.css">
- 
- add own vis classes
- 
-  js/dd.js
+css/myStyle.css
 
+#### own class
+
+js/dd.js
+ 
 ###data files 
+
+maps/us.json
 
 data/floridacourtsystem.json
 
@@ -90,7 +92,7 @@ launches video demo.
 
 ####Left side thumbnails- 
 
-select visualization type.
+select visualization type
 
 ####Dropdown- 
 
@@ -98,35 +100,35 @@ select dataset
 
 ####Link- Forward to Discovery Page 
 
-opens discovery page. 
+opens discovery page
 
 ###Depends on
 
 ####Libraries
 
-libs/d3/d3.min.js" charset="utf-8"></script>
+libs/d3/d3.min.js
 
-http://d3js.org/queue.v1.min.js"></script>
+http://d3js.org/queue.v1.min.js
 
-libs/jquery/jquery-2.1.1.min.js" charset="utf-8"></script>
+libs/jquery/jquery-2.1.1.min.js
 
-libs/bootstrap/js/bootstrap.min.js" charset="utf-8"></script>
+libs/bootstrap/js/bootstrap.min.js
 
 ####Stylesheets
 
- <link rel="stylesheet" type="text/css" href="libs/bootstrap/css/bootstrap.min.css">
+libs/bootstrap/css/bootstrap.min.css
 
- <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+http://fonts.googleapis.com/css
 
- <link rel="stylesheet" type="text/css" href="css/myStyle.css">
+css/myStyle.css
 
 #### own class
 
- <script src = "js/showreelvisx.js"></script>
+js/showreelvisx.js
 
 #### js/showreelvisx.js depends on 
 
-(in js subdirectory)
+(in data subdirectory)
 
 sr_wl_fd.csv
 
