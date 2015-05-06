@@ -6,6 +6,10 @@ Final project for Harvard's [CS171](http://www.cs171.org/2015/index.html) 2015.
 ---
 **Team**: Scott Stephens, Josh Darlington, Eric Arnold
 
+[Screencast Demo](https://www.youtube.com/embed/4_Vh4sr0ajw)
+
+[Process Book](procbook.pdf)
+
 ###
 Project uses two html files, 
 index.html and discovery.html
